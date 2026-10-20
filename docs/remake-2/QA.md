@@ -66,3 +66,10 @@ Historical screenshot `slider-fields.png` (superseded by the neutral-surface fol
 - Found and repaired the inherited Image element parenting condition: unparented images are now attached to their requested container, expose ElementFrame/UIElements.Main and participate in sizing.
 
 Final combined regression on the rebuilt standalone menu: Followup33, Remake2 integration33, FeatureSettings26, InlineSettings30, SliderPolish23 and ThinSliders58 —203 live assertions passed. All pure suites passed. The Image gallery instance is parented, sized846×475.875 at1100px menu width, and its Roblox avatar thumbnail loaded successfully.
+
+## Screenshot review regression
+
+- `tests/ReviewFixes.lua`:35 live assertions passed. Real temporary files with deliberately different creation/modification ordering verify sort order and animated row positions; one-click row load and current-preset download both restore values, with a success notification. Only current rows remain highlighted. Test files and values are restored.
+- Rounded section/native container clipping, normal-page Inline rejection, embedded settings availability, ellipsis-hover expansion and full description canvas are covered. All Hotkeys overflow was exercised with30 temporary bindings: native scrollbar disabled, custom thumb visible and following CanvasPosition; original bindings restored.
+- Fresh full regression: Remake2 33, Followup 33, FeatureSettings 26, InlineSettings 30, SliderPolish 23, ThinSliders 58, ReviewFixes 35 —238 live assertions passed. All pure `npm test` suites passed; rebuilt `dist/main.lua` compiled successfully.
+- Actual game screenshot of the updated Containers gallery inspected after rebuilding/restarting the demo. Anti-AFK remains enabled. Screenshot-review changes are local until explicitly pushed.

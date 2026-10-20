@@ -10,7 +10,7 @@ function Element:New(Config)
         ElementFrame = nil,
     }
     
-    local GroupFrame = New("Frame", {
+    local GroupFrame = New("CanvasGroup", {
         Size = UDim2.new(1,0,0,0),
         BackgroundTransparency = 1,
         AutomaticSize = "Y",
@@ -23,6 +23,9 @@ function Element:New(Config)
             Padding = UDim.new(0, Config.Tab and Config.Tab.Gap or (Config.Window.NewElements and 1 or 6))
         }),
     })
+
+    New("UICorner",{Parent=GroupFrame,CornerRadius=UDim.new(0,12)})
+    GroupFrame.ClipsDescendants=true
 
     GroupModule.ElementFrame = GroupFrame
     

@@ -11,7 +11,7 @@ function Settings.New(content,frame,window,wind,elements,scale,config)
  local title=U.text(panel,config.Title or content.Title or 'Settings',16,10,width-54,30);title.TextSize=16
  local close=U.button(panel,'',width-38,10,28,28);U.icon(close,'x',7,7,14,window)
  local body=U.New('ScrollingFrame',{Parent=panel,Name='SettingsBody',Position=UDim2.fromOffset(16,48),Size=UDim2.new(1,-32,1,-64),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize='Y',CanvasSize=UDim2.new(),ZIndex=822})
- local tab={Elements={},UIElements={ContainerFrame=body}}
+ local tab={Elements={},FeatureSettings=true,UIElements={ContainerFrame=body}}
  require('./RemakeLayout').Attach(tab,window,wind,elements,scale)
  local columns=tab:Columns({Gap=0,MinColumnWidth=1000})
  local button=U.button(frame.UIElements.Main,'',0,0,30,30)

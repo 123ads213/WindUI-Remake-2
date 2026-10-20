@@ -271,14 +271,24 @@ Feature popover groups default to a thin, low-contrast rounded outline with a qu
 
 `group:Dropdown({Inline=true, Values={'Classic','Minimal'}, Value='Classic', Flag='style'})` renders all choices directly inside the group with a checkmark on the left and an animated selected surface. No extra popup or trigger is created. `ShowTitle=true` optionally displays the element title. It supports `Multi`, `AllowNone`, locked values, `:Select()`, `:Refresh()` and standard flag persistence. Without `Inline=true`, dropdowns retain the nearby floating checked menu. Embedded choices remain within the settings panel and contribute to its height/scrolling.
 
-The reference-style example puts six inline choices in the first outlined group, then Subtick mode and Turn speed in a second group. The Selections gallery also demonstrates Classic/Minimal. Sort entries now include calendar, clock and alphabetical-order icons alongside the active checkmark. The preset toolbar was shifted seven logical pixels left.
+The reference-style example puts six inline choices in the first outlined group, then Subtick mode and Turn speed in a second group. The Selections gallery demonstrates Classic/Minimal as a normal floating choice; embedded selection is restricted to feature settings opened through the ellipsis. Sort entries now include calendar, clock and alphabetical-order icons alongside the active checkmark. The preset toolbar was shifted seven logical pixels left.
 
 ## Gallery example and animation details
 
-`RemakeExample.lua` now contains80 registered elements. In addition to Player/World/General/Themes, Elements expands to Controls, Selections, Containers and Media & code. Controls has Interactive/States icon subtabs; Selections covers single/multi/searchable/inline choices and colors/gradients; Containers demonstrates Group/HStack/VStack/Section/Divider/Space; Media contains an interactive local viewport, copyable code and avatar image. HUD preview provides watermark/keylist/field/position controls. Example callbacks are UI-only, not gameplay implementations. `WindUIForkDemo.Showcase` exposes the gallery controls.
+`RemakeExample.lua` now contains the registered demo elements. In addition to Player/World/General/Themes, Elements expands to Controls, Selections, Containers and Media & code. Controls has Interactive/States icon subtabs; Selections covers single/multi/searchable choices and colors/gradients; Containers demonstrates Group/HStack/VStack/Section/Divider/Space; Media contains an interactive local viewport, copyable code and avatar image. HUD preview provides watermark/keylist/field/position controls. Example callbacks are UI-only, not gameplay implementations. `WindUIForkDemo.Showcase` exposes the gallery controls.
 
 - Compact dropdown previews follow configured Values order, regardless of click order. Long previews are clipped with an alpha fade at the right edge, never an ellipsis. Changing the selection fades out the old preview and fades in the new one.
 - Preset refresh reuses named row instances and tweens their positions over240ms when sorting. New/removed or filtered rows fade in/out rather than rebuilding the entire list. `presets.Order` and `presets.RowCache` expose the current order and reusable rows for tests.
 - Drag numbers on sliders inside a feature popover clamp to that popover, not the main window. This prevents the number from jumping sideways when the panel extends outside the menu.
 - Outlined cards leave a one-pixel inset around their stroke so CanvasGroup clipping cannot remove the straight border edges.
 - Example-only Anti-AFK is enabled by default under General. It listens for LocalPlayer.Idled and attempts a VirtualUser idle pulse. Unsupported APIs are reported; network disconnects and server kicks are not prevented. Its connection is disconnected on unload/rerun. It is not automatically installed by the library itself.
+
+
+## Screenshot review fixes
+
+- Click a preset row **once**, or its download icon, to load it. Both show a named success/failure notification. The download icon always reloads, even for the current preset; only the header save button saves.
+- Only the current preset has a persistent row highlight. Newest First sorts descending by creation time, Recently Modified descending by modification time, and Alphabetical by name. Identical relative ordering across criteria is valid; existing rows animate to their sorted positions. The footer names the active criterion.
+- Section cards and Group/HStack/VStack clip child surfaces through rounded CanvasGroups. Compact lock overlays fit their row instead of extending beyond it.
+- `Inline=true` is supported only in feature `:Settings()` groups; normal-page use raises a descriptive error. The obsolete Nested tabs explanation plate was removed from General.
+- All Hotkeys uses the library's custom draggable scrollbar, hidden when the content fits.
+- Long hover descriptions show an ellipsis. Hover or click it to widen/expand the panel and read the full untruncated text; oversized descriptions can scroll. Moving from the feature row into its description no longer dismisses it immediately.

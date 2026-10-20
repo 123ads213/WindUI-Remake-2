@@ -23,6 +23,7 @@ return {
 		for name, module in next, Elements do
 			tbl[name] = function(self, config)
 				config = config or {}
+                if config.Inline and not tbl.FeatureSettings then error('Inline dropdowns are only supported inside an element Settings() popover',2)end
 				config.CompactRow = config.CompactRow or tbl.CompactRows
                 if config.CompactRow and name == "Slider" then config.Width=config.Width or 184;config.ValueWidth=config.ValueWidth or 72 end
                 config.Tab = Tab or tbl

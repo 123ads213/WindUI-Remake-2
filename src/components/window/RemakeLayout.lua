@@ -4,7 +4,7 @@ local N=U.New
 local Layout={}
 function Layout.Attach(tab,window,wind,elements,scale)
  local function proxy(parent)
-  local p={Elements={},UIElements={ContainerFrame=tab.UIElements.ContainerFrame},CompactRows=true,__type='RemakeContainer'}
+  local p={Elements={},UIElements={ContainerFrame=tab.UIElements.ContainerFrame},CompactRows=true,FeatureSettings=tab.FeatureSettings==true,__type='RemakeContainer'}
   elements.Load(p,parent,elements.Elements,window,wind,nil,elements,scale,tab)
   return p
  end
@@ -24,7 +24,7 @@ function Layout.Attach(tab,window,wind,elements,scale)
     cfg=type(cfg)=='string'and{Title=cfg}or(cfg or{})
     local holder=frame(container,'Section');local flow=list(holder,8);N('UIPadding',{Parent=holder,PaddingTop=UDim.new(0,cfg.Outlined and 1 or 0),PaddingLeft=UDim.new(0,cfg.Outlined and 1 or 0),PaddingRight=UDim.new(0,cfg.Outlined and 1 or 0),PaddingBottom=UDim.new(0,18)})
     local heading=U.text(holder,string.upper(cfg.Title==false and '' or cfg.Title or 'Settings'),4,0,200,20,true);heading.Size=UDim2.new(1,-8,0,20);heading.LayoutOrder=0;heading.TextSize=13;heading.Visible=cfg.Title~=false
-    local card=N('Frame',{Parent=holder,Name='Card',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=.1,ThemeTag={BackgroundColor3='ElementBackground'},LayoutOrder=1});U.corner(card,cfg.Outlined and 18 or 12)
+    local card=N('CanvasGroup',{Parent=holder,Name='Card',ClipsDescendants=true,Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=.1,ThemeTag={BackgroundColor3='ElementBackground'},LayoutOrder=1});U.corner(card,cfg.Outlined and 18 or 12)
     if cfg.Outlined then
      card.BackgroundTransparency=.9
      N("UIStroke",{Parent=card,Name="GroupOutline",Thickness=1,Transparency=.87,ApplyStrokeMode="Border",ThemeTag={Color="Text"}})

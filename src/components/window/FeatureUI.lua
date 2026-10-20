@@ -59,29 +59,56 @@ function FeatureUI.New(Window,WindUI)
  end
  local tip=panel('FeatureDescription',330,92)
  local tipTitle=label(tip,'Title','',14,10,-28,22,15)
- local tipBody=label(tip,'Description','',14,36,-28,42,14,true);tipBody.TextWrapped=true;tipBody.TextTruncate='AtEnd';tipBody.TextYAlignment='Top'
+ local tipScroll=New('ScrollingFrame',{Parent=tip,Name='DescriptionScroll',Position=UDim2.fromOffset(14,36),Size=UDim2.new(1,-28,1,-50),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,CanvasSize=UDim2.new(),ZIndex=502})
+ local tipBody=label(tipScroll,'Description','',0,0,0,42,15,true);tipBody.Size=UDim2.new(1,-6,0,42);tipBody.TextWrapped=true;tipBody.TextTruncate='None';tipBody.TextYAlignment='Top'
+ local tipMore=New('TextButton',{Parent=tip,Name='ReadMore',Text='...',TextSize=20,FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),AutoButtonColor=false,Size=UDim2.fromOffset(30,24),Position=UDim2.new(1,-42,1,-28),BackgroundTransparency=1,ThemeTag={TextColor3='Text'},ZIndex=504,Visible=false})
+ local descriptionTarget,descriptionFrame,descriptionExpanded
+ local function contains(gui,point)local a,z=gui.AbsolutePosition,gui.AbsoluteSize;return gui.Visible and point.X>=a.X and point.X<=a.X+z.X and point.Y>=a.Y and point.Y<=a.Y+z.Y end
  local context=panel('FeatureHotkeys',232,188)
  local editor=panel('HotkeyEditor',264,198)
  local modes=panel('HotkeyModes',156,130)
  local all=panel('AllHotkeys',580,420)
- self.UIElements={Tooltip=tip,TooltipTitle=tipTitle,TooltipBody=tipBody,Context=context,Editor=editor,Modes=modes,All=all}
+ self.UIElements={Tooltip=tip,TooltipTitle=tipTitle,TooltipBody=tipBody,TooltipMore=tipMore,TooltipScroll=tipScroll,Context=context,Editor=editor,Modes=modes,All=all}
  local activeEntry,activeBinding,activeRow
  local hoverSerial=0
  function self:HideDescription()hoverSerial+=1;show(tip,false)end
- function self:Describe(content,frame)
+ function self:Describe(content,frame,expanded)
   if self.Picking or context.Visible or all.Visible or Window.Closed or Window.Destroyed then return end
-  local request=hoverSerial
-  local desc=frame.Desc
+  local request=hoverSerial;local desc=frame.Desc
   if not desc or desc==''then return end
+  descriptionTarget,descriptionFrame,descriptionExpanded=content,frame,expanded==true
   tipTitle.Text=content.Title or frame.Title or'Feature';tipBody.Text=desc
-  local s=scale();local width=math.min(330,math.max(220,WindUI.ScreenGui.AbsoluteSize.X/s-32))
-  local params=Instance.new('GetTextBoundsParams');params.Text=desc;params.Font=tipBody.FontFace;params.Size=14;params.Width=width-28
+  local s=scale();local width=math.min(expanded and 480 or 330,math.max(220,WindUI.ScreenGui.AbsoluteSize.X/s-32))
+  local params=Instance.new('GetTextBoundsParams');params.Text=desc;params.Font=tipBody.FontFace;params.Size=tipBody.TextSize;params.Width=width-34
   local ok,bounds=pcall(function()return game:GetService('TextService'):GetTextBoundsAsync(params)end)
-  local height=ok and math.min(180,math.max(20,bounds.Y+2))or 60
+  local full=ok and math.max(22,math.ceil(bounds.Y)+4)or math.max(48,math.ceil(#desc/35)*20)
   if self.Destroyed or not frame.UIElements.Main.Parent or request~=hoverSerial then return end
-  tip.Size=UDim2.fromOffset(width,height+50);tipBody.Size=UDim2.new(1,-28,0,height)
+  local more=not expanded and full>48
+  local visible=expanded and math.min(full,math.max(50,WindUI.ScreenGui.AbsoluteSize.Y/s-100))or math.min(full,48)
+  local height=visible+(more and 74 or 50)
+  tipBody.Size=UDim2.new(1,-6,0,full);tipScroll.CanvasSize=UDim2.fromOffset(0,full);tipScroll.CanvasPosition=Vector2.zero
+  tipScroll.Size=UDim2.new(1,-28,0,visible);tipScroll.ScrollBarThickness=expanded and full>visible and 3 or 0
+  tipMore.Visible=more
+  if tip.Visible then Tween(tip,.18,{Size=UDim2.fromOffset(width,height)}):Play()else tip.Size=UDim2.fromOffset(width,height)end
   beside(tip,frame.UIElements.Main);show(tip,true)
  end
+ function self:ExpandDescription()
+  if descriptionTarget and descriptionFrame and not descriptionExpanded then self:Describe(descriptionTarget,descriptionFrame,true)end
+ end
+ connect(tipMore.MouseEnter,function()hoverSerial+=1;self:ExpandDescription()end)
+ connect(tipMore.MouseButton1Click,function()self:ExpandDescription()end)
+ local function deferDescriptionHide()
+  hoverSerial+=1;local request=hoverSerial
+  task.delay(.12,function()
+   if self.Destroyed or request~=hoverSerial then return end
+   local point=Input:GetMouseLocation()
+   if contains(tip,point)or(descriptionFrame and contains(descriptionFrame.UIElements.Main,point))then return end
+   self:HideDescription()
+  end)
+ end
+ connect(tip.MouseEnter,function()hoverSerial+=1 end)
+ connect(tip.MouseLeave,deferDescriptionHide)
+
  local contextList=New('ScrollingFrame',{Parent=context,Name='Bindings',Position=UDim2.fromOffset(0,8),Size=UDim2.new(1,0,1,-142),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,ThemeTag={ScrollBarImageColor3='Icon'},CanvasSize=UDim2.new(),AutomaticCanvasSize='Y',ZIndex=501})
  local editorKey,editorMode,editorValue,valueTrack,valueDot
  local valueTween
@@ -207,7 +234,10 @@ function FeatureUI.New(Window,WindUI)
  local columns=New('Frame',{Parent=all,Position=UDim2.fromOffset(32,52),Size=UDim2.new(1,-64,0,28),BackgroundTransparency=1,ZIndex=502})
  for _,c in ipairs({{'Feature',0,.40},{'Key',.41,.22},{'Mode',.64,.16},{'Value',.81,.19}})do local t=label(columns,c[1],c[1],0,0,0,28,13,true);t.Position=UDim2.fromScale(c[2],0);t.Size=UDim2.fromScale(c[3],1)end
  separator(all,84)
- local scroll=New('ScrollingFrame',{Parent=all,Name='Entries',Position=UDim2.fromOffset(12,94),Size=UDim2.new(1,-24,1,-110),CanvasSize=UDim2.new(),AutomaticCanvasSize='Y',BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,ThemeTag={ScrollBarImageColor3='Icon'},ZIndex=501})
+ local scroll=New('ScrollingFrame',{Parent=all,Name='Entries',Position=UDim2.fromOffset(12,94),Size=UDim2.new(1,-24,1,-110),CanvasSize=UDim2.new(),AutomaticCanvasSize='Y',BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=0,ThemeTag={ScrollBarImageColor3='Icon'},ZIndex=501})
+ local allScrollHolder=New('Frame',{Parent=all,Name='ScrollHolder',Position=UDim2.new(1,-8,0,94),Size=UDim2.new(0,6,1,-110),BackgroundTransparency=1,ZIndex=505})
+ local customAllScroll=require('../ui/ScrollSlider').New(scroll,allScrollHolder,Window,4,WindUI)
+ self.UIElements.AllEntries=scroll;self.UIElements.AllScrollbar=customAllScroll
  refreshAll=function()
   clearChildren(scroll);local n=0
   for _,e in ipairs(self.Model.Entries)do for _,b in ipairs(e.Bindings)do
@@ -238,7 +268,7 @@ function FeatureUI.New(Window,WindUI)
     hoverSerial+=1;local id=hoverSerial
     task.delay(.35,function()if not self.Destroyed and id==hoverSerial and main.Parent and main.Visible then self:Describe(content,frame)end end)
    end)
-   bind(main.MouseLeave,function()self:HideDescription()end)
+   bind(main.MouseLeave,deferDescriptionHide)
    function content:ShowDescription()self.__FeatureUI:Describe(self,frame)end
    content.__FeatureUI=self
   end

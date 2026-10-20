@@ -9,6 +9,11 @@ return function(content,frame,config)
   main.ImageTransparency=1
  end
  main.BackgroundTransparency=1
+ local locked=frame.UIElements.Locked
+ if locked and locked.Parent then
+  locked.Parent.Size=UDim2.fromScale(1,1);locked.Parent.Position=UDim2.fromScale(.5,.5)
+  locked.Size=UDim2.fromScale(1,1)
+ end
  local title=frame.UIElements.Title
  if frame.UIElements.Container then frame.UIElements.Container.Visible=false end
  if title then

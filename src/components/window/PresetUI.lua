@@ -36,7 +36,7 @@ function P.New(window,wind,options)
  local sortMenu=U.panel(window,'PresetSorting',224,144,890)
  local sortButton=U.button(panel,'',282,54,36,34,function()U.place(sortMenu,self.UIElements.Sort,wind);U.show(sortMenu,not sortMenu:GetAttribute('TargetVisible'))end);U.icon(sortButton,'list-filter',10,9,16,window)
  local rows=U.New('ScrollingFrame',{Parent=panel,Name='PresetRows',Position=UDim2.fromOffset(12,98),Size=UDim2.fromOffset(306,274),BackgroundTransparency=1,CanvasSize=UDim2.new(),AutomaticCanvasSize='None',ScrollBarThickness=2,BorderSizePixel=0,ZIndex=852})
- local rowCache={};self.RowCache=rowCache;self.Order={}
+ local rowCache={};self.RowCache=rowCache;self.Order={};self.SortLabels={Created='Newest First',Modified='Recently Modified',Name='Alphabetical'}
  local editor=U.panel(window,'PresetEditor',306,148,870)
  local editorIcon=U.icon(editor,'file-plus',14,15,18,window)
  local editorTitle=U.text(editor,'New preset',42,9,250,28)
@@ -74,6 +74,12 @@ function P.New(window,wind,options)
   if not isfile(manager.Path..valid..'.json')then return false,'Preset not found'end
   local c=config(valid);local result,message=c:Load();if result==false then return false,message end
   c:SetAsCurrent();self.Current=valid;trigger.Label.Text=valid;self:Refresh();return true
+ end
+ function self:LoadFromUI(name)
+  local ok,err=self:Load(name)
+  self.LastLoadNotification={Name=name,Success=not not ok,Error=not ok and tostring(err)or nil}
+  wind:Notify({Title=ok and 'Preset loaded' or 'Load failed',Content=(name or 'No preset')..(ok and ' loaded successfully' or ': '..tostring(err)),Duration=3,Icon=ok and 'download' or 'circle-alert'})
+  return ok,err
  end
  function self:Delete(name)
   local ok,err=manager:DeleteConfig(name);if not ok then return false,err end
@@ -145,13 +151,17 @@ function P.New(window,wind,options)
    local item=rowCache[n]
    if not item then
     local slot=U.New('CanvasGroup',{Parent=rows,Name='PresetRow',Size=UDim2.fromOffset(302,48),Position=UDim2.fromOffset(0,(count-1)*54+6),BackgroundTransparency=1,GroupTransparency=1,ZIndex=853})
-    local row=U.button(slot,n,0,0,302,48,function()U.show(actions,false);safe(function()return self:Load(n)end)end);row.Label.Size=UDim2.new(1,-94,1,0)
+    local row=U.button(slot,n,0,0,302,48,function()U.show(actions,false);safe(function()return self:LoadFromUI(n)end)end);row.Label.Size=UDim2.new(1,-94,1,0)
     local more;more=U.button(row,'',220,7,32,34,function()actionName=n;U.place(actions,more or row,wind);U.show(actions,true)end);U.icon(more,'ellipsis',8,9,16,window)
-    local load=U.button(row,'',258,7,32,34,function()U.show(actions,false);safe(function()if n==self.Current then return self:QuickSave()else return self:Load(n)end end)end)
+    local load=U.button(row,'',258,7,32,34,function()U.show(actions,false);safe(function()return self:LoadFromUI(n)end)end)
     item={Slot=slot,Row=row,Load=load};rowCache[n]=item
+    row.AutoButtonColor=false
+    row.MouseEnter:Connect(function()U.Tween(row,.12,{BackgroundTransparency=n==self.Current and .35 or .8}):Play()end)
+    row.MouseLeave:Connect(function()U.Tween(row,.12,{BackgroundTransparency=n==self.Current and .5 or 1}):Play()end)
+    U.tooltip(window,wind,load,'Load preset')
    end
-   item.Row.LayoutOrder=count;item.Slot.LayoutOrder=count;item.Row.BackgroundTransparency=n==self.Current and .05 or .6
-   if item.LoadIcon then item.LoadIcon:Destroy()end;item.LoadIcon=U.icon(item.Load,n==self.Current and'save'or'download',8,9,16,window)
+   item.Row.LayoutOrder=count;item.Slot.LayoutOrder=count;item.Row.BackgroundTransparency=n==self.Current and .5 or 1
+   if item.LoadIcon then item.LoadIcon:Destroy()end;item.LoadIcon=U.icon(item.Load,'download',8,9,16,window)
    if item.Motion then item.Motion:Cancel()end
    item.Motion=U.Tween(item.Slot,.24,{Position=UDim2.fromOffset(0,(count-1)*54),GroupTransparency=0});item.Motion:Play()
   end end
@@ -161,6 +171,7 @@ function P.New(window,wind,options)
   end end
   rows.CanvasSize=UDim2.fromOffset(0,count*54)
   if count==0 then local label=U.text(rows,'No presets found',8,10,280,32,true);label.Name='EmptyLabel'end
+  status.Text=(self.SortLabels[self.Sort]or self.Sort)..' · '..count..' presets'
   local height=math.clamp(count*54+130,184,414);panel.Size=UDim2.fromOffset(330,height);rows.Size=UDim2.fromOffset(306,height-140);status.Position=UDim2.fromOffset(14,height-28)
   if self.Opened then U.place(panel,trigger,wind)end
  end
