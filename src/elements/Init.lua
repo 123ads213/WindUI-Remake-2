@@ -24,7 +24,7 @@ return {
 			tbl[name] = function(self, config)
 				config = config or {}
 				config.CompactRow = config.CompactRow or tbl.CompactRows
-                if config.CompactRow and name == "Slider" then config.Width=config.Width or 160;config.ValueWidth=config.ValueWidth or 44 end
+                if config.CompactRow and name == "Slider" then config.Width=config.Width or 184;config.ValueWidth=config.ValueWidth or 72 end
                 config.Tab = Tab or tbl
 				config.ParentType = tbl.__type
 				config.ParentTable = tbl
@@ -116,10 +116,18 @@ return {
 					end
 				end
 
-				if frame and config.CompactRow then require("../components/window/CompactRow")(content,frame,config)end
+				if frame and config.CompactRow and not config.Inline then require("../components/window/CompactRow")(content,frame,config)end
                 if frame and (config.VisibleWhen or config.Visible~=nil or config.CompactRow)then require("../components/window/Visibility").Attach(content,frame.UIElements.Main,config)end
 
                 if frame and Window.FeatureUI then Window.FeatureUI:Register(content,frame,config)end
+                if frame then
+                    function content:Settings(options)
+                        if not self.SettingsPanel then self.SettingsPanel=require('../components/window/FeatureSettings').New(self,frame,Window,WindUI,ElementsModule,UIScale,options)end
+                        return self.SettingsPanel
+                    end
+                    if type(config.Settings)=='function'then config.Settings(content:Settings(config.SettingsConfig),content)end
+                end
+
 
 				table.insert(Window.AllElements,content)
                 table.insert(tbl.Elements,content)

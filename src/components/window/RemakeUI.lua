@@ -2,6 +2,7 @@
 local C=require('../../modules/Creator')
 local Shadow=require('../ui/PopupShadow')
 local U={New=C.New,Tween=C.Tween}
+local popupSerial=setmetatable({},{__mode="k"})
 local fades=setmetatable({},{__mode='k'})
 function U.corner(p,r) C.New('UICorner',{Parent=p,CornerRadius=UDim.new(0,r or 8)}) end
 function U.text(p,text,x,y,w,h,secondary)
@@ -37,9 +38,31 @@ function U.show(p,v)
  if v then p.Visible=true end
  if fades[p]then fades[p]:Cancel()end
  fades[p]=C.Tween(p,.16,{GroupTransparency=v and 0 or 1});fades[p]:Play()
- if not v then task.delay(.17,function()if p.Parent and not p:GetAttribute('TargetVisible')then p.Visible=false end end)end
+ popupSerial[p]=(popupSerial[p]or 0)+1;local serial=popupSerial[p]
+ if not v then task.delay(.17,function()if p.Parent and popupSerial[p]==serial and not p:GetAttribute('TargetVisible')then p.Visible=false end end)end
 end
 function U.inside(p,point)
  local a,z=p.AbsolutePosition,p.AbsoluteSize;return p.Visible and point.X>=a.X and point.X<=a.X+z.X and point.Y>=a.Y and point.Y<=a.Y+z.Y
+end
+function U.beside(p,anchor,wind,gap)
+ local s=math.max(.01,wind.UIScaleObj.Scale);gap=(gap or 8)*s
+ local a,z=anchor.AbsolutePosition,anchor.AbsoluteSize;local origin,size=wind.ScreenGui.AbsolutePosition,wind.ScreenGui.AbsoluteSize
+ local w,h=p.Size.X.Offset*s,p.Size.Y.Offset*s
+ local x=a.X+z.X+gap;local y=a.Y
+ if x+w>origin.X+size.X-8 then x=a.X-w-gap end
+ x=math.clamp(x,origin.X+8,math.max(origin.X+8,origin.X+size.X-w-8));y=math.clamp(y,origin.Y+8,math.max(origin.Y+8,origin.Y+size.Y-h-8))
+ p.Position=UDim2.fromOffset((x-p.Parent.AbsolutePosition.X)/s,(y-p.Parent.AbsolutePosition.Y)/s)
+end
+function U.tooltip(window,wind,anchor,title)
+ local tip=U.panel(window,'ButtonHint',math.max(100,#title*7.5+24),36,1100);tip.Active=false
+ U.text(tip,title,12,0,tip.Size.X.Offset-24,36)
+ local serial=0
+ local function hide()serial+=1;U.show(tip,false)end
+ anchor.MouseEnter:Connect(function()serial+=1;local request=serial;task.delay(.3,function()
+  if request==serial and anchor.Parent and not window.Closed then U.beside(tip,anchor,wind,8);tip.Position+=UDim2.fromOffset(0,(anchor.AbsoluteSize.Y/wind.UIScaleObj.Scale-36)/2);U.show(tip,true)end
+ end)end)
+ anchor.MouseLeave:Connect(hide);anchor.MouseButton1Down:Connect(hide)
+ anchor.Destroying:Connect(function()serial+=1;tip:Destroy()end)
+ return tip
 end
 return U

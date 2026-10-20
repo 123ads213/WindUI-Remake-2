@@ -38,10 +38,31 @@ Limitations are explicit in API.md: no fake cloud service; Recent is modified-or
 
 ## Transparency-style numeric controls
 
-`tests/ThinSliders.lua`:58 live assertions passed. Checks include five slider instances, hidden thumbs, thin4px tracks, inline value editors, drag-only feedback, exact abbreviated input and min/max clamping, invalid input restoration, locks, touch ratio mapping and fixed drag geometry. Balance/Collection match Gravity's44px row height, retain single-line titles and have no nested background plate. Toggle dependencies were verified for animated reveal/hide, collapsed layout, disabled interaction while hidden and retained values.
+`tests/ThinSliders.lua`:58 live assertions passed. Checks include five slider instances, hidden thumbs, thin4px tracks, inline value editors, drag-only feedback, exact abbreviated input and min/max clamping, invalid input restoration, locks, touch ratio mapping and fixed drag geometry. Balance/Collection match Gravity's50px row height, retain single-line titles and have no nested background plate. Toggle dependencies were verified for animated reveal/hide, collapsed layout, disabled interaction while hidden and retained values.
 
 Card separators are visible only between visible rows; the last row has none. Live tests also hide/show Collection and verify Balance becomes the final row without a separator, then regains it when Collection reappears.
 
 Final field/subtab follow-up: live checks verify the right editor stays within its row, ordinary hover does not show floating values, dragging does, shared subtab background exists, and the accent highlight follows the active page.
 
-Actual Roblox screenshot `slider-fields.png` was inspected after the final build: right-side value pills stay inside their rows; no floating number appears on ordinary hover; shared Enemy/Team plate and blue active selection are visible. Runtime bounds were also verified at700px and1000px window widths.
+Historical screenshot `slider-fields.png` (superseded by the neutral-surface follow-up) showed: right-side value pills stay inside their rows; no floating number appears on ordinary hover; shared Enemy/Team plate and the former blue active selection are visible. Runtime bounds were also verified at700px and1000px window widths.
+
+## Animated controls and feature settings
+
+- `tests/SliderPolish.lua`:23 live assertions pass, including actual virtual keyboard Left/Right and held repeat, max/min clamping, lock/hover/focus guards, width/fit of413.46m, animated full-value expansion, fade-in/out lifecycle and neutral surfaces in Dark/Light.
+- `tests/FeatureSettings.lua`:26 live assertions pass. The test opens the actual ellipsis, checks grouped cards/native slider/8px proximity, Escape/outside dismissal, the three checked sorting choices, named quick-save notification and real file roundtrip of main and popup settings. It deletes only its own temporary preset and restores the selected preset/values.
+- Existing58 slider/layout checks and33 integration checks remain regression suites; compact row expectations now use50px, not44px.
+
+## Outlined feature groups and inline dropdown follow-up
+
+- `tests/InlineSettings.lua`:22 live assertions passed: both rounded outlined groups, embedded choices, one active checkmark, horizontal containment, all three filter icons, and actual file save/load of the embedded dropdown selection. Temporary test preset removed.
+- Re-ran26 feature-settings checks and23 animated slider/keyboard checks successfully after this change. Pure suites passed, and bundled Luau compiled successfully.
+- Actual in-game screenshot inspected: the first group contains Names/Health and embedded Classic/Minimal; the second contains Opacity. Fine group outlines remain distinct from the outer popup shadow; no detached dropdown or overlapping controls.
+
+## Sorting, fade previews, complete example and AFK follow-up
+
+- `tests/Followup.lua`:33 live assertions passed:17 native element types registered, active Anti-AFK connection, ordered/faded dropdown preview, animated selection replacement, persistent row identity and animated sorting, and popup-slider number alignment.
+- A simulated Idled signal invoked the installed handler successfully (`Success=true`) in the current executor. This verifies its API call, not protection against network/server disconnects.
+- Actual screenshots inspected: complete outlined feature groups (all four edges visible), six inline choices with selected checkmark, second toggle/slider group; Controls with input/actions and icon subtabs; native containers; local model viewport and copyable code.
+- Found and repaired the inherited Image element parenting condition: unparented images are now attached to their requested container, expose ElementFrame/UIElements.Main and participate in sizing.
+
+Final combined regression on the rebuilt standalone menu: Followup33, Remake2 integration33, FeatureSettings26, InlineSettings30, SliderPolish23 and ThinSliders58 —203 live assertions passed. All pure suites passed. The Image gallery instance is parented, sized846×475.875 at1100px menu width, and its Roblox avatar thumbnail loaded successfully.

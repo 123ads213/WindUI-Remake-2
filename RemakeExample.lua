@@ -51,7 +51,7 @@ local Window = WindUI:CreateWindow({
     Title = 'Sirius', Author = 'Ui library',
     Folder = 'Sirius-Remake2', Icon = 'star', Theme = 'Dark',
     CustomCursor = { Enabled = true, Size = 10 }, DragSmoothness = 0.045,
-    DescriptionMode = 'Tooltip', ContentPaddingTop = 10, HideSearchBar = false, SearchInTopbar = true, ToggleKey=Enum.KeyCode.RightShift, LockOffscreen = true, NewElements = true, Size = UDim2.fromOffset(1000, 650), MinSize=Vector2.new(700,420), MaxSize=Vector2.new(1200,800),
+    DescriptionMode = 'Tooltip', ContentPaddingTop = 10, HideSearchBar = false, SearchInTopbar = true, ToggleKey=Enum.KeyCode.RightShift, LockOffscreen = true, NewElements = true, Size = UDim2.fromOffset(1100, 720), MinSize=Vector2.new(700,420), MaxSize=Vector2.new(1200,800),
 })
 -- Register immediately: even a later setup error remains cleanable on rerun.
 Env.WindUIForkDemo = { Library = WindUI, Window = Window }
@@ -96,6 +96,14 @@ local Fine = PlayerSettings:Slider({ Title = 'Precision', Flag='precision', Widt
     Value = { Min = -1, Max = 1, Default = .12345 }, Step = .00001,
     Callback = function(value) Calls.Fine = value end })
 local ShowPlayers = PlayerControls:Toggle({ Title = 'Show players', Flag = 'show_players', Desc = 'Show player overlays. Right-click to manage multiple hotkeys. K toggles; L applies Enabled while held.', Value = true, Hotkeys = { { Key = 'K', Mode = 'Toggle', Value = true }, { Key = 'L', Mode = 'Hold', Value = true } }, Callback = function(value) Calls.ShowPlayers = value end })
+-- Optional popover settings use the same native controls, flags and themed cards.
+local PlayerOptions=ShowPlayers:Settings({Title='Show players',Width=400})
+local Details=PlayerOptions:Section()
+local PopupStyle=Details:Dropdown({Title='Tracking mode',Inline=true,Flag='popup_player_style',Values={
+ {Title='Avoid collisions',Locked=true},'View angles','Movement keys','Only while holding jump','Stop on Shift key',{Title='Stop on key release',Locked=true}},Value='View angles'})
+local Display=PlayerOptions:Section()
+Display:Toggle({Title='Subtick mode',Flag='popup_subtick',Value=true,Hotkeys=false})
+local PopupDistance=Display:Slider({Title='Turn speed',Flag='popup_player_opacity',Value={Min=0,Max=100,Default=85},Step=1})
 PlayerControls:Button({ Title = 'Reset distance', Callback = function() Big:Set(500000) end })
 
 
@@ -122,6 +130,21 @@ HUD.OnChanged=function(h)
     syncingHUD=false
 end
 Widgets:Button({Title='Reset widget positions',Callback=function()HUD:ResetPositions()end})
+-- Optional example-only AFK protection; one connection, cleaned on rerun/unload.
+if Env.__SiriusIdleConnection then Env.__SiriusIdleConnection:Disconnect()end
+Env.__SiriusAntiAFKEnabled=true
+local AntiAFK=GeneralSettings:Toggle({Title='Anti-AFK',Value=true,Hotkeys=false,Callback=function(v)Env.__SiriusAntiAFKEnabled=v end})
+Env.__SiriusIdleConnection=game:GetService('Players').LocalPlayer.Idled:Connect(function()
+ if not Env.__SiriusAntiAFKEnabled then return end
+ local ok,err=pcall(function()
+  local user=game:GetService('VirtualUser');user:CaptureController()
+  user:Button2Down(Vector2.zero,workspace.CurrentCamera.CFrame);task.wait(.1)
+  user:Button2Up(Vector2.zero,workspace.CurrentCamera.CFrame)
+ end)
+ Env.__SiriusAntiAFKLast={Success=ok,Error=not ok and tostring(err)or nil}
+ if not ok then WindUI:Notify({Title='Anti-AFK unavailable',Content=tostring(err),Duration=4,Icon='circle-alert'})end
+end)
+Window.UIElements.Main.Main.Destroying:Connect(function()if Env.__SiriusIdleConnection then Env.__SiriusIdleConnection:Disconnect();Env.__SiriusIdleConnection=nil end;Env.__SiriusAntiAFKEnabled=false end)
 GeneralSettings:Toggle({ Title = 'Lock Offscreen', Flag = 'lock_offscreen', Value = true,
     Callback = function(value) Window:SetLockOffscreen(value) end })
 General:Paragraph({ Title = 'Nested tabs', Desc = 'Click Visuals to expand Player and World. Each child has its own page; the last selected child is remembered.' })
@@ -162,6 +185,70 @@ local Profile = Window:CreateProfile({
         { Version = '1.6.66-fork.2', Date = '2026-10-18', Title = 'Original WindUI layout', Description = 'Original inline controls and resize behavior, nested Player/World pages and optional Lock Offscreen.' },
     },
 })
+-- A functional element laboratory. These callbacks modify demo state, not gameplay.
+Window:Section({Title='LIBRARY EXAMPLES',HeaderSize=28})
+local Lab=Window:Tab({Title='Elements',Icon='blocks'})
+local LabControls=Lab:Tab({Title='Controls',Icon='sliders-horizontal'})
+local LabChoices=Lab:Tab({Title='Selections',Icon='list-checks'})
+local LabLayout=Lab:Tab({Title='Containers',Icon='panels-top-left'})
+local LabMedia=Lab:Tab({Title='Media & code',Icon='code'})
+local LabHUD=Window:Tab({Title='HUD preview',Icon='layout-dashboard'})
+local Showcase={Root=Lab,Controls=LabControls,Choices=LabChoices,Layout=LabLayout,Media=LabMedia,HUD=LabHUD}
+local labPages=LabControls:IconTabs()
+local normal=labPages:Tab({Title='Interactive',Id='interactive',Icon='mouse-pointer-2'})
+local states=labPages:Tab({Title='States',Id='states',Icon='lock-keyhole'})
+local lc=normal:Columns();local common=lc.Left:Section({Title='Inputs'});local actions=lc.Right:Section({Title='Actions & dependencies'})
+Showcase.Toggle=common:Toggle({Title='Enabled',Flag='lab_enabled',Value=true,Hotkeys={{Key='J',Mode='Toggle',Value=true}}})
+Showcase.Slider=common:Slider({Title='Amount',Flag='lab_amount',Value={Min=0,Max=100,Default=50},Step=1})
+Showcase.Fraction=common:Slider({Title='Fraction',Flag='lab_fraction',Value={Min=-1,Max=1,Default=.25},Step=.01})
+Showcase.Input=common:Input({Title='Label',Flag='lab_label',Value='Sirius',Placeholder='Type a label',Callback=function(v)Calls.LabLabel=v end})
+local showDetails=actions:Toggle({Title='Reveal settings',Flag='lab_reveal',Value=false,Hotkeys=false})
+local reveal=lc.Right:Section({Title='Animated group',VisibleWhen=function()return showDetails.Value end})
+reveal:Slider({Title='Strength',Flag='lab_strength',Value={Min=0,Max=100,Default=75},Step=1})
+reveal:Toggle({Title='Optional',Flag='lab_optional',Value=true,Hotkeys=false})
+Showcase.Progress=actions:ProgressBar({Title='Progress',Value={Min=0,Max=100,Default=25}})
+actions:Button({Title='Advance progress',Icon='plus',Callback=function()Showcase.Progress:Set((Showcase.Progress:GetPercentage()+25)%125)end})
+actions:Button({Title='Test notification',Icon='bell',Callback=function()WindUI:Notify({Title='Sirius',Content='The example button works.',Icon='check',Duration=3})end})
+local sc=states:Columns();local locks=sc.Left:Section({Title='Locked & fixed'})
+locks:Toggle({Title='Locked toggle',Locked=true,Value=false})
+locks:Slider({Title='Locked slider',Locked=true,Value={Min=0,Max=100,Default=35}})
+locks:Slider({Title='Fixed value',Value={Min=5,Max=5,Default=5}})
+locks:Dropdown({Title='Locked choice',Locked=true,Values={'One','Two'},Value='One'})
+local qc=LabChoices:Columns();local floating=qc.Left:Section({Title='Floating menus'});local embedded=qc.Right:Section({Title='Embedded selection',Outlined=true})
+Showcase.Single=floating:Dropdown({Title='Single',Flag='lab_single',Values={'First','Second','Third'},Value='First'})
+Showcase.Multi=floating:Dropdown({Title='Multiple',Flag='lab_multi',Multi=true,AllowNone=true,SearchBarEnabled=true,Values={'First option','Second option','Third option','Fourth option'},Value={'Fourth option','First option'}})
+Showcase.Inline=embedded:Dropdown({Title='Mode',Inline=true,Flag='lab_inline',Values={'Classic','Minimal',{Title='Unavailable',Locked=true}},Value='Classic'})
+local colors=qc.Left:Section({Title='Color & gradient'})
+colors:Colorpicker({Title='Solid color',Flag='lab_color',Default=Color3.fromRGB(76,141,255),Transparency=.2})
+colors:Colorpicker({Title='Gradient',Flag='lab_gradient',Gradient={{Position=0,Color=Color3.fromRGB(0,170,255),Transparency=0},{Position=1,Color=Color3.fromRGB(150,80,255),Transparency=.2}}})
+local opts=Showcase.Toggle:Settings({Title='Enabled settings',Width=400})
+opts:Section():Dropdown({Title='Behaviour',Inline=true,Values={'Default','Alternative','Experimental'},Value='Default',Flag='lab_behaviour'})
+local values=opts:Section();values:Toggle({Title='Smooth',Value=true,Flag='lab_smooth',Hotkeys=false});values:Slider({Title='Speed',Flag='lab_speed',Value={Min=0,Max=10,Default=3},Step=.1})
+Showcase.Settings=opts
+LabLayout:Paragraph({Title='Native containers',Desc='Group and HStack arrange controls side by side. VStack arranges them vertically. Sections, dividers and spacing are shown below.'})
+LabLayout:Section({Title='Group'})
+local g=LabLayout:Group({});g:Button({Title='Left',Callback=function()Calls.Group='Left'end});g:Button({Title='Right',Callback=function()Calls.Group='Right'end})
+LabLayout:Space({Columns=2});LabLayout:Divider();LabLayout:Section({Title='Horizontal stack'})
+local h=LabLayout:HStack({});h:Button({Title='First',Callback=function()Calls.HStack='First'end});h:Button({Title='Second',Callback=function()Calls.HStack='Second'end})
+LabLayout:Section({Title='Vertical stack'})
+local v=LabLayout:VStack({});v:Toggle({Title='Top',Value=true,Hotkeys=false});v:Button({Title='Bottom',Callback=function()Calls.VStack=true end})
+LabMedia:Paragraph({Title='Media and copyable code',Desc='The model below is a local demo object, not a live player. Drag it to test the viewport.'})
+local model=Instance.new('Model');model.Name='SiriusPreview'
+local part=Instance.new('Part');part.Anchored=true;part.Size=Vector3.new(4,4,4);part.Color=Color3.fromRGB(76,141,255);part.Material=Enum.Material.Neon;part.Parent=model;model.PrimaryPart=part
+Showcase.Viewport=LabMedia:Viewport({Object=model,Interactive=true,Height=220})
+LabMedia:Code({Title='Create a settings panel',Code="local options = toggle:Settings({Title = 'Settings'})\nlocal group = options:Section()\ngroup:Slider({Title='Speed', Value={Min=0, Max=100, Default=50}})",Height=UDim.new(0,130),CodeSize=14})
+Showcase.Image=LabMedia:Image({Image='rbxthumb://type=AvatarHeadShot&id='..game:GetService('Players').LocalPlayer.UserId..'&w=420&h=420',AspectRatio='16:9',Radius=8})
+Window.UIElements.Main.Main.Destroying:Connect(function()model:Destroy()end)
+local hc=LabHUD:Columns();local wm=hc.Left:Section({Title='Watermark'});local kl=hc.Right:Section({Title='Keylist & dragging'})
+wm:Button({Title='Show watermark',Callback=function()HUD:SetWatermarkEnabled(true)end})
+wm:Button({Title='Hide watermark',Callback=function()HUD:SetWatermarkEnabled(false)end})
+wm:Button({Title='All fields',Callback=function()HUD:SetFields(HUD:GetAvailableFields())end})
+wm:Button({Title='Compact fields',Callback=function()HUD:SetFields({'FPS','Ping','Username','Time'})end})
+kl:Button({Title='Show keylist',Callback=function()HUD:SetKeylistEnabled(true)end})
+kl:Button({Title='Hide keylist',Callback=function()HUD:SetKeylistEnabled(false)end})
+kl:Button({Title='Reset positions',Callback=function()HUD:ResetPositions()end})
+LabHUD:Paragraph({Title='Try the HUD',Desc='Drag watermark and Hotkeys while the menu is open. Toggle Enabled in Elements > Controls, press J, or right-click its row to add a hotkey. General contains the watermark field selector; Themes switches both HUD surfaces.'})
+
 local Presets,configError=Window:EnablePresets({Default='Default'})
 assert(Presets,configError)
 Env.WindUIForkDemoConfig=Window.CurrentConfig
@@ -169,6 +256,6 @@ Window:SelectTab(Visuals.Index) -- Selects the first unlocked child (Player).
 
 Env.WindUIForkDemo = { Library = WindUI, Window = Window, Big = Big, Billion = Billion,
     ShowPlayers = ShowPlayers, Fine = Fine, Calls = Calls, Visuals = Visuals, Player = Player, Players = Player,
-    World = World, General = General, Themes = Themes, Gravity = Gravity, Balance = Balance, Collection = Collection, Appearance = Appearance, Profile = Profile, HUD = HUD, Presets=Presets, Pages=Pages, Columns=PlayerColumns, ThemeDropdown=ThemeDropdown, Advanced=Advanced, Dependent=Unshortened, DependencyGroup=AdvancedGroup, WatermarkFields = WatermarkFields, SolidColor = SolidColor, GradientColor = GradientColor }
+    World = World, General = General, Themes = Themes, Gravity = Gravity, Balance = Balance, Collection = Collection, Appearance = Appearance, Profile = Profile, HUD = HUD, Presets=Presets, AntiAFK=AntiAFK, Showcase=Showcase, PlayerOptions=PlayerOptions, PopupDistance=PopupDistance, PopupStyle=PopupStyle, Pages=Pages, Columns=PlayerColumns, ThemeDropdown=ThemeDropdown, Advanced=Advanced, Dependent=Unshortened, DependencyGroup=AdvancedGroup, WatermarkFields = WatermarkFields, SolidColor = SolidColor, GradientColor = GradientColor }
 Env.__WindUIForkPendingLibrary = nil
 return "Full remake 2 menu started"

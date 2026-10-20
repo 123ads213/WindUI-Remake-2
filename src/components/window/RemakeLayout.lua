@@ -22,9 +22,13 @@ function Layout.Attach(tab,window,wind,elements,scale)
    local col=proxy(container)
    function col:Section(cfg)
     cfg=type(cfg)=='string'and{Title=cfg}or(cfg or{})
-    local holder=frame(container,'Section');local flow=list(holder,8);N('UIPadding',{Parent=holder,PaddingBottom=UDim.new(0,18)})
-    local heading=U.text(holder,string.upper(cfg.Title or 'Settings'),4,0,200,20,true);heading.Size=UDim2.new(1,-8,0,20);heading.LayoutOrder=0;heading.TextSize=12
-    local card=N('Frame',{Parent=holder,Name='Card',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=.1,ThemeTag={BackgroundColor3='ElementBackground'},LayoutOrder=1});U.corner(card,12)
+    local holder=frame(container,'Section');local flow=list(holder,8);N('UIPadding',{Parent=holder,PaddingTop=UDim.new(0,cfg.Outlined and 1 or 0),PaddingLeft=UDim.new(0,cfg.Outlined and 1 or 0),PaddingRight=UDim.new(0,cfg.Outlined and 1 or 0),PaddingBottom=UDim.new(0,18)})
+    local heading=U.text(holder,string.upper(cfg.Title==false and '' or cfg.Title or 'Settings'),4,0,200,20,true);heading.Size=UDim2.new(1,-8,0,20);heading.LayoutOrder=0;heading.TextSize=13;heading.Visible=cfg.Title~=false
+    local card=N('Frame',{Parent=holder,Name='Card',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=.1,ThemeTag={BackgroundColor3='ElementBackground'},LayoutOrder=1});U.corner(card,cfg.Outlined and 18 or 12)
+    if cfg.Outlined then
+     card.BackgroundTransparency=.9
+     N("UIStroke",{Parent=card,Name="GroupOutline",Thickness=1,Transparency=.87,ApplyStrokeMode="Border",ThemeTag={Color="Text"}})
+    end
     local cardFlow=list(card,0)
     -- The card owns separators: no line after its final currently visible row.
     local function separators()
@@ -44,7 +48,7 @@ function Layout.Attach(tab,window,wind,elements,scale)
     card.ChildAdded:Connect(function()task.defer(separators)end)
     card.ChildRemoved:Connect(function()task.defer(separators)end)
 
-    local group=proxy(card);group.UIElements.Root=holder;group.Title=cfg.Title
+    local group=proxy(card);group.UIElements.Root=holder;group.UIElements.Card=card;group.Title=cfg.Title
     V.Attach(group,holder,cfg)
     return group
    end
@@ -80,10 +84,10 @@ function Layout.Attach(tab,window,wind,elements,scale)
    local page=N('CanvasGroup',{Parent=root,Name='SubtabPage',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=1,GroupTransparency=1});page.Position=UDim2.fromOffset(0,46);page.Visible=false;local flow=list(page,14)
    local p=proxy(page);p.Title=cfg.Title or 'Page';p.Id=cfg.Id or p.Title;p.UIElements.Root=page
    function p:Columns(c)return columns(page,c)end
-   local b=N('TextButton',{Parent=group,Text='',Size=UDim2.fromOffset(36,32),BackgroundTransparency=1,AutoButtonColor=false,ThemeTag={BackgroundColor3='Slider'}});U.corner(b,6);b.LayoutOrder=index
+   local b=N('TextButton',{Parent=group,Text='',Size=UDim2.fromOffset(36,32),BackgroundTransparency=1,AutoButtonColor=false,ThemeTag={BackgroundColor3='Button'}});U.corner(b,6);b.LayoutOrder=index
    b.MouseButton1Click:Connect(function()controller:Select(index)end)
-   b.MouseEnter:Connect(function()U.Tween(b,.12,{BackgroundTransparency=controller.Selected==index and .78 or .94}):Play()end)
-   b.MouseLeave:Connect(function()U.Tween(b,.12,{BackgroundTransparency=controller.Selected==index and .82 or 1}):Play()end)
+   b.MouseEnter:Connect(function()U.Tween(b,.12,{BackgroundTransparency=controller.Selected==index and .35 or .85}):Play()end)
+   b.MouseLeave:Connect(function()U.Tween(b,.12,{BackgroundTransparency=controller.Selected==index and .45 or 1}):Play()end)
    local icon=U.icon(b,cfg.Icon or 'user',9,8,16,window)
    local label=U.text(b,p.Title,34,0,100,32);label.Visible=false
    p.Button=b;p.Label=label;p.Icon=icon
@@ -100,8 +104,8 @@ function Layout.Attach(tab,window,wind,elements,scale)
    if not index or not self.Pages[index]then return false end
    self.Selected=index
    for i,p in ipairs(self.Pages)do
-    local active=i==index;p.UIElements.Root.Visible=active;if active then p.UIElements.Root.GroupTransparency=1;U.Tween(p.UIElements.Root,.18,{GroupTransparency=0}):Play()end;p.Label.Visible=active;p.Button.Size=UDim2.fromOffset(active and math.clamp(p.Label.TextBounds.X+48,90,180)or 36,32);U.Tween(p.Button,.14,{BackgroundTransparency=active and .82 or 1}):Play()
-    require('../../modules/Creator').AddThemeObject(p.Icon.ImageLabel,{ImageColor3=active and 'Slider' or 'Icon'})
+    local active=i==index;p.UIElements.Root.Visible=active;if active then p.UIElements.Root.GroupTransparency=1;U.Tween(p.UIElements.Root,.18,{GroupTransparency=0}):Play()end;p.Label.Visible=active;p.Button.Size=UDim2.fromOffset(active and math.clamp(p.Label.TextBounds.X+48,90,180)or 36,32);U.Tween(p.Button,.14,{BackgroundTransparency=active and .45 or 1}):Play()
+    require('../../modules/Creator').AddThemeObject(p.Icon.ImageLabel,{ImageColor3=active and 'Text' or 'Icon'})
     if active then local flow=p.UIElements.Root:FindFirstChildOfClass('UIListLayout');root.Size=UDim2.new(1,0,0,46+flow.AbsoluteContentSize.Y)end
    end
    return true

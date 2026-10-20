@@ -34,7 +34,7 @@ function Element:New(Config)
 		IsFocusing = false,
 
 		Width = math.max(Numbers.Finite(Config.Width) or (Config.Compact ~= false and 184 or 130), 100),
-		TextBoxWidth = math.max(30, Numbers.Finite(Config.ValueWidth) or (Config.Compact ~= false and 72 or 48)),
+		TextBoxWidth = math.max(72, Numbers.Finite(Config.ValueWidth) or (Config.Compact ~= false and 72 or 48)),
 		ThumbSize = 13,
 		IconSize = 26,
 	}
@@ -214,23 +214,27 @@ function Element:New(Config)
     layout.SortOrder=Enum.SortOrder.LayoutOrder
     TextBox.LayoutOrder=2
     TextBox.AutomaticSize=Enum.AutomaticSize.None
-    TextBox.Size=UDim2.fromOffset(Slider.TextBoxWidth,28)
-    TextBox.BackgroundTransparency=.25
+    TextBox.Size=UDim2.fromOffset(Slider.TextBoxWidth,30)
+    TextBox.BackgroundTransparency=.65
     TextBox.TextTransparency=0
     TextBox.TextXAlignment=Enum.TextXAlignment.Center
-    TextBox.TextSize=13
+    TextBox.TextSize=14
     TextBox.TextEditable=Slider.IsTextbox
     TextBox.ClipsDescendants=true
-    Creator.AddThemeObject(TextBox,{BackgroundColor3='LabelBackground',TextColor3='Text'})
+    Creator.AddThemeObject(TextBox,{BackgroundColor3='Button',TextColor3='Text'})
     New('UICorner',{Parent=TextBox,CornerRadius=UDim.new(0,6)})
     local popupParent = Config.Window.UIElements.Main.Main
-    local HoverValue=New('TextLabel',{
-        Parent=popupParent,Name='SliderDragValue',Size=UDim2.fromOffset(60,24),AnchorPoint=Vector2.new(.5,1),
-        BackgroundTransparency=0,TextTransparency=0,TextXAlignment='Center',TextSize=13,
-        FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),ZIndex=850,Visible=false,
-        ThemeTag={BackgroundColor3='Dialog',TextColor3='Text'},
-    },{New('UICorner',{CornerRadius=UDim.new(0,7)})})
-    require('../components/ui/PopupShadow').New(HoverValue,{Opacity=.14})
+    local HoverText=New('TextLabel',{Size=UDim2.fromScale(1,1),BackgroundTransparency=1,TextTransparency=0,
+        TextXAlignment='Center',TextSize=14,FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),
+        ThemeTag={TextColor3='Text'},ZIndex=851})
+    local HoverScale=New('UIScale',{Scale=.96})
+    local HoverValue=New('CanvasGroup',{
+        Parent=popupParent,Name='SliderDragValue',Size=UDim2.fromOffset(72,28),AnchorPoint=Vector2.new(.5,1),
+        BackgroundTransparency=.1,GroupTransparency=1,ZIndex=850,Visible=false,
+        ThemeTag={BackgroundColor3='Button'},
+    },{New('UICorner',{CornerRadius=UDim.new(0,7)}),HoverText,HoverScale})
+    require('../components/ui/PopupShadow').New(HoverValue,{Opacity=.12})
+    local valueFade,scaleFade,fadeSerial=nil,nil,0
     Slider.UIElements.HoverValue=HoverValue
     Slider.UIElements.ValueInput=TextBox
     local ScrollingFrameParent = Config.Tab.UIElements.ContainerFrame
@@ -245,27 +249,52 @@ function Element:New(Config)
         local scale = math.max(.01, Config.WindUI.UIScaleObj.Scale)
         local ratio = Numbers.Ratio(LastValue,Slider.Value.Min,Slider.Value.Max)
         local x = track.AbsolutePosition.X + ratio*track.AbsoluteSize.X
-        local half = HoverValue.Size.X.Offset*.5
-        local localX = (x-popupParent.AbsolutePosition.X)/scale
-        local localY = (track.AbsolutePosition.Y-popupParent.AbsolutePosition.Y)/scale
-        local maxY=popupParent.AbsoluteSize.Y/scale
-        HoverValue.Position = UDim2.fromOffset(math.clamp(localX,half+4,math.max(half+4,popupParent.AbsoluteSize.X/scale-half-4)),math.clamp(localY-4,28,math.max(28,maxY-4)))
+        -- A floating feature panel can sit outside the main menu. Clamp to the
+        -- slider's owning popup, not the main window, or the number jumps sideways.
+        local bounds=popupParent
+        local ancestor=track.Parent
+        while ancestor and ancestor~=popupParent do
+            if ancestor:IsA('GuiObject')and ancestor.Name=='FeatureSettings'then bounds=ancestor;break end
+            ancestor=ancestor.Parent
+        end
+        local half=HoverValue.Size.X.Offset*scale*.5
+        local left=bounds.AbsolutePosition.X+half+4
+        local right=math.max(left,bounds.AbsolutePosition.X+bounds.AbsoluteSize.X-half-4)
+        local bottom=math.clamp(track.AbsolutePosition.Y-4,bounds.AbsolutePosition.Y+28,math.max(bounds.AbsolutePosition.Y+28,bounds.AbsolutePosition.Y+bounds.AbsoluteSize.Y-4))
+        HoverValue.Position=UDim2.fromOffset((math.clamp(x,left,right)-popupParent.AbsolutePosition.X)/scale,(bottom-popupParent.AbsolutePosition.Y)/scale)
     end
     local function ShowValue(show)
-        HoverValue.Visible = show and Holding and not Slider.Locked
-        if HoverValue.Visible then PositionValue() end
+        show=show and Holding and not Slider.Locked
+        if HoverValue:GetAttribute('Shown')==show then return end
+        HoverValue:SetAttribute('Shown',show);fadeSerial+=1;local serial=fadeSerial
+        if valueFade then valueFade:Cancel()end
+        if scaleFade then scaleFade:Cancel()end
+        if show then HoverValue.Visible=true;PositionValue()end
+        valueFade=Tween(HoverValue,.12,{GroupTransparency=show and 0 or 1});valueFade:Play()
+        scaleFade=Tween(HoverScale,.12,{Scale=show and 1 or .96});scaleFade:Play()
+        if not show then task.delay(.13,function()if not Destroyed and serial==fadeSerial then HoverValue.Visible=false end end)end
     end
+    local fillTween,fieldSizeTween,trackSizeTween
     local function Render(instant)
         if Destroyed then return end
         TextBox.Text = Slider.IsFocusing and Numbers.Plain(LastValue) or Display(LastValue)
-        TextBox.Size=UDim2.fromOffset(Slider.TextBoxWidth,28)
-        local text=Display(LastValue)
-        HoverValue.Text=text
-        HoverValue.Size=UDim2.fromOffset(math.max(44,math.min(280,#text*7+20)),24)
         local gapWidth=12*(IconCount+(Slider.IsTextbox and 1 or 0))
-        track.Size=UDim2.new(1,-TotalSliderWidth-gapWidth-(Slider.IsTextbox and Slider.TextBoxWidth or 0),0,4)
+        local scale=math.max(.01,Config.WindUI.UIScaleObj.Scale)
+        local controlWidth=Slider.UIElements.SliderContainer.AbsoluteSize.X/scale
+        local maxField=math.max(Slider.TextBoxWidth,controlWidth-TotalSliderWidth-gapWidth-48)
+        local fieldWidth=Slider.IsFocusing and math.min(maxField,math.max(Slider.TextBoxWidth,#TextBox.Text*8+20)) or Slider.TextBoxWidth
+        local fieldSize=UDim2.fromOffset(fieldWidth,30)
+        local trackSize=UDim2.new(1,-TotalSliderWidth-gapWidth-(Slider.IsTextbox and fieldWidth or 0),0,4)
+        if fieldSizeTween then fieldSizeTween:Cancel()end
+        if trackSizeTween then trackSizeTween:Cancel()end
+        fieldSizeTween=Tween(TextBox,.16,{Size=fieldSize});fieldSizeTween:Play()
+        trackSizeTween=Tween(track,.16,{Size=trackSize});trackSizeTween:Play()
+        local text=Display(LastValue)
+        HoverText.Text=text
+        HoverValue.Size=UDim2.fromOffset(math.max(64,math.min(280,#text*8+20)),28)
         local size=UDim2.new(Numbers.Ratio(LastValue,Slider.Value.Min,Slider.Value.Max),0,1,0)
-        if instant or Holding then track.Frame.Size=size else Tween(track.Frame,.05,{Size=size}):Play() end
+        if fillTween then fillTween:Cancel()end
+        if instant or Holding then track.Frame.Size=size else fillTween=Tween(track.Frame,.12,{Size=size});fillTween:Play() end
         if HoverValue.Visible then PositionValue() end
     end
 
@@ -278,12 +307,6 @@ function Element:New(Config)
         ScrollingFrameParent.ScrollingEnabled = PreviousScrolling
         if Config.WindUI.CurrentInput == CurInput then Config.WindUI.CurrentInput = nil end
         if not Destroyed then
-            if Config.Window.NewElements then
-                Tween(Slider.UIElements.SliderIcon.Frame.Thumb, 0.2, {
-                    ImageTransparency = 0,
-                    Size = UDim2.new(0, Slider.ThumbSize * 2, 0, Slider.ThumbSize + 4),
-                }):Play()
-            end
             ShowValue(false)
         end
     end
@@ -343,14 +366,15 @@ function Element:New(Config)
     Creator.AddSignal(TextBox.Focused, function()
         if Slider.Locked then TextBox:ReleaseFocus(); return end
         Slider.IsFocusing = true
-        Tween(TextBox,.12,{BackgroundTransparency=0}):Play()
+        Tween(TextBox,.16,{BackgroundTransparency=.2}):Play()
         ShowValue(false)
         Render(true) -- Edit the full exact number, never a rounded abbreviation.
+        TextBox.CursorPosition=#TextBox.Text+1;TextBox.SelectionStart=1
     end)
     Creator.AddSignal(TextBox.FocusLost, function()
         local parsed = Numbers.Parse(TextBox.Text)
         Slider.IsFocusing = false
-        Tween(TextBox,.12,{BackgroundTransparency=.25}):Play()
+        Tween(TextBox,.16,{BackgroundTransparency=.65}):Play()
         if parsed then Slider:Set(parsed) end
         Render(true) -- Restore even if parsing failed or the value did not change.
         ShowValue(false)
@@ -390,9 +414,43 @@ function Element:New(Config)
         end)
         ShowValue(true)
     end)
-    Creator.AddSignal(TextBox.MouseEnter,function()if not Slider.Locked then Tween(TextBox,.12,{BackgroundTransparency=.05}):Play() end end)
-    Creator.AddSignal(TextBox.MouseLeave,function()if not Slider.IsFocusing then Tween(TextBox,.12,{BackgroundTransparency=.25}):Play() end end)
-    Creator.AddSignal(UserInputService.WindowFocusReleased,StopDrag)
+    Creator.AddSignal(TextBox.MouseEnter,function()if not Slider.Locked then Tween(TextBox,.16,{BackgroundTransparency=.4}):Play() end end)
+    Creator.AddSignal(TextBox.MouseLeave,function()if not Slider.IsFocusing then Tween(TextBox,.16,{BackgroundTransparency=.65}):Play() end end)
+    local hovering=false
+    local heldArrow=nil;local arrowAge,arrowRepeat=0,0
+    local function CanUseArrows()
+        local point=UserInputService:GetMouseLocation();local control=Slider.UIElements.SliderContainer
+        local a,z=control.AbsolutePosition,control.AbsoluteSize
+        local inside=point.X>=a.X and point.X<=a.X+z.X and point.Y>=a.Y and point.Y<=a.Y+z.Y
+        if not inside or Destroyed or Slider.Locked or Config.Window.Closed or game:GetService('GuiService').MenuIsOpen or UserInputService:GetFocusedTextBox() then return false end
+        if Config.WindUI.CurrentInput and Config.WindUI.CurrentInput~=CurInput then return false end
+        local parent=track
+        while parent do
+            if parent:IsA('GuiObject') and (not parent.Visible or parent:GetAttribute('WindUIHidden')) then return false end
+            if parent==popupParent then break end;parent=parent.Parent
+        end
+        return true
+    end
+    local function ArrowStep(key)
+        if not CanUseArrows() then return false end
+        Slider:Set(LastValue+(key==Enum.KeyCode.Right and Slider.Step or -Slider.Step))
+        return true
+    end
+    Creator.AddSignal(Slider.UIElements.SliderContainer.MouseEnter,function()hovering=true end)
+    Creator.AddSignal(Slider.UIElements.SliderContainer.MouseLeave,function()hovering=false end)
+    Creator.AddSignal(UserInputService.InputBegan,function(input,processed)
+        local key=input.KeyCode
+        if key~=Enum.KeyCode.Left and key~=Enum.KeyCode.Right then return end
+        if ArrowStep(key) then heldArrow=key;arrowAge=0;arrowRepeat=0 end
+    end)
+    Creator.AddSignal(UserInputService.InputEnded,function(input)if input.KeyCode==heldArrow then heldArrow=nil end end)
+    Creator.AddSignal(RunService.Heartbeat,function(dt)
+        if not heldArrow then return end
+        if not CanUseArrows() then heldArrow=nil;return end
+        arrowAge+=dt
+        if arrowAge>.32 then arrowRepeat+=dt;if arrowRepeat>=.06 then arrowRepeat=0;ArrowStep(heldArrow)end end
+    end)
+    Creator.AddSignal(UserInputService.WindowFocusReleased,function()hovering=false;heldArrow=nil;StopDrag()end)
     Creator.AddSignal(Slider.UIElements.SliderContainer:GetPropertyChangedSignal("AbsoluteSize"), function() Render(true) end)
     Creator.AddSignal(RunService.RenderStepped,function()
         if Destroyed or not HoverValue.Visible then return end

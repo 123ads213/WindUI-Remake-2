@@ -2,7 +2,7 @@ local C=require('../../modules/Creator')
 return function(content,frame,config)
  if not table.find({"Toggle","Slider","Dropdown","Colorpicker","Input","Button","ProgressBar"},content.__type)then return end
  local main=frame.UIElements.Main
- main.AutomaticSize=Enum.AutomaticSize.None;main.Size=UDim2.new(1,0,0,44)
+ main.AutomaticSize=Enum.AutomaticSize.None;main.Size=UDim2.new(1,0,0,50)
  for _,v in ipairs(main:GetChildren())do if v:IsA('UIPadding')then v:Destroy()end end
  if main:IsA('ImageButton')or main:IsA('ImageLabel')then
   if C.Objects[main]then C.Objects[main].Properties.ImageTransparency=nil;C.Objects[main].Properties.ImageColor3=nil end
@@ -12,19 +12,19 @@ return function(content,frame,config)
  local title=frame.UIElements.Title
  if frame.UIElements.Container then frame.UIElements.Container.Visible=false end
  if title then
-  title.Parent=main;title.Visible=true;title.AutomaticSize=Enum.AutomaticSize.None;title.Position=UDim2.fromOffset(14,0);title.Size=UDim2.new(1,-104,1,0);title.TextSize=14;title.TextWrapped=false;title.TextTruncate=Enum.TextTruncate.AtEnd;title.FontFace=Font.new(C.Font,Enum.FontWeight.Medium)
+  title.Parent=main;title.Visible=true;title.AutomaticSize=Enum.AutomaticSize.None;title.Position=UDim2.fromOffset(14,0);title.Size=UDim2.new(1,-104,1,0);title.TextSize=15;title.TextWrapped=false;title.TextTruncate=Enum.TextTruncate.AtEnd;title.FontFace=Font.new(C.Font,Enum.FontWeight.Medium)
  end
  local width=64
  if content.__type=='Slider'then
   local control=content.UIElements.SliderContainer
-  width=config.Width or 160
-  if control then control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0);control.AutomaticSize=Enum.AutomaticSize.None;control.Size=UDim2.fromOffset(width,26)
+  width=math.max(184,config.Width or 184)
+  if control then control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0);control.AutomaticSize=Enum.AutomaticSize.None;control.Size=UDim2.fromOffset(width,32)
    for _,v in ipairs(control:GetChildren())do if v:IsA('TextBox')then v.LayoutOrder=2 elseif v:IsA('GuiObject')then v.LayoutOrder=1 end end
   end
  elseif content.__type=='ProgressBar'then
   local control=content.UIElements.Container
   width=config.Width or 104
-  control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0);control.Size=UDim2.fromOffset(width,26)
+  control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0);control.Size=UDim2.fromOffset(width,32)
   local bar=content.UIElements.Bar
   bar.Size=UDim2.new(1,0,0,4)
   C.AddThemeObject(bar,{ImageColor3='Icon',ImageTransparency=.83})
@@ -65,7 +65,7 @@ return function(content,frame,config)
  elseif content.__type=='Button'then width=24;local control=content.UIElements.ButtonIcon;if control then control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0)end end
  local iconOffset=0
  if config.Icon then
-  local icon=require('./RemakeUI').icon(main,config.Icon,14,12,20,config.Window);iconOffset=28
+  local icon=require('./RemakeUI').icon(main,config.Icon,14,15,20,config.Window);iconOffset=28
  end
  if title then title.Position=UDim2.fromOffset(14+iconOffset,0);title.Size=UDim2.new(1,-width-40-iconOffset,1,0)end
  C.New('Frame',{Parent=main,Name='RowDivider',Position=UDim2.new(0,14,1,-1),Size=UDim2.new(1,-28,0,1),BackgroundTransparency=.95,ThemeTag={BackgroundColor3='Text'}})

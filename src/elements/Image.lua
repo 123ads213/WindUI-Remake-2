@@ -30,7 +30,9 @@ function Element:New(Config)
         "Image",
         false
     )
-    if MainImage and MainImage.Parent then
+    if MainImage then
+        ImageModule.ElementFrame=MainImage
+        ImageModule.UIElements={Main=MainImage}
         MainImage.Parent = Config.Parent
         MainImage.Size = UDim2.new(1,0,0,0)
         MainImage.BackgroundTransparency = 1

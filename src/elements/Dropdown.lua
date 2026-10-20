@@ -27,6 +27,7 @@ local Element = {
 }
 
 function Element:New(Config)
+    if Config.Inline then return require("./InlineDropdown"):New(Config)end
     if Config.CompactRow then return require("./CompactDropdown"):New(Config)end
 	local Dropdown = {
 		__type = "Dropdown",

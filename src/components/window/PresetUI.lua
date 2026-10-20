@@ -6,16 +6,16 @@ local P={}
 function P.New(window,wind,options)
  options=options or{};local manager=window.ConfigManager
  if not manager then return nil,'Preset storage needs Window.Folder and executor file functions'end
- local self={Current=nil,Sort='Name',UIElements={},Opened=false}
+ local self={Current=nil,Sort='Created',UIElements={},Opened=false}
  local host=window.UIElements.Main.Main
  local topbar=host.Topbar
  local bar=U.New('Frame',{Parent=host,Name='PresetToolbar',Size=UDim2.fromOffset(250,34),BackgroundTransparency=.55,ThemeTag={BackgroundColor3='ElementBackground'},ZIndex=30,Active=true});U.corner(bar,8)
- local save=U.button(bar,'',0,0,34,34,function()local ok,err=pcall(function()local result,message=self:Save();assert(result,message)end);if not ok then warn('[WindUI Presets] '..tostring(err))end end);U.icon(save,'save',9,9,16,window)
+ local save=U.button(bar,'',0,0,34,34,function()self:QuickSave()end);U.icon(save,'save',9,9,16,window)
  local trigger=U.button(bar,'Default',36,0,210,34,function()self:Toggle()end);trigger.Label.Size=UDim2.new(1,-38,1,0);local chevron=U.icon(trigger,'chevron-down',184,9,16,window)
  local function fitTrigger()
   local scale=math.max(.01,wind.UIScaleObj.Scale)
-  local x=window.UIElements.SideBarContainer.AbsoluteSize.X/scale+14
-  local title=topbar.Left;local titleRight=(title.AbsolutePosition.X+title.AbsoluteSize.X-host.AbsolutePosition.X)/scale+14
+  local x=window.UIElements.SideBarContainer.AbsoluteSize.X/scale+7
+  local title=topbar.Left;local titleRight=(title.AbsolutePosition.X+title.AbsoluteSize.X-host.AbsolutePosition.X)/scale+7
   x=math.max(x,titleRight)
   local right=(topbar.Right.AbsolutePosition.X-host.AbsolutePosition.X)/scale-12
   local available=math.max(92,right-x-36)
@@ -33,9 +33,10 @@ function P.New(window,wind,options)
  U.New('Frame',{Parent=panel,Position=UDim2.fromOffset(12,48),Size=UDim2.new(1,-24,0,1),BackgroundTransparency=.94,ThemeTag={BackgroundColor3='Text'},ZIndex=852})
  local status=U.text(panel,'',14,384,302,22,true);status.TextSize=12
  local search=U.input(panel,'Search presets',12,54,266,34)
- local sortButton=U.button(panel,'',282,54,36,34,function()self.Sort=self.Sort=='Name'and'Modified'or'Name';self:Refresh()end);U.icon(sortButton,'list-filter',10,9,16,window)
- local rows=U.New('ScrollingFrame',{Parent=panel,Name='PresetRows',Position=UDim2.fromOffset(12,98),Size=UDim2.fromOffset(306,274),BackgroundTransparency=1,CanvasSize=UDim2.new(),AutomaticCanvasSize='Y',ScrollBarThickness=2,BorderSizePixel=0,ZIndex=852})
- U.New('UIListLayout',{Parent=rows,Padding=UDim.new(0,6),SortOrder='LayoutOrder'})
+ local sortMenu=U.panel(window,'PresetSorting',224,144,890)
+ local sortButton=U.button(panel,'',282,54,36,34,function()U.place(sortMenu,self.UIElements.Sort,wind);U.show(sortMenu,not sortMenu:GetAttribute('TargetVisible'))end);U.icon(sortButton,'list-filter',10,9,16,window)
+ local rows=U.New('ScrollingFrame',{Parent=panel,Name='PresetRows',Position=UDim2.fromOffset(12,98),Size=UDim2.fromOffset(306,274),BackgroundTransparency=1,CanvasSize=UDim2.new(),AutomaticCanvasSize='None',ScrollBarThickness=2,BorderSizePixel=0,ZIndex=852})
+ local rowCache={};self.RowCache=rowCache;self.Order={}
  local editor=U.panel(window,'PresetEditor',306,148,870)
  local editorIcon=U.icon(editor,'file-plus',14,15,18,window)
  local editorTitle=U.text(editor,'New preset',42,9,250,28)
@@ -58,9 +59,15 @@ function P.New(window,wind,options)
   local c=config(valid);if options.Author then c.Meta.author=options.Author end
   c:Save();self.Current=valid;trigger.Label.Text=valid;self:Refresh();return true
  end
+ function self:QuickSave()
+  local name=self.Current;local ok,err=self:Save(name)
+  self.LastNotification={Name=name,Success=not not ok,Error=not ok and tostring(err)or nil}
+  wind:Notify({Title=ok and 'Preset saved' or 'Save failed',Content=(name or 'No preset selected')..(ok and ' saved successfully' or ': '..tostring(err)),Duration=3,Icon=ok and 'save' or 'circle-alert'})
+  return ok,err
+ end
  function self:Save(name)
   name=name or self.Current;if not name then return false,'No preset selected'end
-  local c=config(name);c:Save();self.Current=name;trigger.Label.Text=name;self:Refresh();return true
+  local c=config(name);c:Save();assert(isfile(c.Path),'Preset file was not written');local persisted=Http:JSONDecode(readfile(c.Path));assert(type(persisted.__elements)=='table','Preset verification failed');self.Current=name;trigger.Label.Text=name;self:Refresh();return true
  end
  function self:Load(name)
   local valid,err=Names.Validate(name);if not valid then return false,err end
@@ -126,23 +133,39 @@ function P.New(window,wind,options)
  local imp=U.button(panel,'',202,10,34,32,function()edit('Import')end);U.icon(imp,'upload',9,8,16,window)
  recent=U.button(panel,'',242,10,34,32,function()self.View='Recent';self.Sort='Modified';self:Refresh()end);U.icon(recent,'folder-clock',9,8,16,window)
  function self:Refresh()
-  for _,v in ipairs(rows:GetChildren())do if v:IsA('GuiObject')then v:Destroy()end end
-  viewButton.BackgroundTransparency=self.View=='Recent'and 1 or .15
+  viewButton.BackgroundTransparency=.15
   recent.BackgroundTransparency=self.View=='Recent'and .15 or 1
   local names=manager:AllConfigs();local meta={}
   for _,n in ipairs(names)do local ok,d=pcall(function()return Http:JSONDecode(readfile(manager.Path..n..'.json'))end);meta[n]=ok and type(d)=='table'and d.__meta or{}end
-  table.sort(names,function(a,b)if self.Sort=='Modified'then local aa,bb=(meta[a]or{}).modified or 0,(meta[b]or{}).modified or 0;if aa~=bb then return aa>bb end end;return a:lower()<b:lower()end)
-  local count=0
+  table.sort(names,function(a,b)if self.Sort=='Modified'or self.Sort=='Created'then local field=self.Sort=='Created'and'created'or'modified';local aa,bb=(meta[a]or{})[field]or 0,(meta[b]or{})[field]or 0;if aa~=bb then return aa>bb end end;return a:lower()<b:lower()end)
+  local count=0;local present={};self.Order={}
+  local empty=rows:FindFirstChild('EmptyLabel');if empty then empty:Destroy()end
   for _,n in ipairs(names)do if n:lower():find(search.Text:lower(),1,true)then
-   count+=1;local row=U.button(rows,n,0,0,302,48,function()safe(function()return self:Load(n)end)end);row.LayoutOrder=count;row.BackgroundTransparency=n==self.Current and .05 or .6;row.Label.Size=UDim2.new(1,-94,1,0)
-   local more=U.button(row,'',220,7,32,34,function()actionName=n;U.place(actions,row,wind);U.show(actions,true)end);U.icon(more,'ellipsis',8,9,16,window)
-   local load=U.button(row,'',258,7,32,34,function()safe(function()if n==self.Current then return self:Save(n)else return self:Load(n)end end)end);U.icon(load,n==self.Current and'save'or'download',8,9,16,window)
+   count+=1;present[n]=true;self.Order[count]=n
+   local item=rowCache[n]
+   if not item then
+    local slot=U.New('CanvasGroup',{Parent=rows,Name='PresetRow',Size=UDim2.fromOffset(302,48),Position=UDim2.fromOffset(0,(count-1)*54+6),BackgroundTransparency=1,GroupTransparency=1,ZIndex=853})
+    local row=U.button(slot,n,0,0,302,48,function()U.show(actions,false);safe(function()return self:Load(n)end)end);row.Label.Size=UDim2.new(1,-94,1,0)
+    local more;more=U.button(row,'',220,7,32,34,function()actionName=n;U.place(actions,more or row,wind);U.show(actions,true)end);U.icon(more,'ellipsis',8,9,16,window)
+    local load=U.button(row,'',258,7,32,34,function()U.show(actions,false);safe(function()if n==self.Current then return self:QuickSave()else return self:Load(n)end end)end)
+    item={Slot=slot,Row=row,Load=load};rowCache[n]=item
+   end
+   item.Row.LayoutOrder=count;item.Slot.LayoutOrder=count;item.Row.BackgroundTransparency=n==self.Current and .05 or .6
+   if item.LoadIcon then item.LoadIcon:Destroy()end;item.LoadIcon=U.icon(item.Load,n==self.Current and'save'or'download',8,9,16,window)
+   if item.Motion then item.Motion:Cancel()end
+   item.Motion=U.Tween(item.Slot,.24,{Position=UDim2.fromOffset(0,(count-1)*54),GroupTransparency=0});item.Motion:Play()
   end end
-  if count==0 then U.text(rows,'No presets found',8,10,280,32,true)end
+  for name,item in pairs(rowCache)do if not present[name]then
+   rowCache[name]=nil;if item.Motion then item.Motion:Cancel()end
+   U.Tween(item.Slot,.16,{GroupTransparency=1}):Play();task.delay(.17,function()item.Slot:Destroy()end)
+  end end
+  rows.CanvasSize=UDim2.fromOffset(0,count*54)
+  if count==0 then local label=U.text(rows,'No presets found',8,10,280,32,true);label.Name='EmptyLabel'end
   local height=math.clamp(count*54+130,184,414);panel.Size=UDim2.fromOffset(330,height);rows.Size=UDim2.fromOffset(306,height-140);status.Position=UDim2.fromOffset(14,height-28)
   if self.Opened then U.place(panel,trigger,wind)end
  end
  function self:Toggle()
+  U.show(sortMenu,false)
   if info then U.show(info,false);info.Visible=false end
   U.show(editor,false);U.show(actions,false)
   self.Opened=not self.Opened;if self.Opened then self:Refresh();U.place(panel,trigger,wind)end;U.show(panel,self.Opened)
@@ -158,14 +181,28 @@ function P.New(window,wind,options)
  trigger.MouseLeave:Connect(function()U.show(info,false)end)
  search:GetPropertyChangedSignal('Text'):Connect(function()self:Refresh()end)
  local conn=Input.InputBegan:Connect(function(input)
+  if input.KeyCode==Enum.KeyCode.Escape then U.show(sortMenu,false)end
   if input.KeyCode==Enum.KeyCode.Escape then self.Opened=false;for _,p in ipairs({panel,editor,actions,info})do U.show(p,false)end end
   if input.UserInputType==Enum.UserInputType.MouseButton1 then
    local point=input.Position
-   if not U.inside(panel,point)and not U.inside(editor,point)and not U.inside(actions,point)and not U.inside(trigger,point)then self.Opened=false;for _,p in ipairs({panel,editor,actions,info})do U.show(p,false)end end
+   if not U.inside(sortMenu,point)and not U.inside(sortButton,point)then U.show(sortMenu,false)end
+   if not U.inside(panel,point)and not U.inside(editor,point)and not U.inside(actions,point)and not U.inside(trigger,point)and not U.inside(sortMenu,point)then self.Opened=false;for _,p in ipairs({panel,editor,actions,info})do U.show(p,false)end end
   end
  end)
- bar.Destroying:Connect(function()conn:Disconnect();for _,p in ipairs({panel,editor,actions,info})do p:Destroy()end end)
- self.UIElements={Toolbar=bar,Trigger=trigger,Panel=panel,Search=search,Rows=rows,Editor=editor,Info=info,Save=save,Import=imp,Recent=recent,Add=add,Sort=sortButton}
+ bar.Destroying:Connect(function()conn:Disconnect();sortMenu:Destroy();for _,p in ipairs({panel,editor,actions,info})do p:Destroy()end end)
+ self.UIElements={Toolbar=bar,Trigger=trigger,Panel=panel,Search=search,Rows=rows,Editor=editor,Info=info,Save=save,Import=imp,Recent=recent,Add=add,Sort=sortButton,SortMenu=sortMenu}
+ self.SortOptions={}
+ for i,choice in ipairs({{'Created','Newest First','calendar-plus'},{'Modified','Recently Modified','clock'},{'Name','Alphabetical','arrow-down-a-z'}})do
+  local b=U.button(sortMenu,choice[2],6,6+(i-1)*44,212,42,function()self.Sort=choice[1];self:Refresh();U.show(sortMenu,false)end)
+  local icon=U.icon(b,choice[3],10,13,16,window);b.Label.Position=UDim2.fromOffset(36,0);b.Label.Size=UDim2.new(1,-70,1,0);local check=U.icon(b,'check',184,13,16,window)
+  self.SortOptions[i]={Key=choice[1],Button=b,Check=check,Icon=icon}
+ end
+ local refresh=self.Refresh
+ function self:Refresh()refresh(self);for _,choice in ipairs(self.SortOptions)do choice.Check.Visible=self.Sort==choice.Key end end
+ self.UIElements.Tooltips={}
+ for _,hint in ipairs({{save,'Save preset'},{imp,'Import preset'},{recent,'Recently modified'},{add,'Create preset'},{sortButton,'Sort presets'}})do
+  self.UIElements.Tooltips[hint[2]]=U.tooltip(window,wind,hint[1],hint[2])
+ end
  -- File APIs can fail (permissions, missing clipboard/file support). Public calls report errors.
  for _,key in ipairs({'Create','Save','Load','Rename','Delete','Export','Import'})do
   local operation=self[key];self[key]=function(this,...)local result=table.pack(pcall(operation,this,...));if not result[1]then return false,tostring(result[2])end;return table.unpack(result,2,result.n)end
