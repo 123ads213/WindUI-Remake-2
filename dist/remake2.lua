@@ -41120,7 +41120,7 @@ Env.WindUIForkDemo = { Library = WindUI, Window = Window, Big = Big, Billion = B
 Env.__WindUIForkPendingLibrary = nil
 return Window
 
-end)()
+end)();
 (function()
 -- Restore the captured fork.18 view after loading ForkExample.lua.
 local d=assert(getgenv().WindUIForkDemo,'Load the WindUI demo first')
