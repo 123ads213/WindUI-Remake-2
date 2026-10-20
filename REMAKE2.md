@@ -21,6 +21,10 @@ This is a separate, private working repository for the second remake.
 
 The repository is private. Do not put GitHub PATs into Roblox scripts and do not depend on anonymous raw URLs for this repository.
 
-Build with `npm run build`, then `python build/build-remake2.py`. Load the resulting standalone `dist/remake2.lua` for testing; it embeds this repository's built library and restores the saved view without fetching library code from the first repository. `ForkExample.lua` remains an unmodified historical baseline demo; its original pinned fallback is bypassed by the standalone launcher.
+Initialize submodules with `git submodule update --init --recursive`. Build with `npm run build`, then `python build/build-remake2.py`. The standalone `dist/remake2.lua` embeds the current library and **RemakeExample.lua**, with no first-repository fetch. `ForkExample.lua` and `RestoreBaseline.lua` remain historical baseline utilities.
 
-Future remake work happens only here. No new visual redesign has been applied yet.
+## Current remake
+
+`1.7.0-remake.1`: two-column cards, compact inline controls, nearby checked dropdowns, horizontal icon subtabs, header preset manager and animated dependencies.
+
+See **[complete API and AI integration guide](docs/remake-2/API.md)** and **[working example](RemakeExample.lua)**. All development happens here; the original first-remake repository stays unchanged.

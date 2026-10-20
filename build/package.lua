@@ -3,12 +3,12 @@
 return [[
 {
     "name": "windui",
-    "version": "1.6.66-fork.18",
+    "version": "1.7.0-remake.1",
     "main": "./dist/main.lua",
-    "repository": "https://github.com/123ads213/WindUI",
+    "repository": "https://github.com/123ads213/WindUI-Remake-2",
     "discord": "https://discord.gg/ftgs-development-hub-1300692552005189632",
     "author": "Footagesus",
-    "description": "WindUI by Footagesus \u2014 original layout with compact values, nested tabs and curated themes.",
+    "description": "WindUI Remake 2 \u2014 columns, icon subtabs, compact choices, local presets and animated dependencies.",
     "license": "MIT",
     "scripts": {
         "dev": "bash build/build.sh dev $INPUT_FILE",
@@ -18,7 +18,7 @@ return [[
         "live-build": "concurrently \"npm run live\" \"npm run watch --\"",
         "example-live-build": "INPUT_FILE=main_example.lua npm run live-build",
         "updater": "python3 updater/main.py",
-        "test": "luau tests/NumberFormat.luau && luau tests/TabTree.luau && luau tests/HotkeyModel.luau && luau tests/HUDGeometry.luau && luau tests/HUDModel.luau"
+        "test": "luau tests/NumberFormat.luau && luau tests/TabTree.luau && luau tests/HotkeyModel.luau && luau tests/HUDGeometry.luau && luau tests/HUDModel.luau && luau tests/ConfigNames.luau"
     },
     "keywords": [
         "ui-library",

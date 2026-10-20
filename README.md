@@ -1,3 +1,5 @@
+> **Current Remake 2:** [API and AI integration guide](docs/remake-2/API.md) · [New example](RemakeExample.lua) · [Standalone build](dist/remake2.lua). The launch snippet below belongs to the historical first remake, not this private repository.
+
 > **Remake 2:** see [REMAKE2.md](REMAKE2.md) for the frozen baseline, saved current view and standalone launcher.
 
 > **WindUI Extended — community fork**

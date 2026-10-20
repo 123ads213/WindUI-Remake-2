@@ -23,7 +23,9 @@ return {
 		for name, module in next, Elements do
 			tbl[name] = function(self, config)
 				config = config or {}
-				config.Tab = Tab or tbl
+				config.CompactRow = config.CompactRow or tbl.CompactRows
+                if config.CompactRow and name == "Slider" then config.Width=config.Width or 150;config.ValueWidth=config.ValueWidth or 44 end
+                config.Tab = Tab or tbl
 				config.ParentType = tbl.__type
 				config.ParentTable = tbl
 				config.Index = #tbl.Elements + 1
@@ -37,7 +39,9 @@ return {
 				local _elementInstance, content = module:New(config)
 
 				if config.Flag and typeof(config.Flag) == "string" then
-					if Window.CurrentConfig then
+					Window.PendingFlags = Window.PendingFlags or {}
+                    Window.PendingFlags[config.Flag] = content
+                    if Window.CurrentConfig then
 						Window.CurrentConfig:Register(config.Flag, content)
 
 						if Window.PendingConfigData and Window.PendingConfigData[config.Flag] then
@@ -97,7 +101,7 @@ return {
 						frame:Highlight()
 					end
 					function content:Destroy()
-						frame:Destroy()
+						if content.VisibilityFrame then content.VisibilityFrame:Destroy()else frame:Destroy()end
 
                         -- A Tab may be both tbl and Tab; remove by identity once,
                         -- not by a stale creation index after other deletions.
@@ -112,13 +116,14 @@ return {
 					end
 				end
 
-				if frame and Window.FeatureUI then Window.FeatureUI:Register(content,frame,config)end
+				if frame and config.CompactRow then require("../components/window/CompactRow")(content,frame,config)end
+                if frame and (config.VisibleWhen or config.Visible~=nil or config.CompactRow)then require("../components/window/Visibility").Attach(content,frame.UIElements.Main,config)end
 
-				Window.AllElements[config.Index] = content
-				tbl.Elements[config.Index] = content
-				if Tab then
-					Tab.Elements[config.Index] = content
-				end
+                if frame and Window.FeatureUI then Window.FeatureUI:Register(content,frame,config)end
+
+				table.insert(Window.AllElements,content)
+                table.insert(tbl.Elements,content)
+                if Tab and Tab.Elements~=tbl.Elements then table.insert(Tab.Elements,content)end
 
 				if Window.NewElements then
 					tbl:UpdateAllElementShapes(tbl)

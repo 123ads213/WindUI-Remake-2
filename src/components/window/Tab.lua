@@ -482,6 +482,10 @@ function TabModule.New(Config, UIScale)
 		Tab
 	)
 
+    if Window._PresetInset then Tab.UIElements.ContainerFrameCanvas.Position=UDim2.fromOffset(0,Window._PresetInset);Tab.UIElements.ContainerFrameCanvas.Size=UDim2.new(1,0,1,-Window._PresetInset)end
+
+    require("./RemakeLayout").Attach(Tab,Window,WindUI,ElementsModule,UIScale)
+
 	function Tab:LockAll()
 		--print("LockAll called, number of elements: " .. #self.Elements)
 		for _, element in next, Window.AllElements do

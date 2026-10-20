@@ -337,10 +337,14 @@ function Creator.AddLangObject(idx)
 	return Object
 end
 
+Creator.ThemeTweens = setmetatable({}, {__mode="k"})
 function Creator.UpdateTheme(TargetObject, isTween, isTweenTarget, Duration, EasingStyle, EasingDirection)
 	local function ApplyTheme(objData)
 		for Property, ColorKey in pairs(objData.Properties or {}) do
 			local value = Creator.GetThemeProperty(ColorKey, Creator.Theme)
+            local active=Creator.ThemeTweens[objData.Object]
+            if not active then active={};Creator.ThemeTweens[objData.Object]=active end
+            if active[Property]then active[Property]:Cancel();active[Property]=nil end
 			if value ~= nil then
 				if typeof(value) == "Color3" then
 					local gradient = objData.Object:FindFirstChild("LibraryGradient")
@@ -349,15 +353,10 @@ function Creator.UpdateTheme(TargetObject, isTween, isTweenTarget, Duration, Eas
 					end
 
 					if isTweenTarget then
-						Creator.Tween(
-							objData.Object,
-							Duration or 0.2,
-							{ [Property] = value },
-							EasingStyle or Enum.EasingStyle.Quint,
-							EasingDirection or Enum.EasingDirection.Out
-						):Play()
+						local tween=Creator.Tween(objData.Object,Duration or .2,{[Property]=value},EasingStyle or Enum.EasingStyle.Quint,EasingDirection or Enum.EasingDirection.Out)
+                        active[Property]=tween;tween:Play()
 					elseif isTween then
-						Creator.Tween(objData.Object, 0.08, { [Property] = value }):Play()
+						local tween=Creator.Tween(objData.Object,.08,{[Property]=value});active[Property]=tween;tween:Play()
 					else
 						objData.Object[Property] = value
 					end
@@ -381,15 +380,10 @@ function Creator.UpdateTheme(TargetObject, isTween, isTweenTarget, Duration, Eas
 					end
 				elseif typeof(value) == "number" then
 					if isTweenTarget then
-						Creator.Tween(
-							objData.Object,
-							Duration or 0.2,
-							{ [Property] = value },
-							EasingStyle or Enum.EasingStyle.Quint,
-							EasingDirection or Enum.EasingDirection.Out
-						):Play()
+						local tween=Creator.Tween(objData.Object,Duration or .2,{[Property]=value},EasingStyle or Enum.EasingStyle.Quint,EasingDirection or Enum.EasingDirection.Out)
+                        active[Property]=tween;tween:Play()
 					elseif isTween then
-						Creator.Tween(objData.Object, 0.08, { [Property] = value }):Play()
+						local tween=Creator.Tween(objData.Object,.08,{[Property]=value});active[Property]=tween;tween:Play()
 					else
 						objData.Object[Property] = value
 					end

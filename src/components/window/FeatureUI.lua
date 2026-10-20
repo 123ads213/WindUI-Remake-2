@@ -246,7 +246,10 @@ function FeatureUI.New(Window,WindUI)
   if supports then
    local entry=self.Model:Register(content,function(value)
     if config.HotkeyCallback then Creator.SafeCallback(config.HotkeyCallback,value);content.HotkeyValue=value else content:Set(value,true,true)end
-   end,function()if config.HotkeyCallback then return content.HotkeyValue end;return content.Value end,function()return main.Parent~=nil and not content.Locked and not Window.Destroyed end)
+   end,function()if config.HotkeyCallback then return content.HotkeyValue end;return content.Value end,function()
+    if not main.Parent or content.Locked or content.Hidden or Window.Destroyed then return false end
+    local p=main;while p and p:IsA("GuiObject")do if p:GetAttribute("WindUIHidden")then return false end;p=p.Parent end;return true
+   end)
    record.Entry=entry;content.HotkeyEntry=entry
    function content:GetHotkeys()return self.__HotkeyController.Model:Export(entry)end
    function content:SetHotkeys(rows)

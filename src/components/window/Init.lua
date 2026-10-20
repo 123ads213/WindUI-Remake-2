@@ -2285,5 +2285,10 @@ return function(Config)
     Window.Cursor=require('./Cursor').New(Window,Config.WindUI,Creator)
     function Window:SetCustomCursor(config)Window.Cursor:Set(config);return Window end
     Window:SetCustomCursor(Config.CustomCursor or false)
+    function Window:EnablePresets(options)
+        if self.Presets then return self.Presets end
+        local p,err=require("./PresetUI").New(self,Config.WindUI,options);self.Presets=p;return p,err
+    end
+
     return Window
 end

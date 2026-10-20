@@ -4,6 +4,7 @@ local cloneref = (cloneref or clonereference or function(instance) return instan
 local RunService = cloneref(game:GetService("RunService"))
 local HttpService = cloneref(game:GetService("HttpService"))
 
+local Names=require("../modules/ConfigNames")
 local Window 
 
 local ConfigManager
@@ -30,7 +31,7 @@ ConfigManager = {
                     if data.gradient and element.Import then
                         local ok,err=element:Import(data.gradient)
                         if not ok then error(err)end
-                    else element:Update(Color3.fromHex(data.value), data.transparency or nil)end
+                    else local ok,err=element:Update(Color3.fromHex(data.value), data.transparency or nil);if ok==false then error(err)end end
                 end
             end
         },
@@ -110,7 +111,7 @@ function ConfigManager:Init(WindowTable)
         warn("[ WindUI.ConfigManager ] Window.Folder is not specified.")
         return false
     end
-    if RunService:IsStudio() or not writefile then
+    if RunService:IsStudio() or type(writefile)~="function" or type(readfile)~="function" or type(isfile)~="function" or type(isfolder)~="function" or type(makefolder)~="function" then
         warn("[ WindUI.ConfigManager ] The config system doesn't work in the studio.")
         return false
     end
@@ -121,14 +122,6 @@ function ConfigManager:Init(WindowTable)
     
     if not isfolder(ConfigManager.Path) then
         makefolder(ConfigManager.Path)
-    end
-    
-    local files = ConfigManager:AllConfigs()
-    
-    for _, f in next, files do
-        if isfile and readfile and isfile(f .. ".json") then
-            ConfigManager.Configs[f] = readfile(f .. ".json")
-        end
     end
     
     return ConfigManager
@@ -153,12 +146,15 @@ function ConfigManager:SetPath(customPath)
 end
 
 function ConfigManager:CreateConfig(configFilename, autoload)
+    local valid,err=Names.Validate(configFilename);if not valid then return false,err end;configFilename=valid
     local ConfigModule = {
         Path = ConfigManager.Path .. configFilename .. ".json",
         Elements = {},
         CustomData = {},
         AutoLoad = autoload or false,
-        Version = 1.2,
+        Version = 1.3,
+        Name = configFilename,
+        Meta = {author=game:GetService("Players").LocalPlayer.Name,created=os.time(),modified=os.time()},
     }
     
     if not configFilename then
@@ -196,7 +192,8 @@ function ConfigManager:CreateConfig(configFilename, autoload)
             __version = ConfigModule.Version,
             __elements = {},
             __autoload = ConfigModule.AutoLoad,
-            __custom = ConfigModule.CustomData
+            __custom = ConfigModule.CustomData,
+            __meta = ConfigModule.Meta
         }
         
         for name, element in next, ConfigModule.Elements do
@@ -206,6 +203,7 @@ function ConfigManager:CreateConfig(configFilename, autoload)
         end
         
         if Window.HUD and not Window.HUD.Destroyed then saveData.__hud=Window.HUD:Export()end
+        ConfigModule.Meta.modified=os.time()
         local jsonData = HttpService:JSONEncode(saveData)
         if writefile then 
             writefile(ConfigModule.Path, jsonData)
@@ -227,7 +225,7 @@ function ConfigManager:CreateConfig(configFilename, autoload)
             return HttpService:JSONDecode(readfile(ConfigModule.Path))
         end)
         
-        if not success then
+        if not success or type(loadData)~="table" then
             return false, "Failed to parse config file"
         end
         
@@ -240,22 +238,38 @@ function ConfigManager:CreateConfig(configFilename, autoload)
             loadData = migratedData
         end
         
+        local valid,err=Names.ValidateData(loadData);if not valid then return false,err end
         if Window.PendingFlags then
             for flag, element in next, Window.PendingFlags do
                 ConfigModule:Register(flag, element)
             end
         end
         
-        for name, data in next, (loadData.__elements or {}) do
-            if ConfigModule.Elements[name] and ConfigManager.Parser[data.__type] then
-                task.spawn(function()
-                    ConfigManager.Parser[data.__type].Load(ConfigModule.Elements[name], data)
-                end)
+        -- Preflight every known type before touching any live element.
+        local backup={}
+        for name,data in pairs(loadData.__elements)do
+            local element=ConfigModule.Elements[name]
+            if element then
+                if element.__type~=data.__type then return false,"Element type mismatch: "..name end
+                local parser=ConfigManager.Parser[element.__type]
+                if parser then backup[name]=parser.Save(element)end
             end
         end
-        
+        for name,data in pairs(loadData.__elements)do
+            local element=ConfigModule.Elements[name]
+            local parser=element and ConfigManager.Parser[element.__type]
+            if parser then
+                local ok,err=pcall(parser.Load,element,data)
+                if not ok then
+                    for key,previous in pairs(backup)do pcall(ConfigManager.Parser[previous.__type].Load,ConfigModule.Elements[key],previous)end
+                    return false,"Failed to load "..name..": "..tostring(err)
+                end
+            end
+        end
+
         if loadData.__hud and Window.HUD and not Window.HUD.Destroyed then Window.HUD:Import(loadData.__hud)end
         ConfigModule.CustomData = loadData.__custom or {}
+        ConfigModule.Meta = loadData.__meta or ConfigModule.Meta
         
         return ConfigModule.CustomData
     end
@@ -340,6 +354,7 @@ function ConfigManager:GetAutoLoadConfigs()
 end
 
 function ConfigManager:DeleteConfig(configName)
+    local valid,err=Names.Validate(configName);if not valid then return false,err end;configName=valid
     if not delfile then
         return false, "delfile function is not available"
     end
