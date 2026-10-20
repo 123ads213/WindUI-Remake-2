@@ -1,0 +1,292 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>API guide · WindUI Remake 2</title><link rel="stylesheet" href="style.css"></head><body><header><a class="brand" href="index.html">WindUI <span>Remake 2 / Documentation</span></a><a class="repo" href="https://github.com/123ads213/WindUI-Remake-2">GitHub ↗</a></header><div class="shell"><aside><div class="search"><input id="search" type="search" aria-label="Поиск по документации" placeholder="Поиск методов…"></div><nav class="desktop-nav" aria-label="Документация"><a href="index.html">Подключение</a><a href="api.html" aria-current="page">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a></nav><details class="mobile-nav"><summary>Разделы документации</summary><nav><a href="index.html">Подключение</a><a href="api.html" aria-current="page">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a></nav></details><div class="desktop-nav eyebrow">На этой странице</div><nav class="toc" aria-label="Содержание"><div class="toc">
+<ul>
+<li><a href="#windui-remake-2-api-and-integration-guide">WindUI Remake 2 — API and integration guide</a><ul>
+<li><a href="#start-here-including-ai-coding-assistants">Start here (including AI coding assistants)</a><ul>
+<li><a href="#build-and-launch">Build and launch</a></li>
+</ul>
+</li>
+<li><a href="#window-tabs-and-columns">Window, tabs and columns</a></li>
+<li><a href="#header-search-and-profile-actions">Header search and profile actions</a></li>
+<li><a href="#horizontal-icon-subtabs-not-sidebar-children">Horizontal icon subtabs (not sidebar children)</a></li>
+<li><a href="#compact-elements-and-examples">Compact elements and examples</a><ul>
+<li><a href="#dropdown-multi-select">Dropdown / multi-select</a></li>
+</ul>
+</li>
+<li><a href="#animated-visibility-and-dependencies">Animated visibility and dependencies</a></li>
+<li><a href="#built-in-local-presets">Built-in local presets</a><ul>
+<li><a href="#ui">UI</a></li>
+<li><a href="#storage-and-guarantees">Storage and guarantees</a></li>
+</ul>
+</li>
+<li><a href="#hud-retained-from-remake-1">HUD retained from remake 1</a></li>
+<li><a href="#verification">Verification</a><ul>
+<li><a href="#thin-numeric-controls">Thin numeric controls</a></li>
+</ul>
+</li>
+<li><a href="#per-feature-settings-popovers">Per-feature settings popovers</a></li>
+<li><a href="#slider-interaction-and-appearance-follow-up">Slider interaction and appearance follow-up</a></li>
+<li><a href="#preset-buttons-and-ordering-follow-up">Preset buttons and ordering follow-up</a></li>
+<li><a href="#outlined-groups-and-embedded-selection">Outlined groups and embedded selection</a></li>
+<li><a href="#gallery-example-and-animation-details">Gallery example and animation details</a></li>
+<li><a href="#screenshot-review-fixes">Screenshot review fixes</a></li>
+<li><a href="#compact-ui-revision">Compact UI revision</a></li>
+<li><a href="#config-load-performance-and-cleanup">Config load performance and cleanup</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></aside><main><div id="results" class="results" aria-live="polite"></div><article><h1 id="windui-remake-2-api-and-integration-guide">WindUI Remake 2 — API and integration guide</h1>
+<p>Version: <code>1.7.0-remake.2</code>. Original WindUI by Footagesus, MIT. This is a UI library: example settings do not implement ESP, targeting or gameplay logic.</p>
+<h2 id="start-here-including-ai-coding-assistants">Start here (including AI coding assistants)</h2>
+<ol>
+<li>Work in <strong>WindUI-Remake-2</strong>, not the frozen first-remake repo.</li>
+<li>Read this file and <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/RemakeExample.lua"><code>RemakeExample.lua</code></a>. Use the exact APIs below; do not invent <code>LeftColumn</code>, <code>AddGroupbox</code>, <code>SetDependency</code> or cloud endpoints.</li>
+<li>Keep the native WindUI font, registered themes, color editor, hotkeys and HUD. Do not replace the title font or globally redesign legacy controls.</li>
+<li>Give every persisted control a <strong>unique stable <code>Flag</code></strong> across all tabs, columns and subtabs. Labels are not identifiers.</li>
+<li>The new two-column UI is opt-in. Existing <code>Window:Tab</code>, sidebar <code>Tab:SubTab</code> / <code>Tab:Tab</code>, and original element APIs still work.</li>
+<li>Create controls first, then call <code>Window:EnablePresets</code> so the first save contains all flags. Late controls are registered too, but explicitly load again when their persisted state is needed.</li>
+</ol>
+<h3 id="build-and-launch">Build and launch</h3>
+<pre><code class="language-sh">git submodule update --init --recursive
+npm run build
+python build/build-remake2.py
+</code></pre>
+<p>Use Luau/darklua installed on PATH. The built <code>dist/remake2.lua</code> embeds both library and the <strong>full original menu, adapted rather than replaced</strong>. Search, Visuals → Player/World, General, Themes, profile/preferences/history, both color examples, HUD and original numeric examples remain available. For library-only loading, see <a href="index.html">installation</a> and <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/QuickStart.lua">QuickStart.lua</a>. Public raw URLs work only while the repository is public; for private access download the file first and use <code>loadstring(readfile('WindUI.lua'))()</code>. <strong>Never embed a PAT in a Roblox script</strong>. <code>dist/main.lua</code> is the library only. <code>ForkExample.lua</code> / <code>RestoreBaseline.lua</code> remain historical baseline files.</p>
+<h2 id="window-tabs-and-columns">Window, tabs and columns</h2>
+<pre><code class="language-lua">local Window = WindUI:CreateWindow({
+    Title = 'Sirius', Author = 'Ui library', Icon = 'star',
+    HideSearchBar = false, SearchInTopbar = true, ToggleKey = Enum.KeyCode.RightShift,
+    Folder = 'MyUI', Theme = 'Dark', NewElements = true,
+    Size = UDim2.fromOffset(1100, 720),
+    MinSize = Vector2.new(700, 420), MaxSize = Vector2.new(1200, 800),
+    DescriptionMode = 'Tooltip', ContentPaddingTop = 8,
+})
+local Visuals = Window:Tab({Title = 'Visuals', Icon = 'image'})
+local columns = Visuals:Columns({Gap = 16, MinColumnWidth = 260})
+local main = columns.Left:Section({Title = 'Main'})
+local other = columns.Right:Section({Title = 'Other'})
+-- :Group({...}) on a COLUMN is an alias for :Section({...}).
+</code></pre>
+<ul>
+<li>Each column stacks independent section cards; rows within a card are 50 logical pixels high.</li>
+<li>Section titles sit above the rounded card. Controls sit on one horizontal row: title on the left, control on the right.</li>
+<li>Widths adapt equally; below <code>2 * MinColumnWidth + Gap</code>, the complete left column stacks above the right one. The tab scrolls vertically. Reading order and values are preserved.</li>
+<li><code>Columns</code> returns <code>.Left</code>, <code>.Right</code>, and <code>.UIElements</code> (<code>Root</code>, <code>Left</code>, <code>Right</code>).</li>
+<li>Use <code>Section</code> on a column to create a card. Legacy <code>Tab:Section</code> still means the original section element.</li>
+<li>Keep a reasonable minimum column width for long labels; labels truncate, not overlap. Customize control <code>Width</code> when necessary.</li>
+</ul>
+<h2 id="header-search-and-profile-actions">Header search and profile actions</h2>
+<p><code>SearchInTopbar = true</code> places the existing working search in the top-right button group, before minimize/fullscreen/close; it removes the old sidebar search gap. Keep <code>HideSearchBar = false</code> to enable search. Omit <code>SearchInTopbar</code> for legacy sidebar search.</p>
+<p><code>Window:CreateProfile(...)</code> now includes <strong>Menu bind</strong> above <strong>Unload</strong>. Click Menu bind and press a keyboard key; Escape cancels, Backspace/Delete clears it. Capturing does not also toggle the window. The example defaults to RightShift. <code>Window:SetToggleKey(Enum.KeyCode.F8)</code> changes it programmatically; nil unbinds. This window preference is session-local, not an element flag. Unload invokes the existing <code>Window:Destroy()</code> lifecycle and removes the library GUIs and connections. Do not replace it with a visual-only hide.</p>
+<p>Preset Create/Rename forms are 306×148 logical pixels; JSON forms expand only when required. Actions and metadata rows use native themed icons. A click on the config trigger immediately dismisses its hover information before opening the preset list; editors replace rather than stack with the list.</p>
+<h2 id="horizontal-icon-subtabs-not-sidebar-children">Horizontal icon subtabs (not sidebar children)</h2>
+<pre><code class="language-lua">local pages = Visuals:IconTabs()
+local enemies = pages:Tab({Id = 'enemies', Title = 'Enemies', Icon = 'user'})
+local teammates = pages:Tab({Id = 'team', Title = 'Teammates', Icon = 'user-minus'})
+local enemyColumns = enemies:Columns({MinColumnWidth = 260})
+local teamColumns = teammates:Columns({MinColumnWidth = 260})
+enemyColumns.Left:Section({Title = 'Enemy'}):Toggle({
+    Title = 'Show players', Value = true, Flag = 'enemy.enabled',
+})
+teamColumns.Left:Section({Title = 'Team'}):Toggle({
+    Title = 'Show teammates', Value = false, Flag = 'team.enabled',
+})
+pages:Select('team') -- ID, or 1-based page index; returns false for an unknown page.
+enemies:Select()
+</code></pre>
+<p>The active top-right button shows icon + title; other buttons are compact icons. Pages are created once and keep independent values. Switching fades in the chosen page. No game model preview is fabricated; a real <code>Viewport</code> can be added separately. The previously supported sidebar nesting remains separate.</p>
+<h2 id="compact-elements-and-examples">Compact elements and examples</h2>
+<p>The following inherit compact row layout inside columns/cards. Their original APIs still apply.</p>
+<pre><code class="language-lua">local enabled = main:Toggle({
+    Title = 'Enabled', Value = true, Flag = 'main.enabled',
+    Desc = 'Enable dependent settings.',
+    Hotkeys = {{Key = 'K', Mode = 'Toggle', Value = true}},
+    Callback = function(value) print(value) end,
+})
+local distance = main:Slider({
+    Title = 'Distance', Width = 140, ValueWidth = 44,
+    Value = {Min = 0, Max = 1000, Default = 500}, Step = 1,
+    Flag = 'main.distance', Callback = function(value) print(value) end,
+})
+local label = main:Input({Title = 'Label', Value = 'Sirius', Flag = 'main.label'})
+main:Button({Title = 'Reset distance', Callback = function() distance:Set(500) end})
+local color = other:Colorpicker({
+    Title = 'Accent', Default = Color3.fromHex('2a94ff'), Transparency = .15,
+    Flag = 'main.color',
+    Callback = function(color, transparency, gradient) end,
+})
+</code></pre>
+<ul>
+<li>Toggle: <code>:Set(boolean)</code>, <code>.Value</code>, <code>:Lock()</code>, <code>:Unlock()</code>. Right-click retains the native multiple-hotkey manager and animated New Hotkey rows. <code>Hotkeys=false</code> disables binding support.</li>
+<li>Slider: <code>:Set(number)</code>, <code>:Get()</code>, <code>:SetRange(min,max)</code>, <code>:SetMin</code>, <code>:SetMax</code>, <code>.Value.Default</code>. Transparency-style 4px track with no large thumb. A compact rounded value editor sits to its right. Click it to type an exact number; input is snapped to Step and clamped to Min/Max. The floating value appears only while dragging, never on simple hover. Compact total width defaults to184 with a72px value slot; <code>Width</code> and <code>ValueWidth</code> remain configurable. <code>.UIElements.ValueInput</code> and <code>.UIElements.SliderContainer.TextBox</code> both reference the inline editor; <code>.UIElements.HoverValue</code> is the drag-only label.</li>
+<li>Input: <code>:Set(text)</code>, <code>.Value</code>, editable right-hand text box.</li>
+<li>Button: invokes <code>Callback</code>; use for actions, not saved state.</li>
+<li>Colorpicker: <code>:Set(color,transparency)</code>, <code>:SetGradient</code>, <code>:Export</code>, <code>:Import</code>, <code>:Open</code>. Existing HEX/RGB/HSV/HSL, alpha, gradients and swatch context-copy/paste are preserved.</li>
+<li>Common: <code>Title</code>, <code>Desc</code>, <code>Flag</code>, <code>Locked</code>, <code>Callback</code>, <code>:SetTitle</code>, <code>:Destroy</code> where supported.</li>
+<li>Paragraph, Section, Divider, Space, Image, Code, Group, HStack, VStack and Viewport remain the <strong>native WindUI elements</strong>, not forced into a 50px compact row. Use their original APIs documented in the repository and <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/FORK.md">FORK.md</a>; do not assume they are compact controls. Cards support them through the same element factory.</li>
+</ul>
+<h3 id="dropdown-multi-select">Dropdown / multi-select</h3>
+<pre><code class="language-lua">local target = main:Dropdown({
+    Title = 'Target', Values = {'Closest', 'Distance', 'Health'},
+    Value = 'Closest', Width = 140, MenuWidth = 190, Flag = 'main.target',
+    Callback = function(value) print(value) end,
+})
+local details = main:Dropdown({
+    Title = 'Details', Values = {'Name', 'Distance', 'Health', 'Team'},
+    Multi = true, AllowNone = true, Value = {'Name', 'Health'},
+    SearchBarEnabled = true, Flag = 'main.details',
+    Callback = function(values) end,
+})
+target:Select('Health')
+details:Select({'Name', 'Distance'})
+target:Refresh({'Closest', 'Distance', 'Health', 'Team'})
+target:Open(); target:Close()
+</code></pre>
+<ul>
+<li>Trigger stays beside its label. The nearby popup follows the trigger, respects UI scale and screen edges, flips above if needed, and has a soft shadow.</li>
+<li>Selection is marked by a right-hand check icon. Multi-select stays open; <code>AllowNone=false</code> prevents clearing the last selected option by mouse.</li>
+<li>Long preview text truncates. All options remain visible/searchable in the popup.</li>
+<li>Outside click, Escape, hidden dependency or hidden tab closes it. Only one compact dropdown is open per window.</li>
+<li><code>.Values</code>, <code>.Value</code>, <code>.Opened</code>, <code>.Tabs</code>, <code>:Display</code>, <code>:Refresh</code>, <code>:Select</code>, <code>:Open</code>, <code>:Close</code>, <code>:Lock</code>, <code>:Unlock</code> are available.</li>
+<li>String values are recommended. <code>{Title='Name', Locked=true}</code> choices are supported; compact mode does not render rich descriptions or divider rows. Use original dropdown outside compact containers for those legacy menus.</li>
+</ul>
+<h2 id="animated-visibility-and-dependencies">Animated visibility and dependencies</h2>
+<pre><code class="language-lua">local builder = main:Toggle({Title='Builder', Value=false, Flag='builder.enabled'})
+local settings = columns.Right:Section({
+    Title = 'Builder settings',
+    VisibleWhen = function() return builder.Value end,
+})
+local amount = settings:Slider({
+    Title='Amount', Value={Min=0,Max=100,Default=35}, Flag='builder.amount',
+})
+local extra = main:Slider({
+    Title='Extra', Value={Min=0,Max=10,Default=3}, Flag='builder.extra',
+    VisibleWhen=function() return builder.Value and target.Value=='Health' end,
+})
+extra:SetVisible(false)       -- explicit master gate
+extra:SetVisible(true)        -- predicate is still respected
+extra:VisibleWhen(builder)    -- shorthand: builder.Value == true
+extra:VisibleWhen(target, 'Health')
+extra:SetVisible(false, true) -- instant transition request
+</code></pre>
+<ul>
+<li><code>VisibleWhen</code> must be a <strong>pure, non-yielding function</strong>; do not create controls, write files, or change values inside it. Errors hide the dependent slot.</li>
+<li>Opacity and layout height ease together, including reversal midway. Hidden elements retain values and remain registered for config save/load.</li>
+<li>Hidden slots stop interaction and hidden dependency hotkeys are unavailable. Once revealed, interaction resumes.</li>
+<li>Dependency checks run on Heartbeat, so direct setters, hotkeys and config loads are all observed without overwriting user callbacks.</li>
+<li>Cards and compact controls expose <code>:SetVisible</code> and <code>:VisibleWhen</code>. To opt a legacy element into this wrapper, pass <code>Visible=true</code> or <code>VisibleWhen=...</code> at creation.</li>
+</ul>
+<h2 id="built-in-local-presets">Built-in local presets</h2>
+<pre><code class="language-lua">-- Call after creating the flagged controls. Requires executor file support.
+local presets, err = Window:EnablePresets({Default='Default', Author='Your name'})
+assert(presets, err)
+local ok, err = presets:Create('My settings') -- saves current values, refuses overwrite
+assert(ok, err)
+presets:Save()                 -- selected preset
+presets:Load('My settings')
+presets:Rename('My settings', 'Renamed settings')
+local json, err = presets:Export('Renamed settings')
+presets:Import('Imported settings', json) -- validates; refuses overwrite
+presets:Delete('Imported settings')
+presets:Refresh()
+presets:Toggle()
+</code></pre>
+<h3 id="ui">UI</h3>
+<p>The original top window header, immediately right of the sidebar title block, contains a save icon and active preset name/chevron. It is not an extra row below the header. Hovering the name shows name, author and modified date. Clicking opens a rounded local Presets panel with the reference icon order (cloud/Presets on the left; upload, folder-clock/Recent and plus on the right), search and sorting below, new preset, load/save and per-row Rename/Export/Delete actions. Delete requires confirmation. Errors are shown; Export also copies when <code>setclipboard</code> exists, otherwise the selectable JSON box is available. Import uses a real JSON text box, not an invented external clipboard reader.</p>
+<h3 id="storage-and-guarantees">Storage and guarantees</h3>
+<ul>
+<li>Path: <code>WindUI/&lt;Window.Folder&gt;/config/&lt;name&gt;.json</code>.</li>
+<li>Needs <code>writefile</code>, <code>readfile</code>, <code>isfile</code>, <code>isfolder</code>, <code>makefolder</code>; enumeration uses <code>listfiles</code>, deletion/rename needs <code>delfile</code>. Not available in ordinary Roblox LocalScripts/Studio. <code>EnablePresets</code> returns <code>nil,error</code> when storage is unavailable.</li>
+<li>JSON contains <code>__version</code>, <code>__elements</code> (flagged control values and hotkeys), <code>__custom</code>, <code>__autoload</code>, <code>__meta</code> (author/created/modified) and <code>__hud</code> if a HUD exists.</li>
+<li>Theme can be persisted using a flagged theme dropdown whose callback calls <code>WindUI:SetTheme</code>. Unflagged values are not magically serialized. Window size, selected icon page and every arbitrary callback side effect are not presets.</li>
+<li>Names are trimmed, limited to64 UTF-8 bytes and reject path separators, control characters and reserved filename characters. Import rejects malformed JSON and invalid basic element records.</li>
+<li>Known element types are checked before application; load is synchronous for values, parser failure rolls values back. User callbacks may run asynchronously and their external side effects cannot be rolled back.</li>
+<li>Unknown flags are ignored, enabling configs to survive removed controls. Do not reuse the same flag for a different type.</li>
+<li><code>presets.Current</code> is the selected name; <code>presets.Sort</code> accepts <code>'Created'</code>, <code>'Modified'</code> or <code>'Name'</code>; call <code>:Refresh()</code> after changing it.</li>
+<li>The cloud icon is visual reference styling only; folder-clock shows recently modified local presets, not version backups. This is <strong>local persistence</strong>, not cloud storage or multi-device sync. File operations are not crash-atomic.</li>
+</ul>
+<h2 id="hud-retained-from-remake-1">HUD retained from remake 1</h2>
+<pre><code class="language-lua">local hud=Window:CreateHUD({Watermark=true,Keylist=true,Builds={YourRobloxName='Nightly'}})
+hud:SetFields({'FPS','Ping','Username','Time','Day','Avatar','Platform','Build'})
+hud:SetWatermarkEnabled(true)
+hud:SetKeylistEnabled(true)
+hud:ResetPositions()
+</code></pre>
+<p>Watermark telemetry, Sirius brand, full weekday, theme-aware opaque surfaces, white drag guides, Classic keylist, smaller binding plates, multiple hotkeys and config persistence remain available. The new example includes HUD controls in General.</p>
+<h2 id="verification">Verification</h2>
+<ul>
+<li><code>npm test</code>: inherited model tests + ConfigNames validation tests.</li>
+<li>Compile new modules with <code>luau-compile</code>; build with darklua.</li>
+<li>Execute <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/tests/Remake2.lua"><code>tests/Remake2.lua</code></a> in the game after the demo: actual file create/save/load/rename/delete/import/export, flag registry, dependencies, dropdown selection, subtabs, responsive columns. Temporary <code>__qa_*</code> files are deleted and the selected preset is restored.</li>
+<li>Inspect real game screenshots in Light and Dark, open dropdown/presets, reveal dependencies and resize. Unit tests are not a substitute for visual inspection.</li>
+</ul>
+<h3 id="thin-numeric-controls">Thin numeric controls</h3>
+<p>Sliders use thin tracks without oversized thumbs, plus a right-side rounded inline value editor. Floating values appear only during dragging and use a weak12% dark shadow. Numeric parsing, min/max, steps, callbacks, locks and config persistence are unchanged. <code>IsTextbox=false</code> hides the inline editor; drag feedback remains available. Inline editors use stable display width and clipped text; on focus the field expands smoothly within its control, with the track shrinking by the same amount, so typing never spills outside the control.</p>
+<p>In compact section cards ProgressBar also uses a50px row, single-line title, thin track and read-only hover value. This fixes Balance/Collection mismatched row heights without turning progress indicators into interactive sliders. The outer section card owns the rounded background; compact rows do not draw separate rounded plates, including after theme changes.</p>
+<p>Section cards hide the separator after the last visible row automatically. This also follows animated <code>SetVisible</code> / <code>VisibleWhen</code> changes; do not draw your own bottom separator on the final row.</p>
+<p>Icon subtabs share one rounded background group. The active button has a neutral theme-matched surface and brighter icon; the inactive button remains neutral. Selection/hover transitions do not erase the selected state. <code>IconTabs().UIElements.Group</code> exposes the shared plate.</p>
+<h2 id="per-feature-settings-popovers">Per-feature settings popovers</h2>
+<p>Any native element exposes <code>:Settings(options)</code>. On a toggle this adds the ellipsis <strong>left of the switch</strong>; clicking it does not toggle the feature. The popover uses an8px gap beside its button, flips/clamps at the viewport edge, has the feature title above independent rounded cards, and grows with content until scrolling is necessary. Escape, outside click or its close button closes it. Opening another feature closes the previous one.</p>
+<pre><code class="language-lua">local enabled = main:Toggle({Title = 'Overlay', Flag = 'overlay', Value = true})
+local options = enabled:Settings({Title = 'Overlay', Width = 380})
+local features = options:Section() -- untitled rounded card
+features:Toggle({Title = 'Names', Flag = 'overlay_names', Value = true})
+features:Toggle({Title = 'Health', Flag = 'overlay_health', Value = true})
+features:Dropdown({Title = 'Style', Inline = true, Flag = 'overlay_style',
+    Values = {'Classic', 'Minimal'}, Value = 'Classic'})
+local display = options:Section({Title = 'Display'}) -- another card
+local opacity = display:Slider({
+    Title = 'Opacity', Flag = 'overlay_opacity',
+    Value = {Min = 0, Max = 100, Default = 85}, Step = 1,
+})
+display:Dropdown({Title = 'Target', Flag = 'overlay_target',
+    Values = {'Classic', 'Minimal'}, Value = 'Classic'})
+options:Open()
+options:Close()
+</code></pre>
+<p><code>:Group</code> aliases <code>:Section</code>. A section supports the same native controls as column cards, including sliders, toggles, dropdowns, inputs and color pickers. Flags register with the same window preset manager; values survive closing the popover. <code>VisibleWhen</code> / <code>SetVisible</code> still work. These settings are UI examples, not implementations of gameplay features.</p>
+<p>Alternatively supply <code>Settings = function(popover, element) ... end</code> in an element config, with optional <code>SettingsConfig = {Title = '...', Width = 380}</code>. The builder receives the same controller. Introspection: <code>.Opened</code>, <code>.Sections</code>, <code>.UIElements.Panel/Button/Title/Body/Columns</code>.</p>
+<h2 id="slider-interaction-and-appearance-follow-up">Slider interaction and appearance follow-up</h2>
+<p>-50px compact rows,15px row labels and slightly larger example window1100×720 improve readability without changing the font family or sidebar typography.
+- Inline value editors use the theme's neutral Button surface rather than a hard black plate. Default minimum value width72px prevents compact values such as <code>413.46m</code> from clipping. Focus expands the field smoothly, with the track shrinking by the same amount; blur restores its width. Min/Max/Step validation remains in the shared numeric model.
+- Floating drag values fade/scale in and out with a weak shadow. Ordinary hover never opens them.
+- Hover the slider control and press Left/Right to change by Step. Holding repeats after320ms, then every60ms. Bounds, locks, hidden controls, a closed window, Roblox's menu and active text editing are respected. No floating drag number opens for arrow input.</p>
+<h2 id="preset-buttons-and-ordering-follow-up">Preset buttons and ordering follow-up</h2>
+<p>Toolbar icon buttons have delayed hover labels beside the button with an8px gap. Save is separate from the preset-name dropdown: <code>presets:QuickSave()</code> saves the selected preset, verifies its file and shows a named success/failure notification. <code>presets.UIElements.Save</code> is the actual quick-save button.</p>
+<p>The Sort button opens a checked menu with <strong>Newest First</strong> (<code>Created</code>), <strong>Recently Modified</strong> (<code>Modified</code>) and <strong>Alphabetical</strong> (<code>Name</code>). <code>presets.Sort</code> accepts these keys; <code>:Refresh()</code> reapplies it. Introspection: <code>.SortOptions</code> and <code>.UIElements.SortMenu/Tooltips</code>. Sorting is local; it is not a cloud preset browser or an automatic-save service.</p>
+<h2 id="outlined-groups-and-embedded-selection">Outlined groups and embedded selection</h2>
+<p>Feature popover groups default to a thin, low-contrast rounded outline with a quiet fill, matching the reference grouping rather than separate floating panels. <code>options:Section({Outlined=false})</code> restores the filled card. Ordinary column sections can opt in with <code>Outlined=true</code>; <code>.UIElements.Card</code> exposes the group surface. Only the groups have this outline: floating popup chrome still uses its soft shadow.</p>
+<p><code>group:Dropdown({Inline=true, Values={'Classic','Minimal'}, Value='Classic', Flag='style'})</code> renders all choices directly inside the group with a checkmark on the left and an animated selected surface. No extra popup or trigger is created. <code>ShowTitle=true</code> optionally displays the element title. It supports <code>Multi</code>, <code>AllowNone</code>, locked values, <code>:Select()</code>, <code>:Refresh()</code> and standard flag persistence. Without <code>Inline=true</code>, dropdowns retain the nearby floating checked menu. Embedded choices remain within the settings panel and contribute to its height/scrolling.</p>
+<p>The reference-style example puts six inline choices in the first outlined group, then Subtick mode and Turn speed in a second group. The Selections gallery demonstrates Classic/Minimal as a normal floating choice; embedded selection is restricted to feature settings opened through the ellipsis. Sort entries now include calendar, clock and alphabetical-order icons alongside the active checkmark. The preset toolbar was shifted seven logical pixels left.</p>
+<h2 id="gallery-example-and-animation-details">Gallery example and animation details</h2>
+<p><code>RemakeExample.lua</code> now contains the registered demo elements. In addition to Player/World/General/Themes, Elements expands to Controls, Selections and Containers. Controls has Interactive/States icon subtabs; Selections covers single/multi/searchable choices and colors/gradients; Containers demonstrates Group/HStack/VStack/Section/Divider/Space. HUD preview provides watermark/keylist/field/position controls. Example callbacks are UI-only, not gameplay implementations. <code>WindUIForkDemo.Showcase</code> exposes the gallery controls.</p>
+<ul>
+<li>Compact dropdown previews follow configured Values order, regardless of click order. Long previews are clipped with an alpha fade at the right edge, never an ellipsis. Changing the selection fades out the old preview and fades in the new one.</li>
+<li>Preset refresh reuses named row instances and tweens their positions over240ms when sorting. New/removed or filtered rows fade in/out rather than rebuilding the entire list. <code>presets.Order</code> and <code>presets.RowCache</code> expose the current order and reusable rows for tests.</li>
+<li>Drag numbers on sliders inside a feature popover clamp to that popover, not the main window. This prevents the number from jumping sideways when the panel extends outside the menu.</li>
+<li>Outlined cards leave a one-pixel inset around their stroke so CanvasGroup clipping cannot remove the straight border edges.</li>
+<li>Example-only Anti-AFK is enabled by default under General. It listens for LocalPlayer.Idled and attempts a VirtualUser idle pulse. Unsupported APIs are reported; network disconnects and server kicks are not prevented. Its connection is disconnected on unload/rerun. It is not automatically installed by the library itself.</li>
+</ul>
+<h2 id="screenshot-review-fixes">Screenshot review fixes</h2>
+<ul>
+<li>Click a preset row <strong>once</strong>, or its download icon, to load it. Both show a named success/failure notification. The download icon always reloads, even for the current preset; only the header save button saves.</li>
+<li>Only the current preset has a persistent row highlight. Newest First sorts descending by creation time, Recently Modified descending by modification time, and Alphabetical by name. Identical relative ordering across criteria is valid; existing rows animate to their sorted positions. There is no sort/count footer. Re-selecting the active criterion reverses its direction; <code>:SetSort(key,reversed)</code> selects a direction explicitly.</li>
+<li>Section cards and Group/HStack/VStack clip child surfaces through rounded CanvasGroups. Compact lock overlays fit their row instead of extending beyond it.</li>
+<li><code>Inline=true</code> is supported only in feature <code>:Settings()</code> groups; normal-page use raises a descriptive error. The obsolete Nested tabs explanation plate was removed from General.</li>
+<li>All Hotkeys uses the library's custom draggable scrollbar, hidden when the content fits.</li>
+<li>Long hover descriptions show an ellipsis. Hover or click it to widen/expand the panel and read the full untruncated text; oversized descriptions can scroll. Moving from the feature row into its description no longer dismisses it immediately.</li>
+</ul>
+<h2 id="compact-ui-revision">Compact UI revision</h2>
+<p>Feature settings default to336px width,38px control rows and smaller section gaps. <code>Width</code> remains configurable. Group/HStack/VStack draw symmetric12px container corners; joined child plates use square joins instead of the old horizontal half-squircle assets. The profile theme value is adjacent to its chevron. Menu bind and Quick save retain their original, unaccented styling at the user’s request. Both remain clickable; the theme value is still closer to its chevron.</p>
+<p>Hover description hit-testing uses the same inset-adjusted coordinates as the UI. Expansion preserves the control beneath the pointer, never reduces panel height, and leaves a minus control for collapse. The expanded panel stays open while the cursor is over its text, closes after leaving, and scrolls for oversized content.</p>
+<p>The demo no longer contains Media &amp; code or the Try the HUD/Native containers explanation plates. The library still includes Code, Image and Viewport APIs for projects that need them.</p>
+<h2 id="config-load-performance-and-cleanup">Config load performance and cleanup</h2>
+<ul>
+<li>New text registers its font once; registration does not restyle all existing labels. Destroyed text/theme objects are removed from the font/theme registries.</li>
+<li>Reapplying the same theme is a no-op. Preset row icons are reused instead of destroyed/recreated on every refresh.</li>
+<li>All Hotkeys renders lazily while visible, coalesces updates, and defers rendering until a config batch completes. Loading a preset does not rebuild a hidden hotkey list.</li>
+<li>Config loading preflights types, skips unchanged serialized values, applies changed values in a batch with a3ms cooperative frame budget, and rolls back on a parser failure. Hotkey enforcement is suspended during the batch and restored afterward. Concurrent preset loads are rejected as busy rather than stacked.</li>
+<li>Public <code>presets:Load(name)</code> still returns only after applying values; it may yield to Heartbeat to keep rendering responsive. Arbitrary user callbacks can still be expensive: keep them small or schedule your own expensive work. Unchanged values do not re-fire their callbacks merely because a preset is loaded again.</li>
+<li><code>presets.LastLoadStats</code> and <code>Window.LastConfigLoadStats</code> expose <code>Applied</code>, <code>Skipped</code>, <code>Yields</code>, <code>DurationMs</code>. These are diagnostics, not a frame-time guarantee.</li>
+</ul>
+<p>Alphabetical ставит названия с буквами перед чисто числовыми: <code>Default → Last → 231</code>. Повторный выбор меняет направление внутри групп: <code>Last → Default → 231</code>. Числовые имена сортируются по числу. Сортировка по датам по-прежнему использует реальные created/modified timestamps.</p></article><footer>WindUI Remake 2 · Original WindUI by Footagesus · MIT<br>Сайт собран из Markdown и исходников в этом репозитории. <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/docs/remake-2/API.md">Редактировать источник ↗</a></footer></main></div><script src="search-index.js"></script><script src="site.js"></script></body></html>

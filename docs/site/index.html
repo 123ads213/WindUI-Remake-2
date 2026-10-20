@@ -1,0 +1,63 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Подключение · WindUI Remake 2</title><link rel="stylesheet" href="style.css"></head><body><header><a class="brand" href="index.html">WindUI <span>Remake 2 / Documentation</span></a><a class="repo" href="https://github.com/123ads213/WindUI-Remake-2">GitHub ↗</a></header><div class="shell"><aside><div class="search"><input id="search" type="search" aria-label="Поиск по документации" placeholder="Поиск методов…"></div><nav class="desktop-nav" aria-label="Документация"><a href="index.html" aria-current="page">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a></nav><details class="mobile-nav"><summary>Разделы документации</summary><nav><a href="index.html" aria-current="page">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a></nav></details><div class="desktop-nav eyebrow">На этой странице</div><nav class="toc" aria-label="Содержание"><div class="toc">
+<ul>
+<li><a href="#_1">Подключение</a><ul>
+<li><a href="#_2">Одна строка подключения</a></li>
+<li><a href="#_3">Первое окно</a></li>
+<li><a href="#_4">Готовый короткий пример</a></li>
+<li><a href="#_5">Сохранение</a></li>
+<li><a href="#_6">Версии</a></li>
+<li><a href="#_7">Сборка из исходников</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></aside><main><div id="results" class="results" aria-live="polite"></div><article><h1 id="_1">Подключение</h1>
+<p><strong>Не вставляйте исходники библиотеки в свой скрипт.</strong> Загрузите библиотеку один раз, а затем создавайте интерфейс методами <code>WindUI</code>, <code>Window</code>, вкладок и элементов.</p>
+<h2 id="_2">Одна строка подключения</h2>
+<p>Для публичного репозитория:</p>
+<pre><code class="language-lua">local WindUI = loadstring(game:HttpGet('https://raw.githubusercontent.com/123ads213/WindUI-Remake-2/main/dist/main.lua'))()
+</code></pre>
+<p><code>dist/main.lua</code> возвращает библиотеку. Он <strong>не запускает демонстрационное меню</strong>, не включает Anti-AFK и не создаёт ваши элементы автоматически.</p>
+<p>Если репозиторий приватный, анонимный raw URL не работает. Не вставляйте GitHub-токен в Roblox-код. Скачайте <code>dist/main.lua</code> под своей учётной записью, сохраните как <code>WindUI.lua</code> в рабочую папку своего runner и подключите так:</p>
+<pre><code class="language-lua">local WindUI = loadstring(readfile('WindUI.lua'))()
+</code></pre>
+<p><code>game:HttpGet</code>, <code>loadstring</code> и файловые функции зависят от среды исполнения. Этот способ предназначен для совместимого клиентского runner; обычный LocalScript в Studio не предоставляет эти executor API.</p>
+<h2 id="_3">Первое окно</h2>
+<pre><code class="language-lua">local Window = WindUI:CreateWindow({
+    Title = 'My menu', Author = 'My project', Icon = 'settings',
+    Theme = 'Dark', Folder = 'MyProject', NewElements = true,
+    DescriptionMode = 'Tooltip', SearchInTopbar = true,
+    ToggleKey = Enum.KeyCode.RightShift,
+    Size = UDim2.fromOffset(1000, 650),
+})
+local Main = Window:Tab({Title = 'Main', Icon = 'house'})
+local columns = Main:Columns()
+local group = columns.Left:Section({Title = 'Features'})
+local enabled = group:Toggle({Title = 'Enabled', Flag = 'enabled', Value = false,
+    Callback = function(value)
+        print('Your feature:', value)
+    end,
+})
+</code></pre>
+<p><code>NewElements=true</code> включает новую геометрию. <code>Columns()</code> создаёт две адаптивные колонки; <code>columns.Left:Section()</code> и <code>columns.Right:Section()</code> — карточки. Не путайте их с <code>Tab:Section()</code>, который создаёт обычный заголовок.</p>
+<h2 id="_4">Готовый короткий пример</h2>
+<p><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/QuickStart.lua">QuickStart.lua</a> показывает подключение, окно, две колонки, toggle, настройки через три точки, inline dropdown, slider, тему, профиль и конфиги. Скопируйте этот пример и замените callbacks своими функциями.</p>
+<p><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/RemakeExample.lua">RemakeExample.lua</a> — более крупное демонстрационное меню. Для автономного запуска демо скачайте <code>dist/remake2.lua</code>; не подключайте этот файл вместо библиотеки в своём проекте.</p>
+<h2 id="_5">Сохранение</h2>
+<p>Каждому сохраняемому элементу задайте уникальный <code>Flag</code>. Создайте все элементы <strong>до</strong> включения менеджера конфигов:</p>
+<pre><code class="language-lua">local presets, err = Window:EnablePresets({Default = 'Default'})
+if not presets then warn(err) end
+</code></pre>
+<p>Клик по названию конфига или стрелке загрузки загружает его <strong>один раз</strong>. Quick save в шапке сохраняет текущий конфиг. Фильтр сортирует, а повторный клик по активному критерию меняет направление. Подписи со счётчиком внизу нет.</p>
+<h2 id="_6">Версии</h2>
+<p>URL с <code>/main/</code> получает последнюю опубликованную сборку. Для воспроизводимого проекта замените <code>main</code> на полный SHA проверенного коммита. Не используйте случайный <code>latest</code> из другого репозитория.</p>
+<h2 id="_7">Сборка из исходников</h2>
+<pre><code class="language-sh">git submodule update --init --recursive
+npm install
+npm run build
+python build/build-remake2.py
+python -m pip install -r build/requirements-docs.txt
+python build/build-docs.py
+</code></pre>
+<p>Сборка библиотеки требует Luau/darklua по <code>aftman.toml</code>. Сайт документации собирается в <code>docs/site</code>; его можно открыть локально. GitHub Pages использует workflow <code>.github/workflows/docs.yml</code>; публикация Pages требует разрешённых Pages в настройках репозитория.</p>
+<p>Alphabetical ставит названия с буквами перед чисто числовыми: <code>Default → Last → 231</code>. Повторный выбор меняет направление внутри групп: <code>Last → Default → 231</code>. Числовые имена сортируются по числу. Сортировка по датам по-прежнему использует реальные created/modified timestamps.</p></article><footer>WindUI Remake 2 · Original WindUI by Footagesus · MIT<br>Сайт собран из Markdown и исходников в этом репозитории. <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/docs/remake-2/INSTALL.md">Редактировать источник ↗</a></footer></main></div><script src="search-index.js"></script><script src="site.js"></script></body></html>

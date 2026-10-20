@@ -696,11 +696,9 @@ return function(Config)
 
 	function Element.UpdateShape(Tab)
 		if Config.Window.NewElements then
-			local newShape = Creator:GetElementPosition(
-				Tab.Elements,
-				Element.Index,
-				Config.ParentConfig.ParentTable.__type == "HStack" or Config.ParentConfig.ParentTable.__type == "Group"
-			)
+            local parentType=Config.ParentConfig.ParentTable.__type
+            local joined=parentType=='Group'or parentType=='HStack'or parentType=='VStack'
+            local newShape=joined and 'Square'or Creator:GetElementPosition(Tab.Elements,Element.Index,false)
 
 			if newShape and Main then
 				MainTable:SetType(newShape)

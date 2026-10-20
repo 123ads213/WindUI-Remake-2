@@ -419,7 +419,7 @@ function Element:New(Config)
     local hovering=false
     local heldArrow=nil;local arrowAge,arrowRepeat=0,0
     local function CanUseArrows()
-        local point=UserInputService:GetMouseLocation();local control=Slider.UIElements.SliderContainer
+        local point=UserInputService:GetMouseLocation()+Config.WindUI.ScreenGui.AbsolutePosition;local control=Slider.UIElements.SliderContainer
         local a,z=control.AbsolutePosition,control.AbsoluteSize
         local inside=point.X>=a.X and point.X<=a.X+z.X and point.Y>=a.Y and point.Y<=a.Y+z.Y
         if not inside or Destroyed or Slider.Locked or Config.Window.Closed or game:GetService('GuiService').MenuIsOpen or UserInputService:GetFocusedTextBox() then return false end

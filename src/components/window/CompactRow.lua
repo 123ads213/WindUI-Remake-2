@@ -2,7 +2,7 @@ local C=require('../../modules/Creator')
 return function(content,frame,config)
  if not table.find({"Toggle","Slider","Dropdown","Colorpicker","Input","Button","ProgressBar"},content.__type)then return end
  local main=frame.UIElements.Main
- main.AutomaticSize=Enum.AutomaticSize.None;main.Size=UDim2.new(1,0,0,50)
+ main.AutomaticSize=Enum.AutomaticSize.None;main.Size=UDim2.new(1,0,0,config.RowHeight or 50)
  for _,v in ipairs(main:GetChildren())do if v:IsA('UIPadding')then v:Destroy()end end
  if main:IsA('ImageButton')or main:IsA('ImageLabel')then
   if C.Objects[main]then C.Objects[main].Properties.ImageTransparency=nil;C.Objects[main].Properties.ImageColor3=nil end

@@ -25,6 +25,7 @@ return {
 				config = config or {}
                 if config.Inline and not tbl.FeatureSettings then error('Inline dropdowns are only supported inside an element Settings() popover',2)end
 				config.CompactRow = config.CompactRow or tbl.CompactRows
+                config.RowHeight=config.RowHeight or tbl.RowHeight
                 if config.CompactRow and name == "Slider" then config.Width=config.Width or 184;config.ValueWidth=config.ValueWidth or 72 end
                 config.Tab = Tab or tbl
 				config.ParentType = tbl.__type

@@ -223,15 +223,20 @@ function Creator.SetTheme(Theme)
 end
 
 function Creator.AddFontObject(Object)
-	table.insert(Creator.FontObjects, Object)
-	Creator.UpdateFont(Creator.Font)
+ if not Creator.FontObjects[Object]then
+  Creator.FontObjects[Object]=true
+  Object.Destroying:Once(function()Creator.FontObjects[Object]=nil end)
+ end
+ local face=Object.FontFace
+ if face.Family~=Creator.Font then Object.FontFace=Font.new(Creator.Font,face.Weight,face.Style)end
 end
 
 function Creator.UpdateFont(FontId)
-	Creator.Font = FontId
-	for _, Obj in next, Creator.FontObjects do
-		Obj.FontFace = Font.new(FontId, Obj.FontFace.Weight, Obj.FontFace.Style)
-	end
+ Creator.Font=FontId
+ for Obj in pairs(Creator.FontObjects)do
+  local face=Obj.FontFace
+  if face.Family~=FontId then Obj.FontFace=Font.new(FontId,face.Weight,face.Style)end
+ end
 end
 
 function Creator.GetThemeProperty(Property, Theme)
@@ -316,6 +321,11 @@ function Creator.AddThemeObject(Object, Properties, skipUpdate)
 		end
 	else
 		Creator.Objects[Object] = { Object = Object, Properties = Properties }
+        Object.Destroying:Once(function()
+            Creator.Objects[Object]=nil
+            local active=Creator.ThemeTweens and Creator.ThemeTweens[Object]
+            if active then for _,t in pairs(active)do t:Cancel()end;Creator.ThemeTweens[Object]=nil end
+        end)
 	end
 
 	if not skipUpdate then

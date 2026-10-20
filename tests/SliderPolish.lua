@@ -6,9 +6,11 @@ local function key(code,hold)
  vim:SendKeyEvent(true,code,false,game);task.wait(hold or .05);vim:SendKeyEvent(false,code,false,game);task.wait(.04)
 end
 local function run()
+ d.Window.FeatureUI:CloseAll();d.PlayerOptions:Close();if pcall(function()return d.Presets.Opened end)and d.Presets.Opened then d.Presets:Toggle()end
+ local focused=input:GetFocusedTextBox();if focused then focused:ReleaseFocus()end
  d.Player:Select();task.wait(.25)
  s:Set(500000);local track=s.UIElements.SliderIcon
- vim:SendMouseMoveEvent(track.AbsolutePosition.X+track.AbsoluteSize.X*.5,track.AbsolutePosition.Y+2,game);task.wait(.1)
+ vim:SendMouseMoveEvent(track.AbsolutePosition.X+track.AbsoluteSize.X*.5-d.Library.ScreenGui.AbsolutePosition.X,track.AbsolutePosition.Y+2-d.Library.ScreenGui.AbsolutePosition.Y,game);task.wait(.1)
  key(Enum.KeyCode.Right);check(s:Get()==500001,'right adds one configured step')
  key(Enum.KeyCode.Left);check(s:Get()==500000,'left subtracts one step')
  key(Enum.KeyCode.Right,.55);check(s:Get()>500001,'held key repeats')
@@ -16,7 +18,7 @@ local function run()
  s:Set(s.Value.Min);key(Enum.KeyCode.Left);check(s:Get()==s.Value.Min,'keyboard clamps minimum')
  s:Lock();local saved=s:Get();key(Enum.KeyCode.Right);check(s:Get()==saved,'locked ignores arrows');s:Unlock()
  vim:SendMouseMoveEvent(100,100,game);task.wait(.1);key(Enum.KeyCode.Right);check(s:Get()==saved,'unhovered ignores arrows')
- vim:SendMouseMoveEvent(track.AbsolutePosition.X+track.AbsoluteSize.X*.5,track.AbsolutePosition.Y+2,game);task.wait(.1)
+ vim:SendMouseMoveEvent(track.AbsolutePosition.X+track.AbsoluteSize.X*.5-d.Library.ScreenGui.AbsolutePosition.X,track.AbsolutePosition.Y+2-d.Library.ScreenGui.AbsolutePosition.Y,game);task.wait(.1)
  local box=s.UIElements.ValueInput;box:CaptureFocus();task.wait(.1);key(Enum.KeyCode.Right);check(s:Get()==saved,'editing text does not nudge slider');box:ReleaseFocus();task.wait(.2)
  check(box.Size.X.Offset>=72,'enough display width for compact values')
  s:Set(413460000);task.wait(.2);check(box.Text=='413.46m','reported value formats without losing digits')

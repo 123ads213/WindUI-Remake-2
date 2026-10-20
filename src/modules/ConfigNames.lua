@@ -18,4 +18,23 @@ function M.ValidateData(data)
  end
  return true
 end
+-- Names containing letters come before numeric-only names in Alphabetical.
+function M.SortKey(name)
+ local parts={};local letters=false
+ for _,cp in utf8.codes(name)do
+  if cp>=65 and cp<=90 then cp+=32 end
+  if cp>=1040 and cp<=1071 then cp+=32 elseif cp==1025 then cp=1105 end
+  if(cp>=97 and cp<=122)or(cp>=192 and cp<=687)or(cp>=880 and cp<=1327)or(cp>=12352 and cp<=40959)then letters=true end
+  parts[#parts+1]=utf8.char(cp)
+ end
+ local key=table.concat(parts)
+ return letters and 0 or(name:match('^%d+$')and 1 or 2),key
+end
+function M.NameLess(a,b,reversed)
+ local ac,ak=M.SortKey(a);local bc,bk=M.SortKey(b)
+ if ac~=bc then return ac<bc end -- Letters remain first in either direction.
+ if ac==1 then local an,bn=tonumber(a),tonumber(b);if an and bn and an~=bn then if reversed then return an>bn else return an<bn end end end
+ if ak==bk then ak,bk=a,b end
+ if reversed then return ak>bk else return ak<bk end
+end
 return M

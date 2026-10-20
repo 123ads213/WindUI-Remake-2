@@ -12,7 +12,8 @@ function Element:New(Config)
     
     local VStackFrame = New("CanvasGroup", {
         Size = UDim2.new(1,0,0,0),
-        BackgroundTransparency = 1,
+        BackgroundTransparency = 0.1,
+        ThemeTag = { BackgroundColor3 = "ElementBackground" },
         AutomaticSize = "Y",
         Parent = Config.Parent,
     }, {

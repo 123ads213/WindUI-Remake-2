@@ -1,6 +1,6 @@
 # WindUI Remake 2 — API and integration guide
 
-Version: `1.7.0-remake.1`. Original WindUI by Footagesus, MIT. This is a UI library: example settings do not implement ESP, targeting or gameplay logic.
+Version: `1.7.0-remake.2`. Original WindUI by Footagesus, MIT. This is a UI library: example settings do not implement ESP, targeting or gameplay logic.
 
 ## Start here (including AI coding assistants)
 
@@ -19,7 +19,7 @@ npm run build
 python build/build-remake2.py
 ```
 
-Use Luau/darklua installed on PATH. The built `dist/remake2.lua` embeds both library and the **full original menu, adapted rather than replaced**. Search, Visuals → Player/World, General, Themes, profile/preferences/history, both color examples, HUD and original numeric examples remain available. The repository is private: do not use anonymous raw GitHub URLs and **never embed a PAT in a Roblox script**. Run the locally obtained standalone file with your trusted runner. `dist/main.lua` is the library only. `ForkExample.lua` / `RestoreBaseline.lua` remain historical baseline files.
+Use Luau/darklua installed on PATH. The built `dist/remake2.lua` embeds both library and the **full original menu, adapted rather than replaced**. Search, Visuals → Player/World, General, Themes, profile/preferences/history, both color examples, HUD and original numeric examples remain available. For library-only loading, see [installation](INSTALL.md) and [QuickStart.lua](../../QuickStart.lua). Public raw URLs work only while the repository is public; for private access download the file first and use `loadstring(readfile('WindUI.lua'))()`. **Never embed a PAT in a Roblox script**. `dist/main.lua` is the library only. `ForkExample.lua` / `RestoreBaseline.lua` remain historical baseline files.
 
 ## Window, tabs and columns
 
@@ -275,7 +275,7 @@ The reference-style example puts six inline choices in the first outlined group,
 
 ## Gallery example and animation details
 
-`RemakeExample.lua` now contains the registered demo elements. In addition to Player/World/General/Themes, Elements expands to Controls, Selections, Containers and Media & code. Controls has Interactive/States icon subtabs; Selections covers single/multi/searchable choices and colors/gradients; Containers demonstrates Group/HStack/VStack/Section/Divider/Space; Media contains an interactive local viewport, copyable code and avatar image. HUD preview provides watermark/keylist/field/position controls. Example callbacks are UI-only, not gameplay implementations. `WindUIForkDemo.Showcase` exposes the gallery controls.
+`RemakeExample.lua` now contains the registered demo elements. In addition to Player/World/General/Themes, Elements expands to Controls, Selections and Containers. Controls has Interactive/States icon subtabs; Selections covers single/multi/searchable choices and colors/gradients; Containers demonstrates Group/HStack/VStack/Section/Divider/Space. HUD preview provides watermark/keylist/field/position controls. Example callbacks are UI-only, not gameplay implementations. `WindUIForkDemo.Showcase` exposes the gallery controls.
 
 - Compact dropdown previews follow configured Values order, regardless of click order. Long previews are clipped with an alpha fade at the right edge, never an ellipsis. Changing the selection fades out the old preview and fades in the new one.
 - Preset refresh reuses named row instances and tweens their positions over240ms when sorting. New/removed or filtered rows fade in/out rather than rebuilding the entire list. `presets.Order` and `presets.RowCache` expose the current order and reusable rows for tests.
@@ -287,8 +287,30 @@ The reference-style example puts six inline choices in the first outlined group,
 ## Screenshot review fixes
 
 - Click a preset row **once**, or its download icon, to load it. Both show a named success/failure notification. The download icon always reloads, even for the current preset; only the header save button saves.
-- Only the current preset has a persistent row highlight. Newest First sorts descending by creation time, Recently Modified descending by modification time, and Alphabetical by name. Identical relative ordering across criteria is valid; existing rows animate to their sorted positions. The footer names the active criterion.
+- Only the current preset has a persistent row highlight. Newest First sorts descending by creation time, Recently Modified descending by modification time, and Alphabetical by name. Identical relative ordering across criteria is valid; existing rows animate to their sorted positions. There is no sort/count footer. Re-selecting the active criterion reverses its direction; `:SetSort(key,reversed)` selects a direction explicitly.
 - Section cards and Group/HStack/VStack clip child surfaces through rounded CanvasGroups. Compact lock overlays fit their row instead of extending beyond it.
 - `Inline=true` is supported only in feature `:Settings()` groups; normal-page use raises a descriptive error. The obsolete Nested tabs explanation plate was removed from General.
 - All Hotkeys uses the library's custom draggable scrollbar, hidden when the content fits.
 - Long hover descriptions show an ellipsis. Hover or click it to widen/expand the panel and read the full untruncated text; oversized descriptions can scroll. Moving from the feature row into its description no longer dismisses it immediately.
+
+
+## Compact UI revision
+
+Feature settings default to336px width,38px control rows and smaller section gaps. `Width` remains configurable. Group/HStack/VStack draw symmetric12px container corners; joined child plates use square joins instead of the old horizontal half-squircle assets. The profile theme value is adjacent to its chevron. Menu bind and Quick save retain their original, unaccented styling at the user’s request. Both remain clickable; the theme value is still closer to its chevron.
+
+Hover description hit-testing uses the same inset-adjusted coordinates as the UI. Expansion preserves the control beneath the pointer, never reduces panel height, and leaves a minus control for collapse. The expanded panel stays open while the cursor is over its text, closes after leaving, and scrolls for oversized content.
+
+The demo no longer contains Media & code or the Try the HUD/Native containers explanation plates. The library still includes Code, Image and Viewport APIs for projects that need them.
+
+
+## Config load performance and cleanup
+
+- New text registers its font once; registration does not restyle all existing labels. Destroyed text/theme objects are removed from the font/theme registries.
+- Reapplying the same theme is a no-op. Preset row icons are reused instead of destroyed/recreated on every refresh.
+- All Hotkeys renders lazily while visible, coalesces updates, and defers rendering until a config batch completes. Loading a preset does not rebuild a hidden hotkey list.
+- Config loading preflights types, skips unchanged serialized values, applies changed values in a batch with a3ms cooperative frame budget, and rolls back on a parser failure. Hotkey enforcement is suspended during the batch and restored afterward. Concurrent preset loads are rejected as busy rather than stacked.
+- Public `presets:Load(name)` still returns only after applying values; it may yield to Heartbeat to keep rendering responsive. Arbitrary user callbacks can still be expensive: keep them small or schedule your own expensive work. Unchanged values do not re-fire their callbacks merely because a preset is loaded again.
+- `presets.LastLoadStats` and `Window.LastConfigLoadStats` expose `Applied`, `Skipped`, `Yields`, `DurationMs`. These are diagnostics, not a frame-time guarantee.
+
+
+Alphabetical ставит названия с буквами перед чисто числовыми: `Default → Last → 231`. Повторный выбор меняет направление внутри групп: `Last → Default → 231`. Числовые имена сортируются по числу. Сортировка по датам по-прежнему использует реальные created/modified timestamps.

@@ -78,7 +78,7 @@ function Profile.New(Window, WindUI, Config)
     scaleValue.TextXAlignment='Right'
     icon(scaleButton,'chevron-right',252,13,16)
     local styleButton=button(header,'Style','Style','palette',152)
-    local styleValue=text(styleButton,'Value',WindUI:GetCurrentTheme(),142,0,80,42,13,true)
+    local styleValue=text(styleButton,'Value',WindUI:GetCurrentTheme(),164,0,80,42,13,true)
     styleValue.TextXAlignment='Right'
     icon(styleButton,'chevron-right',252,13,16)
     local historyButton=button(header,'History','History','history',244)

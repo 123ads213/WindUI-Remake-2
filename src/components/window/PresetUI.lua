@@ -6,11 +6,12 @@ local P={}
 function P.New(window,wind,options)
  options=options or{};local manager=window.ConfigManager
  if not manager then return nil,'Preset storage needs Window.Folder and executor file functions'end
- local self={Current=nil,Sort='Created',UIElements={},Opened=false}
+ local self={Current=nil,Sort='Created',SortReversed=false,UIElements={},Opened=false}
  local host=window.UIElements.Main.Main
  local topbar=host.Topbar
  local bar=U.New('Frame',{Parent=host,Name='PresetToolbar',Size=UDim2.fromOffset(250,34),BackgroundTransparency=.55,ThemeTag={BackgroundColor3='ElementBackground'},ZIndex=30,Active=true});U.corner(bar,8)
  local save=U.button(bar,'',0,0,34,34,function()self:QuickSave()end);U.icon(save,'save',9,9,16,window)
+
  local trigger=U.button(bar,'Default',36,0,210,34,function()self:Toggle()end);trigger.Label.Size=UDim2.new(1,-38,1,0);local chevron=U.icon(trigger,'chevron-down',184,9,16,window)
  local function fitTrigger()
   local scale=math.max(.01,wind.UIScaleObj.Scale)
@@ -29,9 +30,9 @@ function P.New(window,wind,options)
  trigger.Label:GetPropertyChangedSignal('TextBounds'):Connect(fitTrigger);task.defer(fitTrigger)
  local panel=U.panel(window,'Presets',330,414,850)
  local recent
- local viewButton=U.button(panel,'Presets',10,8,142,36,function()self.Sort='Name';self.View='Presets';self:Refresh()end);viewButton.Label.Position=UDim2.fromOffset(38,0);viewButton.Label.Size=UDim2.new(1,-44,1,0);U.icon(viewButton,'cloud',10,9,18,window)
+ local viewButton=U.button(panel,'Presets',10,8,142,36,function()self.Sort='Name';self.SortReversed=false;self.View='Presets';self:Refresh()end);viewButton.Label.Position=UDim2.fromOffset(38,0);viewButton.Label.Size=UDim2.new(1,-44,1,0);U.icon(viewButton,'cloud',10,9,18,window)
  U.New('Frame',{Parent=panel,Position=UDim2.fromOffset(12,48),Size=UDim2.new(1,-24,0,1),BackgroundTransparency=.94,ThemeTag={BackgroundColor3='Text'},ZIndex=852})
- local status=U.text(panel,'',14,384,302,22,true);status.TextSize=12
+ local status=U.text(panel,'',14,384,302,22,true);status.Name='ErrorMessage';status.TextSize=12;status.Visible=false
  local search=U.input(panel,'Search presets',12,54,266,34)
  local sortMenu=U.panel(window,'PresetSorting',224,144,890)
  local sortButton=U.button(panel,'',282,54,36,34,function()U.place(sortMenu,self.UIElements.Sort,wind);U.show(sortMenu,not sortMenu:GetAttribute('TargetVisible'))end);U.icon(sortButton,'list-filter',10,9,16,window)
@@ -43,10 +44,10 @@ function P.New(window,wind,options)
  local nameInput=U.input(editor,'Preset name',14,48,278,34)
  local jsonInput=U.input(editor,'Paste preset JSON here',14,92,278,86);jsonInput.MultiLine=true;jsonInput.TextYAlignment='Top';jsonInput.TextWrapped=true
  local mode='Create';local sourceName
- local function statusError(err)status.Text=tostring(err or 'Operation failed')end
+ local function statusError(err)status.Text=tostring(err or 'Operation failed');status.Visible=true end
  local function safe(fn)
   local ok,a,b=pcall(fn);if not ok then statusError(a);return false,a end
-  if a==false or a==nil then statusError(b);return false,b end;status.Text='';return a,b
+  if a==false or a==nil then statusError(b);return false,b end;status.Text='';status.Visible=false;return a,b
  end
  local function config(name)
   local c=manager:GetConfig(name)
@@ -72,7 +73,12 @@ function P.New(window,wind,options)
  function self:Load(name)
   local valid,err=Names.Validate(name);if not valid then return false,err end
   if not isfile(manager.Path..valid..'.json')then return false,'Preset not found'end
-  local c=config(valid);local result,message=c:Load();if result==false then return false,message end
+  if self.Loading then return false,'A preset is already loading'end
+  self.Loading=true
+  local c=config(valid);local ok,result,message=pcall(c.Load,c);self.Loading=false
+  if not ok then return false,tostring(result)end
+  if result==false then return false,message end
+  self.LastLoadStats=c.LastLoadStats
   c:SetAsCurrent();self.Current=valid;trigger.Label.Text=valid;self:Refresh();return true
  end
  function self:LoadFromUI(name)
@@ -137,13 +143,20 @@ function P.New(window,wind,options)
  for i,action in ipairs({'Rename','Export','Delete'})do local b=U.button(actions,action,6,6+(i-1)*40,152,38,function()edit(action,actionName)end);b.Label.Position=UDim2.fromOffset(36,0);b.Label.Size=UDim2.new(1,-42,1,0);U.icon(b,({'pencil','download','trash-2'})[i],10,11,16,window)end
  local add=U.button(panel,'',282,10,36,32,function()edit('Create')end);U.icon(add,'plus',10,8,16,window)
  local imp=U.button(panel,'',202,10,34,32,function()edit('Import')end);U.icon(imp,'upload',9,8,16,window)
- recent=U.button(panel,'',242,10,34,32,function()self.View='Recent';self.Sort='Modified';self:Refresh()end);U.icon(recent,'folder-clock',9,8,16,window)
+ recent=U.button(panel,'',242,10,34,32,function()self.View='Recent';self.Sort='Modified';self.SortReversed=false;self:Refresh()end);U.icon(recent,'folder-clock',9,8,16,window)
  function self:Refresh()
   viewButton.BackgroundTransparency=.15
   recent.BackgroundTransparency=self.View=='Recent'and .15 or 1
   local names=manager:AllConfigs();local meta={}
   for _,n in ipairs(names)do local ok,d=pcall(function()return Http:JSONDecode(readfile(manager.Path..n..'.json'))end);meta[n]=ok and type(d)=='table'and d.__meta or{}end
-  table.sort(names,function(a,b)if self.Sort=='Modified'or self.Sort=='Created'then local field=self.Sort=='Created'and'created'or'modified';local aa,bb=(meta[a]or{})[field]or 0,(meta[b]or{})[field]or 0;if aa~=bb then return aa>bb end end;return a:lower()<b:lower()end)
+  table.sort(names,function(a,b)
+   if self.Sort=='Modified'or self.Sort=='Created'then
+    local field=self.Sort=='Created'and'created'or'modified'
+    local aa,bb=tonumber((meta[a]or{})[field])or 0,tonumber((meta[b]or{})[field])or 0
+    if aa~=bb then if self.SortReversed then return aa<bb else return aa>bb end end
+   end
+   return Names.NameLess(a,b,self.SortReversed)
+  end)
   local count=0;local present={};self.Order={}
   local empty=rows:FindFirstChild('EmptyLabel');if empty then empty:Destroy()end
   for _,n in ipairs(names)do if n:lower():find(search.Text:lower(),1,true)then
@@ -154,14 +167,13 @@ function P.New(window,wind,options)
     local row=U.button(slot,n,0,0,302,48,function()U.show(actions,false);safe(function()return self:LoadFromUI(n)end)end);row.Label.Size=UDim2.new(1,-94,1,0)
     local more;more=U.button(row,'',220,7,32,34,function()actionName=n;U.place(actions,more or row,wind);U.show(actions,true)end);U.icon(more,'ellipsis',8,9,16,window)
     local load=U.button(row,'',258,7,32,34,function()U.show(actions,false);safe(function()return self:LoadFromUI(n)end)end)
-    item={Slot=slot,Row=row,Load=load};rowCache[n]=item
+    item={Slot=slot,Row=row,Load=load,LoadIcon=U.icon(load,'download',8,9,16,window)};rowCache[n]=item
     row.AutoButtonColor=false
     row.MouseEnter:Connect(function()U.Tween(row,.12,{BackgroundTransparency=n==self.Current and .35 or .8}):Play()end)
     row.MouseLeave:Connect(function()U.Tween(row,.12,{BackgroundTransparency=n==self.Current and .5 or 1}):Play()end)
     U.tooltip(window,wind,load,'Load preset')
    end
    item.Row.LayoutOrder=count;item.Slot.LayoutOrder=count;item.Row.BackgroundTransparency=n==self.Current and .5 or 1
-   if item.LoadIcon then item.LoadIcon:Destroy()end;item.LoadIcon=U.icon(item.Load,'download',8,9,16,window)
    if item.Motion then item.Motion:Cancel()end
    item.Motion=U.Tween(item.Slot,.24,{Position=UDim2.fromOffset(0,(count-1)*54),GroupTransparency=0});item.Motion:Play()
   end end
@@ -171,8 +183,7 @@ function P.New(window,wind,options)
   end end
   rows.CanvasSize=UDim2.fromOffset(0,count*54)
   if count==0 then local label=U.text(rows,'No presets found',8,10,280,32,true);label.Name='EmptyLabel'end
-  status.Text=(self.SortLabels[self.Sort]or self.Sort)..' · '..count..' presets'
-  local height=math.clamp(count*54+130,184,414);panel.Size=UDim2.fromOffset(330,height);rows.Size=UDim2.fromOffset(306,height-140);status.Position=UDim2.fromOffset(14,height-28)
+  local height=math.clamp(count*54+110,164,394);panel.Size=UDim2.fromOffset(330,height);rows.Size=UDim2.fromOffset(306,height-110);status.Position=UDim2.fromOffset(14,height-26)
   if self.Opened then U.place(panel,trigger,wind)end
  end
  function self:Toggle()
@@ -201,15 +212,26 @@ function P.New(window,wind,options)
   end
  end)
  bar.Destroying:Connect(function()conn:Disconnect();sortMenu:Destroy();for _,p in ipairs({panel,editor,actions,info})do p:Destroy()end end)
- self.UIElements={Toolbar=bar,Trigger=trigger,Panel=panel,Search=search,Rows=rows,Editor=editor,Info=info,Save=save,Import=imp,Recent=recent,Add=add,Sort=sortButton,SortMenu=sortMenu}
+ self.UIElements={Toolbar=bar,Trigger=trigger,Panel=panel,Search=search,Rows=rows,ErrorMessage=status,Editor=editor,Info=info,Save=save,Import=imp,Recent=recent,Add=add,Sort=sortButton,SortMenu=sortMenu}
  self.SortOptions={}
  for i,choice in ipairs({{'Created','Newest First','calendar-plus'},{'Modified','Recently Modified','clock'},{'Name','Alphabetical','arrow-down-a-z'}})do
-  local b=U.button(sortMenu,choice[2],6,6+(i-1)*44,212,42,function()self.Sort=choice[1];self:Refresh();U.show(sortMenu,false)end)
+  local b=U.button(sortMenu,choice[2],6,6+(i-1)*44,212,42,function()self:SetSort(choice[1],self.Sort==choice[1]and not self.SortReversed or false);U.show(sortMenu,false)end)
   local icon=U.icon(b,choice[3],10,13,16,window);b.Label.Position=UDim2.fromOffset(36,0);b.Label.Size=UDim2.new(1,-70,1,0);local check=U.icon(b,'check',184,13,16,window)
   self.SortOptions[i]={Key=choice[1],Button=b,Check=check,Icon=icon}
  end
  local refresh=self.Refresh
- function self:Refresh()refresh(self);for _,choice in ipairs(self.SortOptions)do choice.Check.Visible=self.Sort==choice.Key end end
+ function self:SetSort(key,reversed)
+  assert(self.SortLabels[key],'Unknown sort criterion');self.Sort=key;self.SortReversed=reversed==true;self:Refresh();return self
+ end
+ function self:Refresh()
+  refresh(self)
+  local reverseLabels={Created='Oldest First',Modified='Least Recently Modified',Name='Alphabetical Z–A'}
+  for _,choice in ipairs(self.SortOptions)do
+   local active=self.Sort==choice.Key;choice.Check.Visible=active
+   choice.Button.Label.Text=active and self.SortReversed and reverseLabels[choice.Key]or self.SortLabels[choice.Key]
+   choice.Button:SetAttribute('IdleTransparency',active and .5 or 1);choice.Button.BackgroundTransparency=active and .5 or 1
+  end
+ end
  self.UIElements.Tooltips={}
  for _,hint in ipairs({{save,'Save preset'},{imp,'Import preset'},{recent,'Recently modified'},{add,'Create preset'},{sortButton,'Sort presets'}})do
   self.UIElements.Tooltips[hint[2]]=U.tooltip(window,wind,hint[1],hint[2])

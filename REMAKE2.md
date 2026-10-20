@@ -1,6 +1,6 @@
 # WindUI — Remake 2
 
-This is a separate, private working repository for the second remake.
+This is the separate working repository for the second remake.
 
 ## Frozen starting point
 
@@ -19,12 +19,12 @@ This is a separate, private working repository for the second remake.
 
 ## Launch / development
 
-The repository is private. Do not put GitHub PATs into Roblox scripts and do not depend on anonymous raw URLs for this repository.
+Never put GitHub PATs into Roblox scripts. Anonymous raw URL loading requires public visibility; private repositories use a downloaded local file. See [installation](docs/remake-2/INSTALL.md).
 
 Initialize submodules with `git submodule update --init --recursive`. Build with `npm run build`, then `python build/build-remake2.py`. The standalone `dist/remake2.lua` embeds the current library and **RemakeExample.lua**, with no first-repository fetch. `ForkExample.lua` and `RestoreBaseline.lua` remain historical baseline utilities.
 
 ## Current remake
 
-`1.7.0-remake.1`: two-column cards, compact inline controls, nearby checked dropdowns, horizontal icon subtabs, header preset manager and animated dependencies.
+`1.7.0-remake.2`: two-column cards, compact inline controls, nearby checked dropdowns, horizontal icon subtabs, header preset manager and animated dependencies.
 
 See **[complete API and AI integration guide](docs/remake-2/API.md)** and **[working example](RemakeExample.lua)**. All development happens here; the original first-remake repository stays unchanged.

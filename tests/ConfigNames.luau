@@ -7,3 +7,10 @@ for _,v in ipairs({'',' ','..','.','../escape','a\\b','a:b','a\n','a?b',string.r
 check(M.ValidateData({__elements={a={__type='Toggle',value=true},b={__type='Slider',value=12}}}),'valid data')
 for _,v in ipairs({{}, {__elements=5},{__elements={a=false}},{__elements={a={__type='Toggle',value='true'}}},{__elements={a={__type='Slider',value=0/0}}},{__elements={a={__type='Input',value=7}}}})do check(not M.ValidateData(v),'invalid data')end
 print('ConfigNames: '..n..' checks passed')
+
+local sorted={'231','Last','Default'}
+table.sort(sorted,function(a,b)return M.NameLess(a,b,false)end)
+assert(table.concat(sorted,',')=='Default,Last,231','Alphabetical must put letter names first')
+table.sort(sorted,function(a,b)return M.NameLess(a,b,true)end)
+assert(table.concat(sorted,',')=='Last,Default,231','Reverse keeps letters first')
+print('ConfigNames: letters-first forward/reverse regression passed')

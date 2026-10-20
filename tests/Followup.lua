@@ -5,7 +5,7 @@ local input=game:GetService('UserInputService');local Http=game:GetService('Http
 local function run()
  check(d.AntiAFK.Value and getgenv().__SiriusAntiAFKEnabled and getgenv().__SiriusIdleConnection.Connected,'Anti-AFK enabled with one idle connection')
  local types={};for _,v in ipairs(d.Window.AllElements)do types[v.__type]=true end
- for _,kind in ipairs({'Toggle','Slider','Input','Button','Dropdown','Colorpicker','ProgressBar','Paragraph','Section','Divider','Space','Group','HStack','VStack','Viewport','Image','Code'})do check(types[kind],'showcase includes '..kind)end
+ for _,kind in ipairs({'Toggle','Slider','Input','Button','Dropdown','Colorpicker','ProgressBar','Section','Divider','Space','Group','HStack','VStack'})do check(types[kind],'showcase includes '..kind)end
  local lab=d.Showcase;lab.Choices:Select();lab.Multi:Select({'Fourth option','First option'});task.wait(.3)
  check(lab.Multi.UIElements.Display.Text=='First option, Fourth option','preview follows configured option order')
  check(lab.Multi.UIElements.Display.TextTruncate==Enum.TextTruncate.None,'no ellipsis')

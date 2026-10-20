@@ -1,56 +1,55 @@
-> **Current Remake 2:** [API and AI integration guide](docs/remake-2/API.md) · [New example](RemakeExample.lua) · [Standalone build](dist/remake2.lua). The launch snippet below belongs to the historical first remake, not this private repository.
+# WindUI Remake 2
 
-> **Remake 2:** see [REMAKE2.md](REMAKE2.md) for the frozen baseline, saved current view and standalone launcher.
+Roblox UI library: adaptive columns, compact controls, per-feature settings, hotkeys, local presets, profile and draggable HUD. Based on WindUI by Footagesus, MIT.
 
-> **WindUI Extended — community fork**
-> Based on WindUI 1.6.66 by [Footagesus](https://github.com/Footagesus/WindUI), MIT. Original authorship and license retained.
->
-> **[Fork features, API, setup and test notes](FORK.md)** · **[Complete example](ForkExample.lua)**
->
-> Original WindUI layout, compact numbers, actual nested tabs (Visuals → Player / World), and curated themes.
+**[Documentation](docs/site/index.html)** · **[Installation](docs/remake-2/INSTALL.md)** · **[API guide](docs/remake-2/API.md)** · **[Method reference](docs/remake-2/REFERENCE.md)** · **[Recipes](docs/remake-2/RECIPES.md)**
+
+## Use as a library
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/123ads213/WindUI/main/ForkExample.lua"))()
+local WindUI = loadstring(game:HttpGet('https://raw.githubusercontent.com/123ads213/WindUI-Remake-2/main/dist/main.lua'))()
+
+local Window = WindUI:CreateWindow({
+    Title = 'My menu', Folder = 'MyProject', Theme = 'Dark',
+    NewElements = true, DescriptionMode = 'Tooltip',
+})
+local columns = Window:Tab({Title = 'Main', Icon = 'house'}):Columns()
+columns.Left:Section({Title = 'Features'}):Toggle({
+    Title = 'Enabled', Flag = 'enabled', Value = false,
+    Callback = function(value) print(value) end,
+})
 ```
 
----
+Raw URL loading requires a **public repository**. If this repository is private, download `dist/main.lua` as `WindUI.lua` and replace the first line with `local WindUI = loadstring(readfile('WindUI.lua'))()`. Never put GitHub credentials in a Roblox script. These runners/API requirements are described in Installation.
 
-<!--<h1 align="center">WindUI</h1> -->
+- **[QuickStart.lua](QuickStart.lua):** a small project you can copy and extend; no embedded library source.
+- **[dist/main.lua](dist/main.lua):** library only, returns WindUI. Import this in your own scripts.
+- **[dist/remake2.lua](dist/remake2.lua):** standalone demonstration, already includes library and example. Not the library entry point.
+- **[RemakeExample.lua](RemakeExample.lua):** large demo source; do not paste it into every project.
 
-<!--
-<picture>
-    <source srcset="docs/banner-dark.webp" media="(prefers-color-scheme: dark)">
-    <source srcset="docs/banner-light.webp" media="(prefers-color-scheme: light)">
-    <img src="docs/banner-light.webp" alt="WindUI Banner">
-</picture>-->
+## Features
 
-<img src="docs/WindUI – Themes.png" alt="WindUI Banner">
+- Sidebar tabs/subtabs, horizontal icon tabs and responsive two-column cards.
+- Toggle, slider, input, dropdown/multi-select, colors/gradients, buttons, progress and containers.
+- Compact settings through ellipsis, inline choices inside those settings only.
+- Readable expandable descriptions; per-feature Toggle/Hold/Always hotkeys and custom-scroll All Hotkeys.
+- Named local presets, quick-save, import/export, rename/delete, reversible sorting and frame-budgeted loading.
+- Profile theme/scale/transparency/menu-bind controls; watermark and draggable keylist.
 
-I might rewrite this project from scratch later.
+## Build and test
 
-> [!WARNING]
-> This WindUI was not inspired by, and the name has nothing to do with UI Frameworks
+```sh
+git submodule update --init --recursive
+npm install
+npm run build
+python build/build-remake2.py
+npm test
+python -m pip install -r build/requirements-docs.txt
+python build/build-docs.py
+```
 
-> [!WARNING]
-> WindUI is currently in Beta.
-> This project is still under active development. Bugs, issues, and unstable features may occur. We’re constantly working on improvements, so please be patient and report any problems you encounter.
+Luau and darklua must be on PATH (see `aftman.toml`). Integration tests under `tests/` run in a compatible connected Roblox client; pure tests run with `npm test`. [QA notes](docs/remake-2/QA.md).
 
-## Credits
+## Credits and history
 
-#### Icons (https://github.com/Footagesus/Icons)
-
-- [Lucide-Icons](https://github.com/lucide-icons/lucide)
-- [Craft Icons](https://www.figma.com/community/file/1415718327120418204)
-- [Geist Icons](https://vercel.com/geist/icons)
-- [Solar Icons](https://icones.js.org/collection/solar)
-- [SF Symbols](https://sf-symbols-one.vercel.app/)
-
-### Links
-
-- [Discord Server](https://discord.gg/ftgs-development-hub-1300692552005189632)
-- [Documentation](https://footagesus.github.io/treehub-web/docs/windui)
-- [Installation](https://footagesus.github.io/WindUI-Docs/docs/installation)
-- [Example](/main_example.lua) (wip)
-    ```luau
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/main_example.lua'))()
-    ```
+Original WindUI by [Footagesus](https://github.com/Footagesus/WindUI), MIT; see [LICENSE](LICENSE). Icons retain their upstream attribution in [Fork documentation](FORK.md). [Frozen first-remake baseline](REMAKE2.md). The first-remake repository is not changed by this project.

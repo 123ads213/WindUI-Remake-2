@@ -20,7 +20,7 @@ local function run()
  check(#d.Showcase.Settings.Sections==2,'embedded selection remains in settings popover')
  d.Player:Select();f:CloseAll();task.wait(.25);d.ShowPlayers:ShowDescription();task.wait(.25);local ui=f.UIElements
  check(ui.TooltipMore.Visible,'long description offers ellipsis');local width=ui.Tooltip.Size.X.Offset
- firesignal(ui.TooltipMore.MouseEnter);task.wait(.3);check(ui.Tooltip.Size.X.Offset>width,'ellipsis hover expands description');check(not ui.TooltipMore.Visible,'expanded description hides ellipsis');check(ui.TooltipBody.TextTruncate==Enum.TextTruncate.None,'description is not truncated');check(ui.TooltipScroll.CanvasSize.Y.Offset>=ui.TooltipBody.Size.Y.Offset,'entire description scrollable');f:HideDescription()
+ firesignal(ui.TooltipMore.MouseEnter);task.wait(.3);check(ui.Tooltip.Size.X.Offset>width,'ellipsis hover expands description');check(ui.TooltipMore.Visible and ui.TooltipMore.Text=='−','expanded description offers collapse');check(ui.TooltipBody.TextTruncate==Enum.TextTruncate.None,'description is not truncated');check(ui.TooltipScroll.CanvasSize.Y.Offset>=ui.TooltipBody.Size.Y.Offset,'entire description scrollable');f:HideDescription()
  for i=1,30 do d.ShowPlayers:AddHotkey({Key='Unbound',Mode='Toggle',Value=true})end
  f:ShowAll();task.wait(.4);local scroll=ui.AllEntries;local thumb=ui.AllScrollbar:FindFirstChildWhichIsA('GuiObject')
  check(scroll.ScrollBarThickness==0,'native scrollbar disabled');check(scroll.AbsoluteCanvasSize.Y>scroll.AbsoluteWindowSize.Y,'long list overflows');check(thumb and thumb.Visible,'custom thumb visible');local before=thumb.Position.Y.Scale

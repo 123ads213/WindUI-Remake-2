@@ -97,7 +97,7 @@ local Fine = PlayerSettings:Slider({ Title = 'Precision', Flag='precision', Widt
     Callback = function(value) Calls.Fine = value end })
 local ShowPlayers = PlayerControls:Toggle({ Title = 'Show players', Flag = 'show_players', Desc = 'Show player overlays. Right-click to manage multiple hotkeys. K toggles; L applies Enabled while held.', Value = true, Hotkeys = { { Key = 'K', Mode = 'Toggle', Value = true }, { Key = 'L', Mode = 'Hold', Value = true } }, Callback = function(value) Calls.ShowPlayers = value end })
 -- Optional popover settings use the same native controls, flags and themed cards.
-local PlayerOptions=ShowPlayers:Settings({Title='Show players',Width=400})
+local PlayerOptions=ShowPlayers:Settings({Title='Show players',Width=336})
 local Details=PlayerOptions:Section()
 local PopupStyle=Details:Dropdown({Title='Tracking mode',Inline=true,Flag='popup_player_style',Values={
  {Title='Avoid collisions',Locked=true},'View angles','Movement keys','Only while holding jump','Stop on Shift key',{Title='Stop on key release',Locked=true}},Value='View angles'})
@@ -191,9 +191,8 @@ local Lab=Window:Tab({Title='Elements',Icon='blocks'})
 local LabControls=Lab:Tab({Title='Controls',Icon='sliders-horizontal'})
 local LabChoices=Lab:Tab({Title='Selections',Icon='list-checks'})
 local LabLayout=Lab:Tab({Title='Containers',Icon='panels-top-left'})
-local LabMedia=Lab:Tab({Title='Media & code',Icon='code'})
 local LabHUD=Window:Tab({Title='HUD preview',Icon='layout-dashboard'})
-local Showcase={Root=Lab,Controls=LabControls,Choices=LabChoices,Layout=LabLayout,Media=LabMedia,HUD=LabHUD}
+local Showcase={Root=Lab,Controls=LabControls,Choices=LabChoices,Layout=LabLayout,HUD=LabHUD}
 local labPages=LabControls:IconTabs()
 local normal=labPages:Tab({Title='Interactive',Id='interactive',Icon='mouse-pointer-2'})
 local states=labPages:Tab({Title='States',Id='states',Icon='lock-keyhole'})
@@ -221,24 +220,16 @@ Showcase.Mode=extra:Dropdown({Title='Mode',Flag='lab_inline',Values={'Classic','
 local colors=qc.Left:Section({Title='Color & gradient'})
 colors:Colorpicker({Title='Solid color',Flag='lab_color',Default=Color3.fromRGB(76,141,255),Transparency=.2})
 colors:Colorpicker({Title='Gradient',Flag='lab_gradient',Gradient={{Position=0,Color=Color3.fromRGB(0,170,255),Transparency=0},{Position=1,Color=Color3.fromRGB(150,80,255),Transparency=.2}}})
-local opts=Showcase.Toggle:Settings({Title='Enabled settings',Width=400})
+local opts=Showcase.Toggle:Settings({Title='Enabled settings',Width=336})
 opts:Section():Dropdown({Title='Behaviour',Inline=true,Values={'Default','Alternative','Experimental'},Value='Default',Flag='lab_behaviour'})
 local values=opts:Section();values:Toggle({Title='Smooth',Value=true,Flag='lab_smooth',Hotkeys=false});values:Slider({Title='Speed',Flag='lab_speed',Value={Min=0,Max=10,Default=3},Step=.1})
 Showcase.Settings=opts
-LabLayout:Paragraph({Title='Native containers',Desc='Group and HStack arrange controls side by side. VStack arranges them vertically. Sections, dividers and spacing are shown below.'})
 LabLayout:Section({Title='Group'})
 local g=LabLayout:Group({});g:Button({Title='Left',Callback=function()Calls.Group='Left'end});g:Button({Title='Right',Callback=function()Calls.Group='Right'end})
 LabLayout:Space({Columns=2});LabLayout:Divider();LabLayout:Section({Title='Horizontal stack'})
 local h=LabLayout:HStack({});h:Button({Title='First',Callback=function()Calls.HStack='First'end});h:Button({Title='Second',Callback=function()Calls.HStack='Second'end})
 LabLayout:Section({Title='Vertical stack'})
 local v=LabLayout:VStack({});v:Toggle({Title='Top',Value=true,Hotkeys=false});v:Button({Title='Bottom',Callback=function()Calls.VStack=true end})
-LabMedia:Paragraph({Title='Media and copyable code',Desc='The model below is a local demo object, not a live player. Drag it to test the viewport.'})
-local model=Instance.new('Model');model.Name='SiriusPreview'
-local part=Instance.new('Part');part.Anchored=true;part.Size=Vector3.new(4,4,4);part.Color=Color3.fromRGB(76,141,255);part.Material=Enum.Material.Neon;part.Parent=model;model.PrimaryPart=part
-Showcase.Viewport=LabMedia:Viewport({Object=model,Interactive=true,Height=220})
-LabMedia:Code({Title='Create a settings panel',Code="local options = toggle:Settings({Title = 'Settings'})\nlocal group = options:Section()\ngroup:Slider({Title='Speed', Value={Min=0, Max=100, Default=50}})",Height=UDim.new(0,130),CodeSize=14})
-Showcase.Image=LabMedia:Image({Image='rbxthumb://type=AvatarHeadShot&id='..game:GetService('Players').LocalPlayer.UserId..'&w=420&h=420',AspectRatio='16:9',Radius=8})
-Window.UIElements.Main.Main.Destroying:Connect(function()model:Destroy()end)
 local hc=LabHUD:Columns();local wm=hc.Left:Section({Title='Watermark'});local kl=hc.Right:Section({Title='Keylist & dragging'})
 wm:Button({Title='Show watermark',Callback=function()HUD:SetWatermarkEnabled(true)end})
 wm:Button({Title='Hide watermark',Callback=function()HUD:SetWatermarkEnabled(false)end})
@@ -247,7 +238,6 @@ wm:Button({Title='Compact fields',Callback=function()HUD:SetFields({'FPS','Ping'
 kl:Button({Title='Show keylist',Callback=function()HUD:SetKeylistEnabled(true)end})
 kl:Button({Title='Hide keylist',Callback=function()HUD:SetKeylistEnabled(false)end})
 kl:Button({Title='Reset positions',Callback=function()HUD:ResetPositions()end})
-LabHUD:Paragraph({Title='Try the HUD',Desc='Drag watermark and Hotkeys while the menu is open. Toggle Enabled in Elements > Controls, press J, or right-click its row to add a hotkey. General contains the watermark field selector; Themes switches both HUD surfaces.'})
 
 local Presets,configError=Window:EnablePresets({Default='Default'})
 assert(Presets,configError)

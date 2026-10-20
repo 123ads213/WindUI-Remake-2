@@ -12,10 +12,10 @@ function U.icon(p,name,x,y,size,window)
  local im=C.Image(name,name,0,window.Folder,'RemakeIcon',true,false,'Icon');im.Parent=p;im.Position=UDim2.fromOffset(x,y);im.Size=UDim2.fromOffset(size,size);im.ZIndex=p.ZIndex+2;im.ImageLabel.ZIndex=im.ZIndex;return im
 end
 function U.button(p,text,x,y,w,h,fn)
- local b=C.New('TextButton',{Parent=p,Text='',Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1,ThemeTag={BackgroundColor3='ElementBackground'},ZIndex=p.ZIndex+1});U.corner(b,7)
+ local b=C.New('TextButton',{Parent=p,Text='',Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1,AutoButtonColor=false,ThemeTag={BackgroundColor3='ElementBackground'},ZIndex=p.ZIndex+1});U.corner(b,7)
  if text~='' then local t=U.text(b,text,10,0,w-20,h);t.Name='Label' end
- b.MouseEnter:Connect(function() C.Tween(b,.12,{BackgroundTransparency=.15}):Play()end)
- b.MouseLeave:Connect(function() C.Tween(b,.12,{BackgroundTransparency=1}):Play()end)
+ b.MouseEnter:Connect(function() C.Tween(b,.12,{BackgroundTransparency=b:GetAttribute('HoverTransparency')or .15}):Play()end)
+ b.MouseLeave:Connect(function() C.Tween(b,.12,{BackgroundTransparency=b:GetAttribute('IdleTransparency')or 1}):Play()end)
  if fn then b.MouseButton1Click:Connect(fn)end;return b
 end
 function U.input(p,placeholder,x,y,w,h)

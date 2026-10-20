@@ -100,9 +100,12 @@ for _,parser in pairs(ConfigManager.Parser)do
  end
  parser.Load=function(element,data)
   local binds=element and element.SetHotkeys and data.hotkeys
-  if binds~=nil then element:SetHotkeys({})end
-  load(element,data)
-  if binds~=nil then element:SetHotkeys(binds)end
+  local entry=element and element.HotkeyEntry;local was=entry and entry.Suspended
+  if entry then entry.Suspended=true end
+  local ok,err=pcall(load,element,data)
+  if ok and binds~=nil then element:SetHotkeys(binds)end
+  if entry then entry.Suspended=was;if element.__HotkeyController then element.__HotkeyController.Model:Enforce(entry)end end
+  if not ok then error(err)end
  end
 end
 
@@ -245,29 +248,59 @@ function ConfigManager:CreateConfig(configFilename, autoload)
             end
         end
         
-        -- Preflight every known type before touching any live element.
-        local backup={}
+        if Window.ConfigLoading then return false,'A config is already loading'end
+        local started=os.clock();local budgetStarted=started
+        local stats={Applied=0,Skipped=0,Yields=0,DurationMs=0}
+        local function budget()
+            if os.clock()-budgetStarted>=.003 then
+                RunService.Heartbeat:Wait();budgetStarted=os.clock();stats.Yields+=1
+            end
+        end
+        local function same(a,b)
+            if type(a)~=type(b)then return false end
+            if type(a)~='table'then return a==b end
+            for k,v in pairs(a)do if not same(v,b[k])then return false end end
+            for k in pairs(b)do if a[k]==nil then return false end end
+            return true
+        end
+        local backup,work={},{}
         for name,data in pairs(loadData.__elements)do
             local element=ConfigModule.Elements[name]
             if element then
-                if element.__type~=data.__type then return false,"Element type mismatch: "..name end
+                if element.__type~=data.__type then return false,'Element type mismatch: '..name end
                 local parser=ConfigManager.Parser[element.__type]
-                if parser then backup[name]=parser.Save(element)end
-            end
-        end
-        for name,data in pairs(loadData.__elements)do
-            local element=ConfigModule.Elements[name]
-            local parser=element and ConfigManager.Parser[element.__type]
-            if parser then
-                local ok,err=pcall(parser.Load,element,data)
-                if not ok then
-                    for key,previous in pairs(backup)do pcall(ConfigManager.Parser[previous.__type].Load,ConfigModule.Elements[key],previous)end
-                    return false,"Failed to load "..name..": "..tostring(err)
+                if parser then
+                    local old=parser.Save(element)
+                    if same(old,data)then stats.Skipped+=1 else backup[name]=old;work[#work+1]={Name=name,Data=data,Element=element,Parser=parser}end
                 end
             end
+            budget()
         end
+        Window.ConfigLoading=true
+        if Window.FeatureUI then Window.FeatureUI:BeginConfigBatch()end
+        local applied={}
+        local ok,message=pcall(function()
+            for _,item in ipairs(work)do
+                applied[#applied+1]=item
+                local good,err=pcall(item.Parser.Load,item.Element,item.Data)
+                if not good then error('Failed to load '..item.Name..': '..tostring(err),0)end
+                stats.Applied+=1;budget()
+            end
+            if loadData.__hud and Window.HUD and not Window.HUD.Destroyed then
+                local good,err=Window.HUD:Import(loadData.__hud)
+                if good==false then error(err or 'Invalid HUD config',0)end
+            end
+        end)
+        if not ok then
+            for i=#applied,1,-1 do
+                local item=applied[i];pcall(item.Parser.Load,item.Element,backup[item.Name]);budget()
+            end
+        end
+        Window.ConfigLoading=false
+        if Window.FeatureUI then Window.FeatureUI:EndConfigBatch()end
+        stats.DurationMs=math.floor((os.clock()-started)*100000)/100;ConfigModule.LastLoadStats=stats;Window.LastConfigLoadStats=stats
+        if not ok then return false,tostring(message)end
 
-        if loadData.__hud and Window.HUD and not Window.HUD.Destroyed then Window.HUD:Import(loadData.__hud)end
         ConfigModule.CustomData = loadData.__custom or {}
         ConfigModule.Meta = loadData.__meta or ConfigModule.Meta
         

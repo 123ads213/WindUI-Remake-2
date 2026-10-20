@@ -5,7 +5,7 @@ function Model.New()
  function self:Register(owner,apply,read,available)
   local e={Owner=owner,Apply=apply,Read=read,Available=available,Bindings={}};self.Entries[#self.Entries+1]=e;return e
  end
- local function allowed(e)return not e.Available or e.Available()end
+ local function allowed(e)return not self.Suspended and not e.Suspended and(not e.Available or e.Available())end
  local function set(e,v)if allowed(e) and (not e.Read or e.Read()~=v)then e.Apply(v)end end
  function self:Enforce(e)
   if not allowed(e)then return end
@@ -51,8 +51,10 @@ function Model.New()
   local rows={};for _,b in ipairs(e.Bindings)do rows[#rows+1]={Key=b.Key,Mode=b.Mode,Value=b.Value}end;return rows
  end
  function self:Import(e,rows)
-  self:Reset(e)
+  local suspended=e.Suspended
+  self:Reset(e);e.Suspended=true
   if type(rows)=='table'then for _,row in ipairs(rows)do if type(row)=='table'then self:Add(e,row)end end end
+  e.Suspended=suspended;self:Enforce(e)
  end
  function self:Unregister(e)
   self:Reset(e);local i=table.find(self.Entries,e);if i then table.remove(self.Entries,i)end

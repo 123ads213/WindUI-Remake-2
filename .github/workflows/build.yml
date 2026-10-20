@@ -34,12 +34,12 @@ jobs:
         run: aftman install
 
       - name: Run build
-        run: npm run build
+        run: npm run build && python3 build/build-remake2.py
 
       - name: Commit dist/main.lua back to repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dist/main.lua
+          git add dist/main.lua dist/remake2.lua
           git commit -m "[AUTO] Upload built main.lua" || exit 0
           git push

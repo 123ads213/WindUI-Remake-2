@@ -73,3 +73,15 @@ Final combined regression on the rebuilt standalone menu: Followup33, Remake2 in
 - Rounded section/native container clipping, normal-page Inline rejection, embedded settings availability, ellipsis-hover expansion and full description canvas are covered. All Hotkeys overflow was exercised with30 temporary bindings: native scrollbar disabled, custom thumb visible and following CanvasPosition; original bindings restored.
 - Fresh full regression: Remake2 33, Followup 33, FeatureSettings 26, InlineSettings 30, SliderPolish 23, ThinSliders 58, ReviewFixes 35 —238 live assertions passed. All pure `npm test` suites passed; rebuilt `dist/main.lua` compiled successfully.
 - Actual game screenshot of the updated Containers gallery inspected after rebuilding/restarting the demo. Anti-AFK remains enabled. Screenshot-review changes are local until explicitly pushed.
+
+
+## Final polish and preset-loading performance (Remake 2)
+
+- Rebuilt and re-injected both current library/demo outputs. Nine live regression suites passed: Remake2 33, Followup 29, FeatureSettings 26, InlineSettings 30, SliderPolish 23, ThinSliders 58, ReviewFixes 35, PolishReview 50, ConfigPerformance 138 — 422 assertions total. All pure `npm test` suites also passed.
+- Alphabetical sorting puts letter-containing names before numeric-only names: Default → Last → 231. Reverse sorting changes order within those groups. Tests verify actual row positions, not just the selected checkmark. No sort/count footer remains.
+- Compact settings use a 336px panel and 38px rows. Joined containers use one rounded outer CanvasGroup, not mismatched half-corner assets. Removed only Media & code demo, not the library methods. Original menu-bind/quick-save colors are retained.
+- Real virtual-pointer tests verify description expansion, reading without disappearance, and dismissal outside the row/tooltip. Slider keyboard hover uses the same GUI inset conversion.
+- Found and removed theme/font registry leaks and repeated full font scans during label registration. Destroyed instances unregister themselves. Hidden hotkey lists no longer rebuild on every change; config import batches hotkey updates and skips unchanged values.
+- On this connected client, 24 real preset loads measured median 2.21ms, maximum 3.16ms. A synthetic 100-control load took 23.01ms across five cooperative yields while the heartbeat continued. Final registry check found zero dead theme objects. These are local measurements, not a cross-device guarantee. Parser-failure tests verify rollback and released loading guards.
+- Documentation includes four responsive routes, 191 source-linked method definitions, 65 searchable sections, copy buttons, mobile navigation and dark mode. All routes checked at 1280px/390px: no page-width overflow or JavaScript errors; search, copy and mobile navigation passed. Desktop/mobile and interactive screenshots visually inspected.
+- GitHub Pages deployment is gated on a public repository. Private repositories retain Markdown docs and downloadable self-contained HTML; no visibility change is performed automatically.

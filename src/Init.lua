@@ -198,6 +198,7 @@ end
 
 function WindUI:SetTheme(Value)
 	if WindUI.Themes[Value] then
+        if WindUI.Theme==WindUI.Themes[Value]then return WindUI.Theme end
 		WindUI.Theme = WindUI.Themes[Value]
 		Creator.SetTheme(WindUI.Themes[Value])
 

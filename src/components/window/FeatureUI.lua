@@ -63,6 +63,7 @@ function FeatureUI.New(Window,WindUI)
  local tipBody=label(tipScroll,'Description','',0,0,0,42,15,true);tipBody.Size=UDim2.new(1,-6,0,42);tipBody.TextWrapped=true;tipBody.TextTruncate='None';tipBody.TextYAlignment='Top'
  local tipMore=New('TextButton',{Parent=tip,Name='ReadMore',Text='...',TextSize=20,FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),AutoButtonColor=false,Size=UDim2.fromOffset(30,24),Position=UDim2.new(1,-42,1,-28),BackgroundTransparency=1,ThemeTag={TextColor3='Text'},ZIndex=504,Visible=false})
  local descriptionTarget,descriptionFrame,descriptionExpanded
+ local descriptionSerial=0;local descriptionSizeTween;local collapsedHeight=122;local collapsedWidth=330
  local function contains(gui,point)local a,z=gui.AbsolutePosition,gui.AbsoluteSize;return gui.Visible and point.X>=a.X and point.X<=a.X+z.X and point.Y>=a.Y and point.Y<=a.Y+z.Y end
  local context=panel('FeatureHotkeys',232,188)
  local editor=panel('HotkeyEditor',264,198)
@@ -71,38 +72,58 @@ function FeatureUI.New(Window,WindUI)
  self.UIElements={Tooltip=tip,TooltipTitle=tipTitle,TooltipBody=tipBody,TooltipMore=tipMore,TooltipScroll=tipScroll,Context=context,Editor=editor,Modes=modes,All=all}
  local activeEntry,activeBinding,activeRow
  local hoverSerial=0
- function self:HideDescription()hoverSerial+=1;show(tip,false)end
+ function self:HideDescription()hoverSerial+=1;descriptionSerial+=1;show(tip,false)end
  function self:Describe(content,frame,expanded)
-  if self.Picking or context.Visible or all.Visible or Window.Closed or Window.Destroyed then return end
-  local request=hoverSerial;local desc=frame.Desc
-  if not desc or desc==''then return end
-  descriptionTarget,descriptionFrame,descriptionExpanded=content,frame,expanded==true
-  tipTitle.Text=content.Title or frame.Title or'Feature';tipBody.Text=desc
-  local s=scale();local width=math.min(expanded and 480 or 330,math.max(220,WindUI.ScreenGui.AbsoluteSize.X/s-32))
+  if self.Picking or context.Visible or all.Visible or Window.Closed or Window.Destroyed or(Window.ActiveFeatureSettings and Window.ActiveFeatureSettings.Opened)then return end
+  local desc=frame.Desc;if not desc or desc==''then return end
+  local same=descriptionFrame==frame and tip.Visible
+  if same and descriptionExpanded and expanded==nil then return end
+  descriptionSerial+=1;local request=descriptionSerial
+  local expanding=expanded==true
+  local s=scale();local width=math.min(expanding and 440 or 330,math.max(220,WindUI.ScreenGui.AbsoluteSize.X/s-32))
   local params=Instance.new('GetTextBoundsParams');params.Text=desc;params.Font=tipBody.FontFace;params.Size=tipBody.TextSize;params.Width=width-34
   local ok,bounds=pcall(function()return game:GetService('TextService'):GetTextBoundsAsync(params)end)
   local full=ok and math.max(22,math.ceil(bounds.Y)+4)or math.max(48,math.ceil(#desc/35)*20)
-  if self.Destroyed or not frame.UIElements.Main.Parent or request~=hoverSerial then return end
-  local more=not expanded and full>48
-  local visible=expanded and math.min(full,math.max(50,WindUI.ScreenGui.AbsoluteSize.Y/s-100))or math.min(full,48)
-  local height=visible+(more and 74 or 50)
-  tipBody.Size=UDim2.new(1,-6,0,full);tipScroll.CanvasSize=UDim2.fromOffset(0,full);tipScroll.CanvasPosition=Vector2.zero
-  tipScroll.Size=UDim2.new(1,-28,0,visible);tipScroll.ScrollBarThickness=expanded and full>visible and 3 or 0
-  tipMore.Visible=more
-  if tip.Visible then Tween(tip,.18,{Size=UDim2.fromOffset(width,height)}):Play()else tip.Size=UDim2.fromOffset(width,height)end
-  beside(tip,frame.UIElements.Main);show(tip,true)
+  if self.Destroyed or not frame.UIElements.Main.Parent or request~=descriptionSerial then return end
+  descriptionTarget,descriptionFrame,descriptionExpanded=content,frame,expanding
+  tipTitle.Text=content.Title or frame.Title or'Feature';tipBody.Text=desc
+  local more=not expanding and full>48
+  local maxHeight=math.max(100,WindUI.ScreenGui.AbsoluteSize.Y/s-32)
+  local visible=expanding and math.min(full,maxHeight-74)or math.min(full,48)
+  local height=visible+((more or expanding)and 74 or 50)
+  if expanding then height=math.max(height,collapsedHeight)else collapsedHeight=height;collapsedWidth=width end
+  tipBody.Size=UDim2.new(1,-6,0,full);tipScroll.CanvasSize=UDim2.fromOffset(0,full)
+  if not same then tipScroll.CanvasPosition=Vector2.zero end
+  tipScroll.Size=UDim2.new(1,-28,0,height-74);if not(more or expanding)then tipScroll.Size=UDim2.new(1,-28,0,visible)end
+  tipScroll.ScrollBarThickness=expanding and full>height-74 and 3 or 0
+  tipMore.Visible=more or expanding;tipMore.Text=expanding and '−'or'…'
+  -- Keep the expansion control under the pointer instead of moving it away.
+  tipMore.Position=UDim2.fromOffset(collapsedWidth-42,collapsedHeight-28)
+  if descriptionSizeTween then descriptionSizeTween:Cancel()end
+  if same then
+   local oldX,oldY=tip.AbsolutePosition.X,tip.AbsolutePosition.Y
+   local origin,size=WindUI.ScreenGui.AbsolutePosition,WindUI.ScreenGui.AbsoluteSize
+   local x=math.clamp(oldX,origin.X+8,math.max(origin.X+8,origin.X+size.X-width*s-8))
+   local y=math.clamp(oldY,origin.Y+8,math.max(origin.Y+8,origin.Y+size.Y-height*s-8))
+   descriptionSizeTween=Tween(tip,.18,{Size=UDim2.fromOffset(width,height),Position=UDim2.fromOffset((x-host.AbsolutePosition.X)/s,(y-host.AbsolutePosition.Y)/s)});descriptionSizeTween:Play()
+  else tip.Size=UDim2.fromOffset(width,height);beside(tip,frame.UIElements.Main)end
+  show(tip,true)
  end
  function self:ExpandDescription()
   if descriptionTarget and descriptionFrame and not descriptionExpanded then self:Describe(descriptionTarget,descriptionFrame,true)end
  end
  connect(tipMore.MouseEnter,function()hoverSerial+=1;self:ExpandDescription()end)
- connect(tipMore.MouseButton1Click,function()self:ExpandDescription()end)
+ connect(tipMore.MouseButton1Click,function()
+  hoverSerial+=1
+  if descriptionExpanded then self:Describe(descriptionTarget,descriptionFrame,false)else self:ExpandDescription()end
+ end)
  local function deferDescriptionHide()
   hoverSerial+=1;local request=hoverSerial
-  task.delay(.12,function()
+  task.delay(.32,function()
    if self.Destroyed or request~=hoverSerial then return end
-   local point=Input:GetMouseLocation()
-   if contains(tip,point)or(descriptionFrame and contains(descriptionFrame.UIElements.Main,point))then return end
+   -- GUI absolute positions exclude Roblox's top inset; raw mouse positions do not.
+   local point=Input:GetMouseLocation()+WindUI.ScreenGui.AbsolutePosition
+   if contains(tip,point)or(descriptionFrame and descriptionFrame.UIElements.Main.Parent and contains(descriptionFrame.UIElements.Main,point))then return end
    self:HideDescription()
   end)
  end
@@ -238,7 +259,9 @@ function FeatureUI.New(Window,WindUI)
  local allScrollHolder=New('Frame',{Parent=all,Name='ScrollHolder',Position=UDim2.new(1,-8,0,94),Size=UDim2.new(0,6,1,-110),BackgroundTransparency=1,ZIndex=505})
  local customAllScroll=require('../ui/ScrollSlider').New(scroll,allScrollHolder,Window,4,WindUI)
  self.UIElements.AllEntries=scroll;self.UIElements.AllScrollbar=customAllScroll
- refreshAll=function()
+ local function renderAll()
+  if self.Destroyed then return end
+  self.AllDirty=false;self.AllRenderCount=(self.AllRenderCount or 0)+1
   clearChildren(scroll);local n=0
   for _,e in ipairs(self.Model.Entries)do for _,b in ipairs(e.Bindings)do
    local row=button(scroll,'Hotkey_'..b.Id,e.Owner.Title or'Feature',nil,n*48,function()self:Open(e,all.AbsolutePosition);self:Edit(e,b,context)end)
@@ -250,9 +273,33 @@ function FeatureUI.New(Window,WindUI)
   end end
   if n==0 then label(scroll,'Empty','No hotkeys. Right-click a toggle to add one.',12,24,-24,40,15,true)end
  end
+ local allQueued=false
+ refreshAll=function(force)
+  self.AllDirty=true
+  if self.BatchDepth and self.BatchDepth>0 then return end
+  if force then renderAll();return end
+  if not targets[all]or allQueued then return end
+  allQueued=true
+  task.defer(function()
+   allQueued=false
+   if not self.Destroyed and targets[all]and not(self.BatchDepth and self.BatchDepth>0)and self.AllDirty then renderAll()end
+  end)
+ end
+ function self:BeginConfigBatch()
+  self.BatchDepth=(self.BatchDepth or 0)+1;self.Model.Suspended=true
+ end
+ function self:EndConfigBatch()
+  self.BatchDepth=math.max(0,(self.BatchDepth or 1)-1)
+  if self.BatchDepth>0 then return end
+  self.Model.Suspended=false
+  for _,entry in ipairs(self.Model.Entries)do self.Model:Enforce(entry)end
+  if activeEntry then rebuildContext()end
+  refreshAll()
+ end
+
  function self:ShowAll()
   if Window.ActiveColorPopup then Window.ActiveColorPopup:Close()end
-  self:Close();self:HideDescription();refreshAll()
+  self:Close();self:HideDescription();refreshAll(true)
   local s=scale();all.Size=UDim2.fromOffset(math.min(580,WindUI.ScreenGui.AbsoluteSize.X/s-24),math.min(420,WindUI.ScreenGui.AbsoluteSize.Y/s-24))
   local a=Window.UIElements.Main.AbsolutePosition;local z=Window.UIElements.Main.AbsoluteSize
   place(all,a.X+(z.X-all.Size.X.Offset*s)/2,a.Y+(z.Y-all.Size.Y.Offset*s)/2);show(all,true)
@@ -284,7 +331,7 @@ function FeatureUI.New(Window,WindUI)
    function content:GetHotkeys()return self.__HotkeyController.Model:Export(entry)end
    function content:SetHotkeys(rows)
     local clean={};if type(rows)=='table'then for _,b in ipairs(rows)do if type(b)=='table'then clean[#clean+1]={Key=validKey(b.Key),Mode=b.Mode,Value=b.Value}end end end
-    self.__HotkeyController.Model:Import(entry,clean);refreshAll();if activeEntry==entry then rebuildContext();show(editor,false);show(modes,false)end
+    self.__HotkeyController.Model:Import(entry,clean);refreshAll();if activeEntry==entry and not(self.BatchDepth and self.BatchDepth>0)then rebuildContext();show(editor,false);show(modes,false)end
     return self
    end
    function content:AddHotkey(data)
@@ -334,7 +381,7 @@ function FeatureUI.New(Window,WindUI)
  connect(WindUI.ScreenGui:GetPropertyChangedSignal('AbsoluteSize'),function()self:CloseAll();self:HideDescription()end)
  connect(WindUI.UIScaleObj:GetPropertyChangedSignal('Scale'),function()self:CloseAll();self:HideDescription()end)
  function self:Destroy()
-  if self.Destroyed then return end;self.Destroyed=true;hoverSerial+=1;self.Picking=nil
+  if self.Destroyed then return end;self.Destroyed=true;hoverSerial+=1;descriptionSerial+=1;if descriptionSizeTween then descriptionSizeTween:Cancel()end;self.Picking=nil
   if themeSignal then themeSignal:Disconnect()end
   if valueTween then valueTween:Cancel()end
   for _,c in ipairs(signals)do c:Disconnect()end

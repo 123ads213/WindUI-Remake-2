@@ -1,0 +1,117 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Примеры · WindUI Remake 2</title><link rel="stylesheet" href="style.css"></head><body><header><a class="brand" href="index.html">WindUI <span>Remake 2 / Documentation</span></a><a class="repo" href="https://github.com/123ads213/WindUI-Remake-2">GitHub ↗</a></header><div class="shell"><aside><div class="search"><input id="search" type="search" aria-label="Поиск по документации" placeholder="Поиск методов…"></div><nav class="desktop-nav" aria-label="Документация"><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html" aria-current="page">Примеры</a></nav><details class="mobile-nav"><summary>Разделы документации</summary><nav><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html" aria-current="page">Примеры</a></nav></details><div class="desktop-nav eyebrow">На этой странице</div><nav class="toc" aria-label="Содержание"><div class="toc">
+<ul>
+<li><a href="#_1">Примеры методов</a><ul>
+<li><a href="#_2">Вкладки и две колонки</a></li>
+<li><a href="#toggle-slider-callback">Toggle, slider и callback</a></li>
+<li><a href="#_3">Настройки через три точки</a></li>
+<li><a href="#dropdown-multi-select">Обычный dropdown и multi-select</a></li>
+<li><a href="#_4">Описания и хоткеи</a></li>
+<li><a href="#_5">Зависимые группы</a></li>
+<li><a href="#_6">Цвет</a></li>
+<li><a href="#hud">Профиль и HUD</a></li>
+<li><a href="#_7">Конфиги и сортировка</a></li>
+<li><a href="#_8">Завершение</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></aside><main><div id="results" class="results" aria-live="polite"></div><article><h1 id="_1">Примеры методов</h1>
+<p>Все фрагменты ниже предполагают, что библиотека уже загружена и <code>Window</code> создан. Полный минимальный пример — <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/QuickStart.lua">QuickStart.lua</a>.</p>
+<h2 id="_2">Вкладки и две колонки</h2>
+<pre><code class="language-lua">local Visuals = Window:Tab({Title = 'Visuals', Icon = 'image'})
+local Player = Visuals:SubTab({Title = 'Player', Icon = 'user'})
+local columns = Player:Columns({Gap = 16, MinColumnWidth = 260})
+local left = columns.Left:Section({Title = 'Main'})
+local right = columns.Right:Section({Title = 'Appearance'})
+</code></pre>
+<p>Для горизонтальных вкладок внутри страницы используйте <code>Player:IconTabs()</code>, затем <code>pages:Tab({Title='Enemy', Id='enemy', Icon='user'})</code> и <code>pages:Select('enemy')</code>. Это не те же sidebar SubTab.</p>
+<h2 id="toggle-slider-callback">Toggle, slider и callback</h2>
+<pre><code class="language-lua">local enabled = left:Toggle({Title = 'Enabled', Flag = 'enabled', Value = true,
+    Callback = function(value) print(value) end})
+local speed = left:Slider({Title = 'Speed', Flag = 'speed', Step = .1,
+    Value = {Min = 0, Max = 100, Default = 50},
+    Callback = function(value) print(value) end})
+enabled:Set(false)
+speed:Set(75)
+print(speed:Get())
+speed:SetRange(0, 200)
+</code></pre>
+<h2 id="_3">Настройки через три точки</h2>
+<pre><code class="language-lua">local options = enabled:Settings({Title = 'Feature settings', Width = 336})
+local choices = options:Section()
+local mode = choices:Dropdown({Inline = true, Title = 'Mode', Flag = 'mode',
+    Values = {'Default', 'Alternative', {Title = 'Unavailable', Locked = true}},
+    Value = 'Default'})
+local settings = options:Section()
+settings:Toggle({Title = 'Smooth', Flag = 'smooth', Value = true, Hotkeys = false})
+settings:Slider({Title = 'Speed', Flag = 'speed_extra',
+    Value = {Min = 0, Max = 100, Default = 50}})
+options:Open()
+options:Close()
+</code></pre>
+<p><code>Inline=true</code> допустим только в группах этого popover. На обычной странице используйте обычный <code>Dropdown</code>. Ширина по умолчанию 336, строки настроек компактнее обычных.</p>
+<h2 id="dropdown-multi-select">Обычный dropdown и multi-select</h2>
+<pre><code class="language-lua">local theme = right:Dropdown({Title = 'Theme', Flag = 'theme',
+    Values = {'Dark', 'Light'}, Value = 'Dark',
+    Callback = function(value) WindUI:SetTheme(value) end})
+local selection = right:Dropdown({Title = 'Options', Multi = true, AllowNone = true,
+    SearchBarEnabled = true, Values = {'One', 'Two', 'Three'}, Value = {'One'}})
+theme:Select('Light')
+selection:Select({'Three', 'One'})
+</code></pre>
+<p>Превью multi-select следует порядку <code>Values</code>, а не порядку кликов. Для длинного значения край плавно затухает.</p>
+<h2 id="_4">Описания и хоткеи</h2>
+<pre><code class="language-lua">local feature = left:Toggle({Title = 'Feature', Flag = 'feature', Value = false,
+    Desc = 'Long readable description of what this option does.',
+    Hotkeys = {{Key = 'K', Mode = 'Toggle', Value = true}}})
+feature:AddHotkey({Key = 'L', Mode = 'Hold', Value = true})
+local saved = feature:GetHotkeys()
+feature:SetHotkeys(saved)
+Window:ShowHotkeys()
+</code></pre>
+<p>Правый клик по toggle открывает управление биндами. Toggle/Hold/Always — режимы хоткеев; <code>Hotkeys=false</code> отключает их для конкретного toggle. Для пользовательского действия можно передать <code>HotkeyCallback</code>. Глобальная клавиша меню задаётся <code>Window:SetToggleKey(Enum.KeyCode.F8)</code>, а не хоткеем элемента.</p>
+<p>При <code>DescriptionMode='Tooltip'</code> длинное описание раскрывается при наведении на <code>…</code>. Панель не сжимается под курсором; <code>−</code> сворачивает её. Указатель можно перевести в панель, чтобы прочитать или прокрутить текст.</p>
+<h2 id="_5">Зависимые группы</h2>
+<pre><code class="language-lua">local advanced = left:Toggle({Title = 'Advanced', Flag = 'advanced', Value = false})
+local details = columns.Right:Section({Title = 'Details',
+    VisibleWhen = function() return advanced.Value end})
+details:Slider({Title = 'Amount', Flag = 'amount',
+    Value = {Min = 0, Max = 10, Default = 5}})
+</code></pre>
+<p>Скрытие не удаляет значения и не исключает flagged элементы из конфигов.</p>
+<h2 id="_6">Цвет</h2>
+<pre><code class="language-lua">local color = right:Colorpicker({Title = 'Color', Flag = 'color',
+    Default = Color3.fromRGB(76, 141, 255), Transparency = .2})
+color:Set(Color3.fromRGB(255, 100, 100), .1)
+color:Reset()
+local state = color:Export()
+color:Import(state)
+</code></pre>
+<p>Для градиентов и формата stops смотрите API guide. Прозрачность хранится отдельно от RGB.</p>
+<h2 id="hud">Профиль и HUD</h2>
+<pre><code class="language-lua">local profile = Window:CreateProfile({Name = 'Player'})
+local hud = Window:CreateHUD({Watermark = true, Keylist = true})
+hud:SetFields({'FPS', 'Ping', 'Username', 'Time'})
+hud:SetWatermarkEnabled(true)
+hud:SetKeylistEnabled(true)
+hud:ResetPositions()
+</code></pre>
+<h2 id="_7">Конфиги и сортировка</h2>
+<pre><code class="language-lua">local presets, err = Window:EnablePresets({Default = 'Default', Author = 'Me'})
+assert(presets, err)
+presets:Create('My setup')
+presets:Save('My setup')
+presets:Load('My setup')
+presets:QuickSave()
+presets:SetSort('Name', false)     -- A–Z
+presets:SetSort('Name', true)      -- Z–A
+presets:SetSort('Created', false)  -- новые сначала
+presets:SetSort('Modified', true)  -- давно изменённые сначала
+</code></pre>
+<p><code>Create</code>/<code>Import</code> отказываются перезаписывать существующий файл. Проверяйте <code>ok, err</code>. Сохранение и загрузка — разные действия; сортировка никогда не сохраняет конфиг.</p>
+<h2 id="_8">Завершение</h2>
+<pre><code class="language-lua">Window:OnDestroy(function() print('Disconnect your own connections here') end)
+Window:Destroy()
+</code></pre>
+<p>Библиотека управляет собственными соединениями. Ваши RunService/игровые callbacks должны иметь собственную очистку. Anti-AFK в большом демо — код примера, не скрытое поведение подключения библиотеки.</p>
+<p>Alphabetical ставит названия с буквами перед чисто числовыми: <code>Default → Last → 231</code>. Повторный выбор меняет направление внутри групп: <code>Last → Default → 231</code>. Числовые имена сортируются по числу. Сортировка по датам по-прежнему использует реальные created/modified timestamps.</p></article><footer>WindUI Remake 2 · Original WindUI by Footagesus · MIT<br>Сайт собран из Markdown и исходников в этом репозитории. <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/docs/remake-2/RECIPES.md">Редактировать источник ↗</a></footer></main></div><script src="search-index.js"></script><script src="site.js"></script></body></html>

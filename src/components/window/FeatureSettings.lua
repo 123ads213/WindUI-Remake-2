@@ -5,12 +5,12 @@ local Input=game:GetService('UserInputService')
 local Settings={}
 function Settings.New(content,frame,window,wind,elements,scale,config)
  config=config or{}
- local width=math.clamp(config.Width or 400,300,520)
+ local width=math.clamp(config.Width or 336,280,520)
  local panel=U.panel(window,'FeatureSettings',width,120,820)
  panel.ClipsDescendants=true
- local title=U.text(panel,config.Title or content.Title or 'Settings',16,10,width-54,30);title.TextSize=16
- local close=U.button(panel,'',width-38,10,28,28);U.icon(close,'x',7,7,14,window)
- local body=U.New('ScrollingFrame',{Parent=panel,Name='SettingsBody',Position=UDim2.fromOffset(16,48),Size=UDim2.new(1,-32,1,-64),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize='Y',CanvasSize=UDim2.new(),ZIndex=822})
+ local title=U.text(panel,config.Title or content.Title or 'Settings',12,7,width-50,28);title.TextSize=16
+ local close=U.button(panel,'',width-36,7,26,26);U.icon(close,'x',7,7,14,window)
+ local body=U.New('ScrollingFrame',{Parent=panel,Name='SettingsBody',Position=UDim2.fromOffset(12,42),Size=UDim2.new(1,-24,1,-54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize='Y',CanvasSize=UDim2.new(),ZIndex=822})
  local tab={Elements={},FeatureSettings=true,UIElements={ContainerFrame=body}}
  require('./RemakeLayout').Attach(tab,window,wind,elements,scale)
  local columns=tab:Columns({Gap=0,MinColumnWidth=1000})
@@ -21,7 +21,7 @@ function Settings.New(content,frame,window,wind,elements,scale,config)
  local self={Opened=false,Sections={},UIElements={Panel=panel,Button=button,Title=title,Body=body,Columns=columns}}
  local function fit()
   if not panel.Parent then return end
-  local height=columns.UIElements.Root.Size.Y.Offset+64
+  local height=columns.UIElements.Root.Size.Y.Offset+54
   panel.Size=UDim2.fromOffset(width,math.clamp(height,110,math.min(620,wind.ScreenGui.AbsoluteSize.Y/math.max(.01,wind.UIScaleObj.Scale)-24)))
   if self.Opened then U.beside(panel,button,wind,8)end
  end
