@@ -103,6 +103,7 @@ function Layout.Attach(tab,window,wind,elements,scale)
    local index=type(which)=='number'and which or nil
    if not index then for i,p in ipairs(self.Pages)do if p.Id==which then index=i;break end end end
    if not index or not self.Pages[index]then return false end
+   if self.Selected==index then return true end -- active tab is a no-op, not a replay
    self.Selected=index
    for i,p in ipairs(self.Pages)do
     local active=i==index;p.UIElements.Root.Visible=active;if active then p.UIElements.Root.GroupTransparency=1;U.Tween(p.UIElements.Root,.18,{GroupTransparency=0}):Play()end;p.Label.Visible=active;p.Button.Size=UDim2.fromOffset(active and math.clamp(p.Label.TextBounds.X+48,90,180)or 36,32);U.Tween(p.Button,.14,{BackgroundTransparency=active and .45 or 1}):Play()

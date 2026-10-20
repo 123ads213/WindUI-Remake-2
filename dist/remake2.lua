@@ -36103,6 +36103,7 @@ function av.Select(aw,ax)
 local ay=type(ax)=='number'and ax or nil
 if not ay then for az,aA in ipairs(aw.Pages)do if aA.Id==ax then ay=az;break end end end
 if not ay or not aw.Pages[ay]then return false end
+if aw.Selected==ay then return true end
 aw.Selected=ay
 for az,aA in ipairs(aw.Pages)do
 local aB=az==ay;aA.UIElements.Root.Visible=aB;if aB then aA.UIElements.Root.GroupTransparency=1;aa.Tween(aA.UIElements.Root,.18,{GroupTransparency=0}):Play()end;aA.Label.Visible=aB;aA.Button.Size=UDim2.fromOffset(aB and math.clamp(aA.Label.TextBounds.X+48,90,180)or 36,32);aa.Tween(aA.Button,.14,{BackgroundTransparency=aB and.45 or 1}):Play()a.j()
