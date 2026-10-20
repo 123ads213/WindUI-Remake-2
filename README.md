@@ -1,3 +1,5 @@
+> **Remake 2:** see [REMAKE2.md](REMAKE2.md) for the frozen baseline, saved current view and standalone launcher.
+
 > **WindUI Extended — community fork**
 > Based on WindUI 1.6.66 by [Footagesus](https://github.com/Footagesus/WindUI), MIT. Original authorship and license retained.
 >

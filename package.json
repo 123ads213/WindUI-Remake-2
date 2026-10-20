@@ -2,10 +2,10 @@
     "name": "windui",
     "version": "1.6.66-fork.18",
     "main": "./dist/main.lua",
-    "repository": "https://github.com/123ads213/WindUI",
+    "repository": "https://github.com/123ads213/WindUI-Remake-2",
     "discord": "https://discord.gg/ftgs-development-hub-1300692552005189632",
     "author": "Footagesus",
-    "description": "WindUI by Footagesus \u2014 original layout with compact values, nested tabs and curated themes.",
+    "description": "WindUI by Footagesus — original layout with compact values, nested tabs and curated themes.",
     "license": "MIT",
     "scripts": {
         "dev": "bash build/build.sh dev $INPUT_FILE",
