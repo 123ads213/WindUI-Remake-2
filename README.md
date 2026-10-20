@@ -2,7 +2,7 @@
 
 Roblox UI library: adaptive columns, compact controls, per-feature settings, hotkeys, local presets, profile and draggable HUD. Based on WindUI by Footagesus, MIT.
 
-**[Documentation](docs/site/index.html)** · **[Installation](docs/remake-2/INSTALL.md)** · **[API guide](docs/remake-2/API.md)** · **[Method reference](docs/remake-2/REFERENCE.md)** · **[Recipes](docs/remake-2/RECIPES.md)**
+**[Documentation website](https://123ads213.github.io/WindUI-Remake-2/)** · **[Installation](docs/remake-2/INSTALL.md)** · **[API guide](docs/remake-2/API.md)** · **[Method reference](docs/remake-2/REFERENCE.md)** · **[Recipes](docs/remake-2/RECIPES.md)**
 
 ## Use as a library
 
