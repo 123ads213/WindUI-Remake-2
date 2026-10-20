@@ -35,3 +35,13 @@ Limitations are explicit in API.md: no fake cloud service; Recent is modified-or
 - Re-ran 33 integration checks and 17 new `tests/Chrome.lua` checks. Pure suites pass.
 - Actual screenshots inspected: Dark compact editor and profile; Light profile with lower tooltip, native icons, readable labels, top-right Search and no overlap.
 - Final live smoke tests: Search opens from its header button, accepts `Distance`, and closes normally; Unload actually destroys the window and removes its root GUI. Latest menu relaunched afterward. Profile synchronizes the Style label when reopened after an external theme change.
+
+## Transparency-style numeric controls
+
+`tests/ThinSliders.lua`:58 live assertions passed. Checks include five slider instances, hidden thumbs, thin4px tracks, inline value editors, drag-only feedback, exact abbreviated input and min/max clamping, invalid input restoration, locks, touch ratio mapping and fixed drag geometry. Balance/Collection match Gravity's44px row height, retain single-line titles and have no nested background plate. Toggle dependencies were verified for animated reveal/hide, collapsed layout, disabled interaction while hidden and retained values.
+
+Card separators are visible only between visible rows; the last row has none. Live tests also hide/show Collection and verify Balance becomes the final row without a separator, then regains it when Collection reappears.
+
+Final field/subtab follow-up: live checks verify the right editor stays within its row, ordinary hover does not show floating values, dragging does, shared subtab background exists, and the accent highlight follows the active page.
+
+Actual Roblox screenshot `slider-fields.png` was inspected after the final build: right-side value pills stay inside their rows; no floating number appears on ordinary hover; shared Enemy/Team plate and blue active selection are visible. Runtime bounds were also verified at700px and1000px window widths.

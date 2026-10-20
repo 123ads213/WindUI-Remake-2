@@ -24,7 +24,7 @@ return {
 			tbl[name] = function(self, config)
 				config = config or {}
 				config.CompactRow = config.CompactRow or tbl.CompactRows
-                if config.CompactRow and name == "Slider" then config.Width=config.Width or 150;config.ValueWidth=config.ValueWidth or 44 end
+                if config.CompactRow and name == "Slider" then config.Width=config.Width or 160;config.ValueWidth=config.ValueWidth or 44 end
                 config.Tab = Tab or tbl
 				config.ParentType = tbl.__type
 				config.ParentTable = tbl

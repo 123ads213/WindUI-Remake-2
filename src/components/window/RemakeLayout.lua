@@ -24,7 +24,26 @@ function Layout.Attach(tab,window,wind,elements,scale)
     cfg=type(cfg)=='string'and{Title=cfg}or(cfg or{})
     local holder=frame(container,'Section');local flow=list(holder,8);N('UIPadding',{Parent=holder,PaddingBottom=UDim.new(0,18)})
     local heading=U.text(holder,string.upper(cfg.Title or 'Settings'),4,0,200,20,true);heading.Size=UDim2.new(1,-8,0,20);heading.LayoutOrder=0;heading.TextSize=12
-    local card=N('Frame',{Parent=holder,Name='Card',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=.1,ThemeTag={BackgroundColor3='ElementBackground'},LayoutOrder=1});U.corner(card,12);list(card,0)
+    local card=N('Frame',{Parent=holder,Name='Card',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=.1,ThemeTag={BackgroundColor3='ElementBackground'},LayoutOrder=1});U.corner(card,12)
+    local cardFlow=list(card,0)
+    -- The card owns separators: no line after its final currently visible row.
+    local function separators()
+     if not card.Parent then return end
+     local rows={}
+     for index,child in ipairs(card:GetChildren())do
+      if child:IsA('GuiObject')then
+       local divider=child:FindFirstChild('RowDivider',true)
+       if divider then divider.Visible=false end
+       if child.Visible and child.AbsoluteSize.Y>.5 then rows[#rows+1]={node=child,divider=divider,index=index}end
+      end
+     end
+     table.sort(rows,function(a,b)if a.node.LayoutOrder==b.node.LayoutOrder then return a.index<b.index end;return a.node.LayoutOrder<b.node.LayoutOrder end)
+     for i=1,#rows-1 do if rows[i].divider then rows[i].divider.Visible=true end end
+    end
+    cardFlow:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(separators)
+    card.ChildAdded:Connect(function()task.defer(separators)end)
+    card.ChildRemoved:Connect(function()task.defer(separators)end)
+
     local group=proxy(card);group.UIElements.Root=holder;group.Title=cfg.Title
     V.Attach(group,holder,cfg)
     return group
@@ -52,16 +71,22 @@ function Layout.Attach(tab,window,wind,elements,scale)
   config=config or {};local root=frame(self.UIElements.ContainerFrame,'IconTabs');root.AutomaticSize='None'
   local bar=N('Frame',{Parent=root,Name='SubtabBar',Size=UDim2.new(1,0,0,38),BackgroundTransparency=1})
   N('UIListLayout',{Parent=bar,FillDirection='Horizontal',HorizontalAlignment='Right',SortOrder='LayoutOrder',Padding=UDim.new(0,4)})
-  local controller={Pages={},Selected=nil,UIElements={Root=root,Bar=bar}}
+  local group=N('Frame',{Parent=bar,Name='SubtabGroup',Size=UDim2.fromOffset(0,38),AutomaticSize='X',BackgroundTransparency=.18,ThemeTag={BackgroundColor3='ElementBackground'}});U.corner(group,8)
+  N('UIPadding',{Parent=group,PaddingLeft=UDim.new(0,4),PaddingRight=UDim.new(0,4),PaddingTop=UDim.new(0,3),PaddingBottom=UDim.new(0,3)})
+  N('UIListLayout',{Parent=group,FillDirection='Horizontal',SortOrder='LayoutOrder',VerticalAlignment='Center',Padding=UDim.new(0,3)})
+  local controller={Pages={},Selected=nil,UIElements={Root=root,Bar=bar,Group=group}}
   function controller:Tab(cfg)
    cfg=cfg or {};local index=#self.Pages+1
    local page=N('CanvasGroup',{Parent=root,Name='SubtabPage',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=1,GroupTransparency=1});page.Position=UDim2.fromOffset(0,46);page.Visible=false;local flow=list(page,14)
    local p=proxy(page);p.Title=cfg.Title or 'Page';p.Id=cfg.Id or p.Title;p.UIElements.Root=page
    function p:Columns(c)return columns(page,c)end
-   local b=U.button(bar,'',0,0,36,34,function()controller:Select(index)end);b.LayoutOrder=index
-   U.icon(b,cfg.Icon or 'user',9,9,16,window)
-   local label=U.text(b,p.Title,34,0,100,34);label.Visible=false
-   p.Button=b;p.Label=label
+   local b=N('TextButton',{Parent=group,Text='',Size=UDim2.fromOffset(36,32),BackgroundTransparency=1,AutoButtonColor=false,ThemeTag={BackgroundColor3='Slider'}});U.corner(b,6);b.LayoutOrder=index
+   b.MouseButton1Click:Connect(function()controller:Select(index)end)
+   b.MouseEnter:Connect(function()U.Tween(b,.12,{BackgroundTransparency=controller.Selected==index and .78 or .94}):Play()end)
+   b.MouseLeave:Connect(function()U.Tween(b,.12,{BackgroundTransparency=controller.Selected==index and .82 or 1}):Play()end)
+   local icon=U.icon(b,cfg.Icon or 'user',9,8,16,window)
+   local label=U.text(b,p.Title,34,0,100,32);label.Visible=false
+   p.Button=b;p.Label=label;p.Icon=icon
    table.insert(self.Pages,p)
    function p:Select()controller:Select(index);return self end
    local function resize()if controller.Selected==index then root.Size=UDim2.new(1,0,0,46+flow.AbsoluteContentSize.Y)end end
@@ -75,7 +100,8 @@ function Layout.Attach(tab,window,wind,elements,scale)
    if not index or not self.Pages[index]then return false end
    self.Selected=index
    for i,p in ipairs(self.Pages)do
-    local active=i==index;p.UIElements.Root.Visible=active;if active then p.UIElements.Root.GroupTransparency=1;U.Tween(p.UIElements.Root,.18,{GroupTransparency=0}):Play()end;p.Label.Visible=active;p.Button.Size=UDim2.fromOffset(active and math.clamp(p.Label.TextBounds.X+48,90,180)or 36,34);p.Button.BackgroundTransparency=active and .05 or 1
+    local active=i==index;p.UIElements.Root.Visible=active;if active then p.UIElements.Root.GroupTransparency=1;U.Tween(p.UIElements.Root,.18,{GroupTransparency=0}):Play()end;p.Label.Visible=active;p.Button.Size=UDim2.fromOffset(active and math.clamp(p.Label.TextBounds.X+48,90,180)or 36,32);U.Tween(p.Button,.14,{BackgroundTransparency=active and .82 or 1}):Play()
+    require('../../modules/Creator').AddThemeObject(p.Icon.ImageLabel,{ImageColor3=active and 'Slider' or 'Icon'})
     if active then local flow=p.UIElements.Root:FindFirstChildOfClass('UIListLayout');root.Size=UDim2.new(1,0,0,46+flow.AbsoluteContentSize.Y)end
    end
    return true

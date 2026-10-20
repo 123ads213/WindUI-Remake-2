@@ -102,7 +102,7 @@ PlayerControls:Button({ Title = 'Reset distance', Callback = function() Big:Set(
 local Gravity = WorldSettings:Slider({ Title = 'Gravity', Flag='world_gravity', Value = { Min = 0, Max = 500, Default = 196.2 }, Step = .1 })
 local Balance = WorldValues:ProgressBar({ Title = 'Balance', DisplayMode = 'Value',
     Value = { Min = 0, Max = 1e9, Default = 500000 } })
-local Collection = WorldValues:ProgressBar({ Title = 'Collection', DisplayMode = 'Fraction', Width = 210,
+local Collection = WorldValues:ProgressBar({ Title = 'Collection', DisplayMode = 'Fraction',
     Value = { Min = 0, Max = 1e9, Default = 250000000 } })
 WorldSettings:Toggle({ Title = 'Shadows', Flag = 'world_shadows', Value = true, Callback = function() end })
 

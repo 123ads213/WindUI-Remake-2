@@ -23,7 +23,7 @@ function Element:New(Config)
 		LockedTitle = Config.LockedTitle,
 		Value = Config.Value or {},
 		Icons = Config.Icons or nil,
-		IsTooltip = Config.IsTooltip or false,
+		IsTooltip = true,
 		IsTextbox = Config.IsTextbox,
 		Step = math.max(Numbers.Finite(Config.Step) or 1, 1e-9),
 		Compact = Config.Compact ~= false,
@@ -126,13 +126,13 @@ function Element:New(Config)
 	})
 
 	Slider.UIElements.SliderIcon = Creator.NewRoundFrame(99, "Squircle", {
-		ImageTransparency = 0.95,
+		ImageTransparency = 0.83,
 		Size = UDim2.new(1, not Slider.IsTextbox and -TotalSliderWidth or (-Slider.TextBoxWidth - 8), 0, 4),
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 		Name = "Frame",
 		ThemeTag = {
-			ImageColor3 = "Text",
+			ImageColor3 = "Icon",
 		},
 	}, {
 		Creator.NewRoundFrame(99, "Squircle", {
@@ -205,21 +205,34 @@ function Element:New(Config)
 		}),
 	})
 
-	local Tooltip
-	if Slider.IsTooltip then
-		Tooltip = require("../components/ui/Tooltip").New(
-			Display(Value),
-			Slider.UIElements.SliderIcon.Frame.Thumb,
-			true,
-			"Secondary",
-			"Small",
-			false
-		)
-		Tooltip.Container.AnchorPoint = Vector2.new(0.5, 1)
-		Tooltip.Container.Position = UDim2.new(0.5, 0, 0, -8)
-	end
-
+    -- Thin track plus a stable inline value editor, like the reference.
+    local track = Slider.UIElements.SliderIcon
+    track.Frame.Thumb.Visible = false
+    track.LayoutOrder = 1
     local TextBox = Slider.UIElements.SliderContainer.TextBox
+    local layout=Slider.UIElements.SliderContainer:FindFirstChildOfClass('UIListLayout')
+    layout.SortOrder=Enum.SortOrder.LayoutOrder
+    TextBox.LayoutOrder=2
+    TextBox.AutomaticSize=Enum.AutomaticSize.None
+    TextBox.Size=UDim2.fromOffset(Slider.TextBoxWidth,28)
+    TextBox.BackgroundTransparency=.25
+    TextBox.TextTransparency=0
+    TextBox.TextXAlignment=Enum.TextXAlignment.Center
+    TextBox.TextSize=13
+    TextBox.TextEditable=Slider.IsTextbox
+    TextBox.ClipsDescendants=true
+    Creator.AddThemeObject(TextBox,{BackgroundColor3='LabelBackground',TextColor3='Text'})
+    New('UICorner',{Parent=TextBox,CornerRadius=UDim.new(0,6)})
+    local popupParent = Config.Window.UIElements.Main.Main
+    local HoverValue=New('TextLabel',{
+        Parent=popupParent,Name='SliderDragValue',Size=UDim2.fromOffset(60,24),AnchorPoint=Vector2.new(.5,1),
+        BackgroundTransparency=0,TextTransparency=0,TextXAlignment='Center',TextSize=13,
+        FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),ZIndex=850,Visible=false,
+        ThemeTag={BackgroundColor3='Dialog',TextColor3='Text'},
+    },{New('UICorner',{CornerRadius=UDim.new(0,7)})})
+    require('../components/ui/PopupShadow').New(HoverValue,{Opacity=.14})
+    Slider.UIElements.HoverValue=HoverValue
+    Slider.UIElements.ValueInput=TextBox
     local ScrollingFrameParent = Config.Tab.UIElements.ContainerFrame
     local CurInput = Config.WindUI.GenerateGUID()
     local PreviousScrolling
@@ -227,20 +240,33 @@ function Element:New(Config)
     local Holding = false
     local Destroyed = false
 
+    local function PositionValue()
+        if not track.Parent or not popupParent.Parent then return end
+        local scale = math.max(.01, Config.WindUI.UIScaleObj.Scale)
+        local ratio = Numbers.Ratio(LastValue,Slider.Value.Min,Slider.Value.Max)
+        local x = track.AbsolutePosition.X + ratio*track.AbsoluteSize.X
+        local half = HoverValue.Size.X.Offset*.5
+        local localX = (x-popupParent.AbsolutePosition.X)/scale
+        local localY = (track.AbsolutePosition.Y-popupParent.AbsolutePosition.Y)/scale
+        local maxY=popupParent.AbsoluteSize.Y/scale
+        HoverValue.Position = UDim2.fromOffset(math.clamp(localX,half+4,math.max(half+4,popupParent.AbsoluteSize.X/scale-half-4)),math.clamp(localY-4,28,math.max(28,maxY-4)))
+    end
+    local function ShowValue(show)
+        HoverValue.Visible = show and Holding and not Slider.Locked
+        if HoverValue.Visible then PositionValue() end
+    end
     local function Render(instant)
         if Destroyed then return end
-        local text = Slider.IsFocusing and Numbers.Plain(LastValue) or Display(LastValue)
-        TextBox.Text = text
-        local gap = 12
-        local gapWidth = gap * (IconCount + (Slider.IsTextbox and 1 or 0))
-        -- Fixed value slot: never shift the track as digits/suffixes change during drag.
-        TextBox.Size = UDim2.new(0, Slider.TextBoxWidth, 0, 0)
-        Slider.UIElements.SliderIcon.Size = UDim2.new(1,
-            -TotalSliderWidth - gapWidth - (Slider.IsTextbox and Slider.TextBoxWidth or 0), 0, 4)
-        local size = UDim2.new(Numbers.Ratio(LastValue, Slider.Value.Min, Slider.Value.Max), 0, 1, 0)
-        if instant or Holding then Slider.UIElements.SliderIcon.Frame.Size = size
-        else Tween(Slider.UIElements.SliderIcon.Frame, 0.05, { Size = size }):Play() end
-        if Tooltip then Tooltip.TitleFrame.Text = Display(LastValue) end
+        TextBox.Text = Slider.IsFocusing and Numbers.Plain(LastValue) or Display(LastValue)
+        TextBox.Size=UDim2.fromOffset(Slider.TextBoxWidth,28)
+        local text=Display(LastValue)
+        HoverValue.Text=text
+        HoverValue.Size=UDim2.fromOffset(math.max(44,math.min(280,#text*7+20)),24)
+        local gapWidth=12*(IconCount+(Slider.IsTextbox and 1 or 0))
+        track.Size=UDim2.new(1,-TotalSliderWidth-gapWidth-(Slider.IsTextbox and Slider.TextBoxWidth or 0),0,4)
+        local size=UDim2.new(Numbers.Ratio(LastValue,Slider.Value.Min,Slider.Value.Max),0,1,0)
+        if instant or Holding then track.Frame.Size=size else Tween(track.Frame,.05,{Size=size}):Play() end
+        if HoverValue.Visible then PositionValue() end
     end
 
     local function StopDrag()
@@ -258,7 +284,7 @@ function Element:New(Config)
                     Size = UDim2.new(0, Slider.ThumbSize * 2, 0, Slider.ThumbSize + 4),
                 }):Play()
             end
-            if Tooltip then Tooltip:Close(false) end
+            ShowValue(false)
         end
     end
 
@@ -305,24 +331,29 @@ function Element:New(Config)
         StopDrag()
         Slider.Locked, CanCallback = true, false
         TextBox.TextEditable = false
+        ShowValue(false)
         return Slider.SliderFrame:Lock(Slider.LockedTitle)
     end
     function Slider:Unlock()
         Slider.Locked, CanCallback = false, true
-        TextBox.TextEditable = true
+        TextBox.TextEditable = Slider.IsTextbox
         return Slider.SliderFrame:Unlock()
     end
 
     Creator.AddSignal(TextBox.Focused, function()
         if Slider.Locked then TextBox:ReleaseFocus(); return end
         Slider.IsFocusing = true
+        Tween(TextBox,.12,{BackgroundTransparency=0}):Play()
+        ShowValue(false)
         Render(true) -- Edit the full exact number, never a rounded abbreviation.
     end)
     Creator.AddSignal(TextBox.FocusLost, function()
         local parsed = Numbers.Parse(TextBox.Text)
         Slider.IsFocusing = false
+        Tween(TextBox,.12,{BackgroundTransparency=.25}):Play()
         if parsed then Slider:Set(parsed) end
         Render(true) -- Restore even if parsing failed or the value did not change.
+        ShowValue(false)
     end)
 
     local function ReadPointer(input)
@@ -338,7 +369,7 @@ function Element:New(Config)
             and input.UserInputType ~= Enum.UserInputType.Touch then return end
         -- The numeric editor must not start a drag when clicked/tapped.
         local p = input.Position
-        if Slider.IsTextbox and p.X >= TextBox.AbsolutePosition.X
+        if TextBox.Visible and Slider.IsTextbox and p.X >= TextBox.AbsolutePosition.X
             and p.X <= TextBox.AbsolutePosition.X + TextBox.AbsoluteSize.X
             and p.Y >= TextBox.AbsolutePosition.Y
             and p.Y <= TextBox.AbsolutePosition.Y + TextBox.AbsoluteSize.Y then return end
@@ -357,12 +388,29 @@ function Element:New(Config)
                 StopDrag()
             end
         end)
-        if Tooltip then Tooltip:Open() end
+        ShowValue(true)
     end)
+    Creator.AddSignal(TextBox.MouseEnter,function()if not Slider.Locked then Tween(TextBox,.12,{BackgroundTransparency=.05}):Play() end end)
+    Creator.AddSignal(TextBox.MouseLeave,function()if not Slider.IsFocusing then Tween(TextBox,.12,{BackgroundTransparency=.25}):Play() end end)
+    Creator.AddSignal(UserInputService.WindowFocusReleased,StopDrag)
     Creator.AddSignal(Slider.UIElements.SliderContainer:GetPropertyChangedSignal("AbsoluteSize"), function() Render(true) end)
+    Creator.AddSignal(RunService.RenderStepped,function()
+        if Destroyed or not HoverValue.Visible then return end
+        local parent=track;local visible=true
+        while parent and parent~=popupParent do
+            if parent:IsA('GuiObject') and not parent.Visible then visible=false;break end
+            parent=parent.Parent
+        end
+        local viewport=Config.Tab.UIElements.ContainerFrame
+        local y=track.AbsolutePosition.Y
+        if not visible or not popupParent.Visible or y<viewport.AbsolutePosition.Y or y>viewport.AbsolutePosition.Y+viewport.AbsoluteSize.Y then
+            StopDrag();ShowValue(false)
+        else PositionValue() end
+    end)
     Creator.AddSignal(Slider.UIElements.SliderContainer.Destroying, function()
         Destroyed = true
         StopDrag()
+        HoverValue:Destroy()
     end)
     Render(true)
     if Slider.Locked then Slider:Lock() end

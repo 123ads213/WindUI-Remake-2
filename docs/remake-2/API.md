@@ -100,12 +100,12 @@ local color = other:Colorpicker({
 ```
 
 - Toggle: `:Set(boolean)`, `.Value`, `:Lock()`, `:Unlock()`. Right-click retains the native multiple-hotkey manager and animated New Hotkey rows. `Hotkeys=false` disables binding support.
-- Slider: `:Set(number)`, `:Get()`, `:SetRange(min,max)`, `:SetMin`, `:SetMax`, `.Value.Default`. Track is before numeric editor; typing retains the precise full value. Compact defaults: control150/value44; choose `Width` for tighter cards.
+- Slider: `:Set(number)`, `:Get()`, `:SetRange(min,max)`, `:SetMin`, `:SetMax`, `.Value.Default`. Transparency-style 4px track with no large thumb. A compact rounded value editor sits to its right. Click it to type an exact number; input is snapped to Step and clamped to Min/Max. The floating value appears only while dragging, never on simple hover. Compact total width defaults to160 with a44px value slot; `Width` and `ValueWidth` remain configurable. `.UIElements.ValueInput` and `.UIElements.SliderContainer.TextBox` both reference the inline editor; `.UIElements.HoverValue` is the drag-only label.
 - Input: `:Set(text)`, `.Value`, editable right-hand text box.
 - Button: invokes `Callback`; use for actions, not saved state.
 - Colorpicker: `:Set(color,transparency)`, `:SetGradient`, `:Export`, `:Import`, `:Open`. Existing HEX/RGB/HSV/HSL, alpha, gradients and swatch context-copy/paste are preserved.
 - Common: `Title`, `Desc`, `Flag`, `Locked`, `Callback`, `:SetTitle`, `:Destroy` where supported.
-- Paragraph, ProgressBar, Section, Divider, Space, Image, Code, Group, HStack, VStack and Viewport remain the **native WindUI elements**, not forced into a 44px compact row. Use their original APIs documented in the repository and [FORK.md](../../FORK.md); do not assume they are compact controls. Cards support them through the same element factory.
+- Paragraph, Section, Divider, Space, Image, Code, Group, HStack, VStack and Viewport remain the **native WindUI elements**, not forced into a 44px compact row. Use their original APIs documented in the repository and [FORK.md](../../FORK.md); do not assume they are compact controls. Cards support them through the same element factory.
 
 ### Dropdown / multi-select
 
@@ -214,3 +214,13 @@ Watermark telemetry, Sirius brand, full weekday, theme-aware opaque surfaces, wh
 - Compile new modules with `luau-compile`; build with darklua.
 - Execute [`tests/Remake2.lua`](../../tests/Remake2.lua) in the game after the demo: actual file create/save/load/rename/delete/import/export, flag registry, dependencies, dropdown selection, subtabs, responsive columns. Temporary `__qa_*` files are deleted and the selected preset is restored.
 - Inspect real game screenshots in Light and Dark, open dropdown/presets, reveal dependencies and resize. Unit tests are not a substitute for visual inspection.
+
+### Thin numeric controls
+
+Sliders use thin tracks without oversized thumbs, plus a right-side rounded inline value editor. Floating values appear only during dragging and use a weak14% dark shadow. Numeric parsing, min/max, steps, callbacks, locks and config persistence are unchanged. `IsTextbox=false` hides the inline editor; drag feedback remains available. Inline editors use fixed width and clipped text, so typing does not shift the track or spill outside the control.
+
+In compact section cards ProgressBar also uses a44px row, single-line title, thin track and read-only hover value. This fixes Balance/Collection mismatched row heights without turning progress indicators into interactive sliders. The outer section card owns the rounded background; compact rows do not draw separate rounded plates, including after theme changes.
+
+Section cards hide the separator after the last visible row automatically. This also follows animated `SetVisible` / `VisibleWhen` changes; do not draw your own bottom separator on the final row.
+
+Icon subtabs share one rounded background group. The active button has a blue tinted surface and accent icon; the inactive button remains neutral. Selection/hover transitions do not erase the selected state. `IconTabs().UIElements.Group` exposes the shared plate.
