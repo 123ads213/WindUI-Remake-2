@@ -95,3 +95,11 @@ Final combined regression on the rebuilt standalone menu: Followup33, Remake2 in
 - Compound uses independent native Colorpicker + Dropdown or Toggle children, independent flags/callbacks, row-wide locks/visibility and cleanup. The local mock preview supports cloned models, materials, color, independent box color, health/name/distance, rotation and display visibility; it never scans players or workspace. Config load now invokes the native color callback after restoring its state so connected previews/renderers stay synchronized.
 - Final regression: ten suites, 476 live assertions passed (including 54 composition checks). Pure suites passed. Color/choice/toggle file roundtrip, model clone ownership/script removal, independent state snapshots, box/model colors, root/child teardown and flag cleanup tested. Movement and track color were observed between endpoints.
 - In-game screenshots reviewed: original Dark, static rounded dropdown fields, small switches, compound rows and local block model preview. New documentation route checked at 1280px/390px; no page-width overflow.
+
+
+## Smooth icon-tab transitions
+
+- Selected tab re-click is a no-op (numeric/id selection, repeated button signals, actual virtual pointer click and clicking during an in-flight transition).
+- Both pages crossfade for 0.22s; outgoing content remains visible until fade completion but immediately stops receiving input. Button width, label transparency and content height also tween rather than jump.
+- Rapid switches cancel prior page/label/width/height tweens. Cancelled completion handlers cannot hide the newly selected page.
+- Final full regression: eleven suites, 496 live assertions passed, including 20 dedicated transition checks. Both incoming/outgoing opacity, expanding/shrinking button widths and label opacity were measured at intermediate positions. Active clicks generated zero opacity changes. All pure suites passed.

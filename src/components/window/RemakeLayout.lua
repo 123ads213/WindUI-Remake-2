@@ -85,12 +85,12 @@ function Layout.Attach(tab,window,wind,elements,scale)
    local page=N('CanvasGroup',{Parent=root,Name='SubtabPage',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=1,GroupTransparency=1});page.Position=UDim2.fromOffset(0,46);page.Visible=false;local flow=list(page,14)
    local p=proxy(page);p.Title=cfg.Title or 'Page';p.Id=cfg.Id or p.Title;p.UIElements.Root=page
    function p:Columns(c)return columns(page,c)end
-   local b=N('TextButton',{Parent=group,Text='',Size=UDim2.fromOffset(36,32),BackgroundTransparency=1,AutoButtonColor=false,ThemeTag={BackgroundColor3='Button'}});U.corner(b,6);b.LayoutOrder=index
+   local b=N('TextButton',{Parent=group,Text='',Size=UDim2.fromOffset(36,32),BackgroundTransparency=1,AutoButtonColor=false,ClipsDescendants=true,ThemeTag={BackgroundColor3='Button'}});U.corner(b,6);b.LayoutOrder=index
    b.MouseButton1Click:Connect(function()controller:Select(index)end)
    b.MouseEnter:Connect(function()U.Tween(b,.12,{BackgroundTransparency=controller.Selected==index and .35 or .85}):Play()end)
    b.MouseLeave:Connect(function()U.Tween(b,.12,{BackgroundTransparency=controller.Selected==index and .45 or 1}):Play()end)
    local icon=U.icon(b,cfg.Icon or 'user',9,8,16,window)
-   local label=U.text(b,p.Title,34,0,100,32);label.Visible=false
+   local label=U.text(b,p.Title,34,0,100,32);label.Visible=true;label.TextTransparency=1
    p.Button=b;p.Label=label;p.Icon=icon
    table.insert(self.Pages,p)
    function p:Select()controller:Select(index);return self end
@@ -106,9 +106,30 @@ function Layout.Attach(tab,window,wind,elements,scale)
    if self.Selected==index then return true end -- active tab is a no-op, not a replay
    self.Selected=index
    for i,p in ipairs(self.Pages)do
-    local active=i==index;p.UIElements.Root.Visible=active;if active then p.UIElements.Root.GroupTransparency=1;U.Tween(p.UIElements.Root,.18,{GroupTransparency=0}):Play()end;p.Label.Visible=active;p.Button.Size=UDim2.fromOffset(active and math.clamp(p.Label.TextBounds.X+48,90,180)or 36,32);U.Tween(p.Button,.14,{BackgroundTransparency=active and .45 or 1}):Play()
+    local active=i==index;local page=p.UIElements.Root
+    if p.PageTween then p.PageTween:Cancel()end
+    if p.WidthTween then p.WidthTween:Cancel()end
+    if p.LabelTween then p.LabelTween:Cancel()end
+    page.Interactable=active;page:SetAttribute('WindUIHidden',not active)
+    if active or page.Visible then
+     if not page.Visible then page.GroupTransparency=1;page.Visible=true end
+     local fade=U.Tween(page,.22,{GroupTransparency=active and 0 or 1},Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
+     p.PageTween=fade
+     if not active then fade.Completed:Once(function(state)
+      if state==Enum.PlaybackState.Completed and p.PageTween==fade and self.Selected~=i then page.Visible=false end
+     end)end
+     fade:Play()
+    end
+    p.Label.Visible=true
+    p.LabelTween=U.Tween(p.Label,.22,{TextTransparency=active and 0 or 1},Enum.EasingStyle.Quad,Enum.EasingDirection.Out);p.LabelTween:Play()
+    p.WidthTween=U.Tween(p.Button,.22,{Size=UDim2.fromOffset(active and math.clamp(p.Label.TextBounds.X+48,90,180)or 36,32)},Enum.EasingStyle.Quad,Enum.EasingDirection.Out);p.WidthTween:Play()
+    U.Tween(p.Button,.18,{BackgroundTransparency=active and .45 or 1}):Play()
     require('../../modules/Creator').AddThemeObject(p.Icon.ImageLabel,{ImageColor3=active and 'Text' or 'Icon'})
-    if active then local flow=p.UIElements.Root:FindFirstChildOfClass('UIListLayout');root.Size=UDim2.new(1,0,0,46+flow.AbsoluteContentSize.Y)end
+    if active then
+     local flow=page:FindFirstChildOfClass('UIListLayout')
+     if self.HeightTween then self.HeightTween:Cancel()end
+     self.HeightTween=U.Tween(root,.22,{Size=UDim2.new(1,0,0,46+flow.AbsoluteContentSize.Y)},Enum.EasingStyle.Quad,Enum.EasingDirection.Out);self.HeightTween:Play()
+    end
    end
    return true
   end

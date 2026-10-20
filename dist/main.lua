@@ -36082,12 +36082,12 @@ ax=ax or{};local ay=#aw.Pages+1
 local az=ag('CanvasGroup',{Parent=as,Name='SubtabPage',Size=UDim2.new(1,0,0,0),AutomaticSize='Y',BackgroundTransparency=1,GroupTransparency=1});az.Position=UDim2.fromOffset(0,46);az.Visible=false;local aA=list(az,14)
 local aB=proxy(az);aB.Title=ax.Title or'Page';aB.Id=ax.Id or aB.Title;aB.UIElements.Root=az
 function aB.Columns(b,d)return columns(az,d)end
-local b=ag('TextButton',{Parent=au,Text='',Size=UDim2.fromOffset(36,32),BackgroundTransparency=1,AutoButtonColor=false,ThemeTag={BackgroundColor3='Button'}});aa.corner(b,6);b.LayoutOrder=ay
+local b=ag('TextButton',{Parent=au,Text='',Size=UDim2.fromOffset(36,32),BackgroundTransparency=1,AutoButtonColor=false,ClipsDescendants=true,ThemeTag={BackgroundColor3='Button'}});aa.corner(b,6);b.LayoutOrder=ay
 b.MouseButton1Click:Connect(function()av:Select(ay)end)
 b.MouseEnter:Connect(function()aa.Tween(b,.12,{BackgroundTransparency=av.Selected==ay and.35 or.85}):Play()end)
 b.MouseLeave:Connect(function()aa.Tween(b,.12,{BackgroundTransparency=av.Selected==ay and.45 or 1}):Play()end)
 local d=aa.icon(b,ax.Icon or'user',9,8,16,am)
-local f=aa.text(b,aB.Title,34,0,100,32);f.Visible=false
+local f=aa.text(b,aB.Title,34,0,100,32);f.Visible=true;f.TextTransparency=1
 aB.Button=b;aB.Label=f;aB.Icon=d
 table.insert(aw.Pages,aB)
 function aB.Select(g)av:Select(ay);return g end
@@ -36103,9 +36103,30 @@ if not ay or not aw.Pages[ay]then return false end
 if aw.Selected==ay then return true end
 aw.Selected=ay
 for az,aA in ipairs(aw.Pages)do
-local aB=az==ay;aA.UIElements.Root.Visible=aB;if aB then aA.UIElements.Root.GroupTransparency=1;aa.Tween(aA.UIElements.Root,.18,{GroupTransparency=0}):Play()end;aA.Label.Visible=aB;aA.Button.Size=UDim2.fromOffset(aB and math.clamp(aA.Label.TextBounds.X+48,90,180)or 36,32);aa.Tween(aA.Button,.14,{BackgroundTransparency=aB and.45 or 1}):Play()a.j()
+local aB=az==ay;local b=aA.UIElements.Root
+if aA.PageTween then aA.PageTween:Cancel()end
+if aA.WidthTween then aA.WidthTween:Cancel()end
+if aA.LabelTween then aA.LabelTween:Cancel()end
+b.Interactable=aB;b:SetAttribute('WindUIHidden',not aB)
+if aB or b.Visible then
+if not b.Visible then b.GroupTransparency=1;b.Visible=true end
+local d=aa.Tween(b,.22,{GroupTransparency=aB and 0 or 1},Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
+aA.PageTween=d
+if not aB then d.Completed:Once(function(f)
+if f==Enum.PlaybackState.Completed and aA.PageTween==d and aw.Selected~=az then b.Visible=false end
+end)end
+d:Play()
+end
+aA.Label.Visible=true
+aA.LabelTween=aa.Tween(aA.Label,.22,{TextTransparency=aB and 0 or 1},Enum.EasingStyle.Quad,Enum.EasingDirection.Out);aA.LabelTween:Play()
+aA.WidthTween=aa.Tween(aA.Button,.22,{Size=UDim2.fromOffset(aB and math.clamp(aA.Label.TextBounds.X+48,90,180)or 36,32)},Enum.EasingStyle.Quad,Enum.EasingDirection.Out);aA.WidthTween:Play()
+aa.Tween(aA.Button,.18,{BackgroundTransparency=aB and.45 or 1}):Play()a.j()
 .AddThemeObject(aA.Icon.ImageLabel,{ImageColor3=aB and'Text'or'Icon'})
-if aB then local b=aA.UIElements.Root:FindFirstChildOfClass'UIListLayout';as.Size=UDim2.new(1,0,0,46+b.AbsoluteContentSize.Y)end
+if aB then
+local d=b:FindFirstChildOfClass'UIListLayout'
+if aw.HeightTween then aw.HeightTween:Cancel()end
+aw.HeightTween=aa.Tween(as,.22,{Size=UDim2.new(1,0,0,46+d.AbsoluteContentSize.Y)},Enum.EasingStyle.Quad,Enum.EasingDirection.Out);aw.HeightTween:Play()
+end
 end
 return true
 end
