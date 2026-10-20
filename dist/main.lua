@@ -39265,8 +39265,8 @@ local as=ar.Topbar
 local at=aa.New('Frame',{Parent=ar,Name='PresetToolbar',Size=UDim2.fromOffset(250,34),BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},ZIndex=30,Active=true});aa.corner(at,8)
 local au=aa.button(at,'',0,0,34,34,function()aq:QuickSave()end);au:SetAttribute('NoHover',true);aa.icon(au,'save',9,9,16,am)
 
-aa.New('Frame',{Parent=at,Name='SaveDivider',Position=UDim2.fromOffset(35,0),Size=UDim2.new(0,1,1,0),BackgroundTransparency=.86,ThemeTag={BackgroundColor3='Text'},ZIndex=32})
-aa.New('UIStroke',{Parent=at,Name='ToolbarOutline',Thickness=1,Transparency=.87,ApplyStrokeMode='Border',ThemeTag={Color='Text'}})
+aa.New('Frame',{Parent=at,Name='SaveDivider',Position=UDim2.fromOffset(35,0),Size=UDim2.new(0,1,1,0),BackgroundTransparency=.92,ThemeTag={BackgroundColor3='Text'},ZIndex=32})
+aa.New('UIStroke',{Parent=at,Name='ToolbarOutline',Thickness=1,Transparency=.94,ApplyStrokeMode='Border',ThemeTag={Color='Text'}})
 local av=aa.button(at,'Default',36,0,210,34,function()aq:Toggle()end);av:SetAttribute('NoHover',true);av.Label.Size=UDim2.new(1,-38,1,0);local aw=aa.icon(av,'chevron-down',184,9,16,am)
 local function fitTrigger()
 local ax=math.max(.01,an.UIScaleObj.Scale)
