@@ -85,3 +85,13 @@ Final combined regression on the rebuilt standalone menu: Followup33, Remake2 in
 - On this connected client, 24 real preset loads measured median 2.21ms, maximum 3.16ms. A synthetic 100-control load took 23.01ms across five cooperative yields while the heartbeat continued. Final registry check found zero dead theme objects. These are local measurements, not a cross-device guarantee. Parser-failure tests verify rollback and released loading guards.
 - Documentation includes four responsive routes, 191 source-linked method definitions, 65 searchable sections, copy buttons, mobile navigation and dark mode. All routes checked at 1280px/390px: no page-width overflow or JavaScript errors; search, copy and mobile navigation passed. Desktop/mobile and interactive screenshots visually inspected.
 - GitHub Pages deployment is gated on a public repository. Private repositories retain Markdown docs and downloadable self-contained HTML; no visibility change is performed automatically.
+
+
+## Original Dark, static fields, composed rows and local preview
+
+- Dark definitions compared against the official Footagesus/WindUI `src/themes/Init.lua`; they are identical. No violet palette is installed. Other registered themes remain available.
+- Compact circular switches are 40×24 with a 20px thumb and 0.18s movement tween. A real virtual mouse click toggles the value and shows an intermediate thumb position before it settles. Locks, config flags and hotkeys retain native behavior.
+- Compact dropdown triggers and header save/preset buttons have no hover opacity changes. Real pointer hover left both color and transparency unchanged. Choice fields have a permanent rounded Dialog-colored surface. Preset toolbar has a thin outline and save/name divider.
+- Compound uses independent native Colorpicker + Dropdown or Toggle children, independent flags/callbacks, row-wide locks/visibility and cleanup. The local mock preview supports cloned models, materials, color, independent box color, health/name/distance, rotation and display visibility; it never scans players or workspace. Config load now invokes the native color callback after restoring its state so connected previews/renderers stay synchronized.
+- Final regression: ten suites, 476 live assertions passed (including 54 composition checks). Pure suites passed. Color/choice/toggle file roundtrip, model clone ownership/script removal, independent state snapshots, box/model colors, root/child teardown and flag cleanup tested. Movement and track color were observed between endpoints.
+- In-game screenshots reviewed: original Dark, static rounded dropdown fields, small switches, compound rows and local block model preview. New documentation route checked at 1280px/390px; no page-width overflow.

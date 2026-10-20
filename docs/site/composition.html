@@ -1,0 +1,67 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Тема и составные строки · WindUI Remake 2</title><link rel="stylesheet" href="style.css"></head><body><header><a class="brand" href="index.html">WindUI <span>Remake 2 / Documentation</span></a><a class="repo" href="https://github.com/123ads213/WindUI-Remake-2">GitHub ↗</a></header><div class="shell"><aside><div class="search"><input id="search" type="search" aria-label="Поиск по документации" placeholder="Поиск методов…"></div><nav class="desktop-nav" aria-label="Документация"><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a><a href="composition.html" aria-current="page">Тема и составные строки</a></nav><details class="mobile-nav"><summary>Разделы документации</summary><nav><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a><a href="composition.html" aria-current="page">Тема и составные строки</a></nav></details><div class="desktop-nav eyebrow">На этой странице</div><nav class="toc" aria-label="Содержание"><div class="toc">
+<ul>
+<li><a href="#reference-theme-and-composable-appearance-controls">Reference theme and composable appearance controls</a><ul>
+<li><a href="#original-windui-dark">Original WindUI Dark</a></li>
+<li><a href="#label-on-the-left-dropdown-on-the-right">Label on the left, dropdown on the right</a></li>
+<li><a href="#label-color-dropdown-or-toggle">Label → color → dropdown (or toggle)</a></li>
+<li><a href="#local-player-mock">Local player mock</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></aside><main><div id="results" class="results" aria-live="polite"></div><article><h1 id="reference-theme-and-composable-appearance-controls">Reference theme and composable appearance controls</h1>
+<h2 id="original-windui-dark">Original WindUI Dark</h2>
+<pre><code class="language-lua">local Window = WindUI:CreateWindow({
+    Title='My menu', Folder='MyProject', Theme='Dark',
+    NewElements=true, DescriptionMode='Tooltip',
+})
+</code></pre>
+<p>The Dark color definitions match <a href="https://github.com/Footagesus/WindUI/blob/main/src/themes/Init.lua">upstream WindUI</a>: Accent <code>#18181B</code>, Dialog <code>#1A1A1A</code>, Background <code>#101010</code>, ElementBackground <code>#2A2A2C</code>, Text <code>#FFFFFF</code>, Toggle <code>#33C759</code>, Slider <code>#0091FF</code>.</p>
+<p>NewElements switches use a 40×24px track and circular 20px thumb. The thumb moves with a 0.18s tween and track/thumb colors transition smoothly. Rapid clicks cancel the previous movement tween. Native Toggle flags, callbacks, locks and hotkeys are retained; non-NewElements controls remain compatible. Save/name are divided by a vertical separator.</p>
+<p>Compact dropdown fields have a permanent Dialog-colored rounded background and no hover opacity changes. The parent row has no hover fill either.</p>
+<h2 id="label-on-the-left-dropdown-on-the-right">Label on the left, dropdown on the right</h2>
+<p>Already supported in columns/cards:</p>
+<pre><code class="language-lua">section:Dropdown({
+    Title='Target', Flag='target', Width=170,
+    Values={'Hit Chance','Distance','Health'}, Value='Hit Chance',
+    Callback=function(value) print(value) end,
+})
+section:Dropdown({
+    Title='Hitboxes', Flag='hitboxes', Width=170, Multi=true,
+    Values={'Head','Chest','Stomach'}, Value={'Head','Chest'},
+})
+</code></pre>
+<h2 id="label-color-dropdown-or-toggle">Label → color → dropdown (or toggle)</h2>
+<pre><code class="language-lua">local row = section:Compound({
+    Title='Player',
+    Color={Flag='player_color',Default=Color3.fromRGB(164,167,56),AllowGradient=false,
+        Callback=function(color,transparency) MyRenderer:SetColor(color,transparency) end},
+    Dropdown={Flag='player_mode',Width=140,Values={'Solid','Neon','Ghost'},Value='Solid',
+        Callback=function(mode) MyRenderer:SetMode(mode) end},
+})
+
+local box = section:Compound({
+    Title='Box',
+    Color={Flag='box_color',Default=Color3.fromRGB(89,87,227)},
+    Toggle={Flag='box_enabled',Value=true,Callback=function(on) MyRenderer:SetBoxEnabled(on) end},
+})
+</code></pre>
+<p><code>MyRenderer</code> is your own object, not a library global. Each child is a real native control: <code>row.Color:Open()</code>, <code>row.Color:Set(color)</code>, <code>row.Dropdown:Select('Ghost')</code>, <code>box.Toggle:Set(false)</code>. <code>row:GetControl('Color')</code> returns the same child. Use an independent unique <code>Flag</code> on each child; do not assign a flag to the whole Compound. Dropdown and Toggle are alternatives in one row. <code>row:Lock()</code>, <code>row:Unlock()</code>, <code>row:SetTitle(...)</code>, <code>row:SetVisible(...)</code>, and <code>row:Destroy()</code> operate on the row. Child programmatic setters follow the corresponding native control's callback rules.</p>
+<h2 id="local-player-mock">Local player mock</h2>
+<pre><code class="language-lua">local preview = rightSection:PlayerPreview({Height=350,State={
+    Name='Preview player', Health=75, Distance='25m',
+    Color=Color3.fromRGB(164,167,56), Mode='Solid', Box=true,
+}})
+preview:SetColor(Color3.fromRGB(89,87,227))
+preview:SetMode('Ghost') -- Solid / Neon / Ghost
+preview:SetBoxColor(Color3.fromRGB(89,87,227)) -- independent of model color
+preview:Update({Health=40,Box=false,Name='Sample'})
+preview:SetEnabled(true)
+preview:SetRotation(30)
+-- Optional: clones your model; never reparents/destroys the caller's source model.
+preview:SetModel(myModel)
+preview:SetModel(nil) -- return to the built-in block dummy
+local state = preview:GetState() -- detached state table
+</code></pre>
+<p>Connect compound callbacks to <code>preview:SetColor</code>, <code>preview:SetMode</code> or your own rendering adapter. The preview is just a local ViewportFrame/WorldModel with a mock box/name/health overlay. It does not discover players, draw through walls, hook a game, or read gameplay state. It has no polling/render loop. Scripts are removed from cloned models. The supplied model must be Archivable and contain a BasePart.</p>
+<p>Demo: Visuals → Preview. Solid/Neon/Ghost, colors, box visibility, health and rotation are interactive. The preview state itself is not persisted; store source controls with stable flags and reconstruct display state in callbacks.</p></article><footer>WindUI Remake 2 · Original WindUI by Footagesus · MIT<br>Сайт собран из Markdown и исходников в этом репозитории. <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/docs/remake-2/COMPOSITE.md">Редактировать источник ↗</a></footer></main></div><script src="search-index.js"></script><script src="site.js"></script></body></html>

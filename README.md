@@ -27,6 +27,10 @@ Raw URL loading requires a **public repository**. If this repository is private,
 - **[dist/remake2.lua](dist/remake2.lua):** standalone demonstration, already includes library and example. Not the library entry point.
 - **[RemakeExample.lua](RemakeExample.lua):** large demo source; do not paste it into every project.
 
+## Reference theme & appearance composition
+
+Use `Theme="Dark"` and `NewElements=true` for the original WindUI Dark palette and compact animated round switches. [Compound rows + local player preview](docs/remake-2/COMPOSITE.md) show left-label dropdowns, color + dropdown/toggle combinations and mock-model methods.
+
 ## Features
 
 - Sidebar tabs/subtabs, horizontal icon tabs and responsive two-column cards.

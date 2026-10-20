@@ -9,10 +9,12 @@ function P.New(window,wind,options)
  local self={Current=nil,Sort='Created',SortReversed=false,UIElements={},Opened=false}
  local host=window.UIElements.Main.Main
  local topbar=host.Topbar
- local bar=U.New('Frame',{Parent=host,Name='PresetToolbar',Size=UDim2.fromOffset(250,34),BackgroundTransparency=.55,ThemeTag={BackgroundColor3='ElementBackground'},ZIndex=30,Active=true});U.corner(bar,8)
- local save=U.button(bar,'',0,0,34,34,function()self:QuickSave()end);U.icon(save,'save',9,9,16,window)
+ local bar=U.New('Frame',{Parent=host,Name='PresetToolbar',Size=UDim2.fromOffset(250,34),BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},ZIndex=30,Active=true});U.corner(bar,8)
+ local save=U.button(bar,'',0,0,34,34,function()self:QuickSave()end);save:SetAttribute('NoHover',true);U.icon(save,'save',9,9,16,window)
 
- local trigger=U.button(bar,'Default',36,0,210,34,function()self:Toggle()end);trigger.Label.Size=UDim2.new(1,-38,1,0);local chevron=U.icon(trigger,'chevron-down',184,9,16,window)
+ local divider=U.New('Frame',{Parent=bar,Name='SaveDivider',Position=UDim2.fromOffset(35,0),Size=UDim2.new(0,1,1,0),BackgroundTransparency=.86,ThemeTag={BackgroundColor3='Text'},ZIndex=32})
+ U.New('UIStroke',{Parent=bar,Name='ToolbarOutline',Thickness=1,Transparency=.87,ApplyStrokeMode='Border',ThemeTag={Color='Text'}})
+ local trigger=U.button(bar,'Default',36,0,210,34,function()self:Toggle()end);trigger:SetAttribute('NoHover',true);trigger.Label.Size=UDim2.new(1,-38,1,0);local chevron=U.icon(trigger,'chevron-down',184,9,16,window)
  local function fitTrigger()
   local scale=math.max(.01,wind.UIScaleObj.Scale)
   local x=window.UIElements.SideBarContainer.AbsoluteSize.X/scale+7

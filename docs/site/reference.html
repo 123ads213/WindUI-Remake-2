@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Методы · WindUI Remake 2</title><link rel="stylesheet" href="style.css"></head><body><header><a class="brand" href="index.html">WindUI <span>Remake 2 / Documentation</span></a><a class="repo" href="https://github.com/123ads213/WindUI-Remake-2">GitHub ↗</a></header><div class="shell"><aside><div class="search"><input id="search" type="search" aria-label="Поиск по документации" placeholder="Поиск методов…"></div><nav class="desktop-nav" aria-label="Документация"><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html" aria-current="page">Методы</a><a href="recipes.html">Примеры</a></nav><details class="mobile-nav"><summary>Разделы документации</summary><nav><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html" aria-current="page">Методы</a><a href="recipes.html">Примеры</a></nav></details><div class="desktop-nav eyebrow">На этой странице</div><nav class="toc" aria-label="Содержание"><div class="toc">
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Методы · WindUI Remake 2</title><link rel="stylesheet" href="style.css"></head><body><header><a class="brand" href="index.html">WindUI <span>Remake 2 / Documentation</span></a><a class="repo" href="https://github.com/123ads213/WindUI-Remake-2">GitHub ↗</a></header><div class="shell"><aside><div class="search"><input id="search" type="search" aria-label="Поиск по документации" placeholder="Поиск методов…"></div><nav class="desktop-nav" aria-label="Документация"><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html" aria-current="page">Методы</a><a href="recipes.html">Примеры</a><a href="composition.html">Тема и составные строки</a></nav><details class="mobile-nav"><summary>Разделы документации</summary><nav><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html" aria-current="page">Методы</a><a href="recipes.html">Примеры</a><a href="composition.html">Тема и составные строки</a></nav></details><div class="desktop-nav eyebrow">На этой странице</div><nav class="toc" aria-label="Содержание"><div class="toc">
 <ul>
 <li><a href="#_1">Справочник методов</a><ul>
 <li><a href="#_2">Создание элементов</a></li>
@@ -13,6 +13,8 @@
 <li><a href="#common-element-methods">Common element methods</a></li>
 <li><a href="#visibility">Visibility</a></li>
 <li><a href="#hotkeys-and-descriptions">Hotkeys and descriptions</a></li>
+<li><a href="#compound">Compound</a></li>
+<li><a href="#playerpreview">PlayerPreview</a></li>
 <li><a href="#toggle">Toggle</a></li>
 <li><a href="#slider">Slider</a></li>
 <li><a href="#progressbar">ProgressBar</a></li>
@@ -366,27 +368,27 @@
 </tr>
 <tr>
 <td><code>tab:Columns(config)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L73">source</a></td>
-</tr>
-<tr>
-<td><code>tab:IconTabs(config)</code></td>
 <td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L74">source</a></td>
 </tr>
 <tr>
+<td><code>tab:IconTabs(config)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L75">source</a></td>
+</tr>
+<tr>
 <td><code>controller:Tab(cfg)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L82">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L83">source</a></td>
 </tr>
 <tr>
 <td><code>p:Columns(c)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L86">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L87">source</a></td>
 </tr>
 <tr>
 <td><code>p:Select()</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L95">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L96">source</a></td>
 </tr>
 <tr>
 <td><code>controller:Select(which)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L101">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L102">source</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -523,51 +525,51 @@
 <tbody>
 <tr>
 <td><code>presets:Create(name)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L57">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L59">source</a></td>
 </tr>
 <tr>
 <td><code>presets:QuickSave()</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L63">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L65">source</a></td>
 </tr>
 <tr>
 <td><code>presets:Save(name)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L69">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L71">source</a></td>
 </tr>
 <tr>
 <td><code>presets:Load(name)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L73">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L75">source</a></td>
 </tr>
 <tr>
 <td><code>presets:LoadFromUI(name)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L84">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L86">source</a></td>
 </tr>
 <tr>
 <td><code>presets:Delete(name)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L90">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L92">source</a></td>
 </tr>
 <tr>
 <td><code>presets:Export(name)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L94">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L96">source</a></td>
 </tr>
 <tr>
 <td><code>presets:Import(name,json)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L98">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L100">source</a></td>
 </tr>
 <tr>
 <td><code>presets:Rename(old,new)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L105">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L107">source</a></td>
 </tr>
 <tr>
 <td><code>presets:Refresh()</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L226">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L228">source</a></td>
 </tr>
 <tr>
 <td><code>presets:Toggle()</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L189">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L191">source</a></td>
 </tr>
 <tr>
 <td><code>presets:SetSort(key,reversed)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L223">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L225">source</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -613,31 +615,31 @@
 <tbody>
 <tr>
 <td><code>element:SetTitle(title)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L88">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L90">source</a></td>
 </tr>
 <tr>
 <td><code>element:SetDesc(desc)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L92">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L94">source</a></td>
 </tr>
 <tr>
 <td><code>element:SetImage(image, size)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L96">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L98">source</a></td>
 </tr>
 <tr>
 <td><code>element:SetThumbnail(image, size)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L99">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L101">source</a></td>
 </tr>
 <tr>
 <td><code>element:Highlight()</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L102">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L104">source</a></td>
 </tr>
 <tr>
 <td><code>element:Destroy()</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L105">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L107">source</a></td>
 </tr>
 <tr>
 <td><code>element:Settings(options)</code></td>
-<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L126">source</a></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L128">source</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -692,6 +694,72 @@
 <tr>
 <td><code>element:OpenHotkeys(point)</code></td>
 <td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/FeatureUI.lua#L341">source</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="compound">Compound</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Исходник</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compound:GetControl(name)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Compound.lua#L39">source</a></td>
+</tr>
+<tr>
+<td><code>compound:Lock()</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Compound.lua#L40">source</a></td>
+</tr>
+<tr>
+<td><code>compound:Unlock()</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Compound.lua#L41">source</a></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="playerpreview">PlayerPreview</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Исходник</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>playerPreview:SetModel(model)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L38">source</a></td>
+</tr>
+<tr>
+<td><code>playerPreview:Update(values)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L46">source</a></td>
+</tr>
+<tr>
+<td><code>playerPreview:SetColor(color)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L56">source</a></td>
+</tr>
+<tr>
+<td><code>playerPreview:SetBoxColor(color)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L57">source</a></td>
+</tr>
+<tr>
+<td><code>playerPreview:SetMode(mode)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L58">source</a></td>
+</tr>
+<tr>
+<td><code>playerPreview:SetEnabled(value)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L59">source</a></td>
+</tr>
+<tr>
+<td><code>playerPreview:SetRotation(degrees)</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L60">source</a></td>
+</tr>
+<tr>
+<td><code>playerPreview:GetState()</code></td>
+<td><a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L61">source</a></td>
 </tr>
 </tbody>
 </table></div>

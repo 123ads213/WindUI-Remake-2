@@ -101,12 +101,12 @@
 | Метод | Исходник |
 | --- | --- |
 | `col:Section(cfg)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L23) |
-| `tab:Columns(config)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L73) |
-| `tab:IconTabs(config)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L74) |
-| `controller:Tab(cfg)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L82) |
-| `p:Columns(c)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L86) |
-| `p:Select()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L95) |
-| `controller:Select(which)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L101) |
+| `tab:Columns(config)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L74) |
+| `tab:IconTabs(config)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L75) |
+| `controller:Tab(cfg)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L83) |
+| `p:Columns(c)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L87) |
+| `p:Select()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L96) |
+| `controller:Select(which)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/RemakeLayout.lua#L102) |
 
 ## Profile
 
@@ -147,18 +147,18 @@
 
 | Метод | Исходник |
 | --- | --- |
-| `presets:Create(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L57) |
-| `presets:QuickSave()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L63) |
-| `presets:Save(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L69) |
-| `presets:Load(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L73) |
-| `presets:LoadFromUI(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L84) |
-| `presets:Delete(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L90) |
-| `presets:Export(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L94) |
-| `presets:Import(name,json)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L98) |
-| `presets:Rename(old,new)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L105) |
-| `presets:Refresh()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L226) |
-| `presets:Toggle()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L189) |
-| `presets:SetSort(key,reversed)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L223) |
+| `presets:Create(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L59) |
+| `presets:QuickSave()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L65) |
+| `presets:Save(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L71) |
+| `presets:Load(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L75) |
+| `presets:LoadFromUI(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L86) |
+| `presets:Delete(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L92) |
+| `presets:Export(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L96) |
+| `presets:Import(name,json)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L100) |
+| `presets:Rename(old,new)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L107) |
+| `presets:Refresh()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L228) |
+| `presets:Toggle()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L191) |
+| `presets:SetSort(key,reversed)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/PresetUI.lua#L225) |
 
 ## Feature settings
 
@@ -174,13 +174,13 @@
 
 | Метод | Исходник |
 | --- | --- |
-| `element:SetTitle(title)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L88) |
-| `element:SetDesc(desc)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L92) |
-| `element:SetImage(image, size)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L96) |
-| `element:SetThumbnail(image, size)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L99) |
-| `element:Highlight()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L102) |
-| `element:Destroy()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L105) |
-| `element:Settings(options)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L126) |
+| `element:SetTitle(title)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L90) |
+| `element:SetDesc(desc)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L94) |
+| `element:SetImage(image, size)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L98) |
+| `element:SetThumbnail(image, size)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L101) |
+| `element:Highlight()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L104) |
+| `element:Destroy()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L107) |
+| `element:Settings(options)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Init.lua#L128) |
 
 ## Visibility
 
@@ -199,6 +199,27 @@
 | `element:AddHotkey(data)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/FeatureUI.lua#L337) |
 | `element:ResetHotkeys()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/FeatureUI.lua#L340) |
 | `element:OpenHotkeys(point)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/components/window/FeatureUI.lua#L341) |
+
+## Compound
+
+| Метод | Исходник |
+| --- | --- |
+| `compound:GetControl(name)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Compound.lua#L39) |
+| `compound:Lock()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Compound.lua#L40) |
+| `compound:Unlock()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/Compound.lua#L41) |
+
+## PlayerPreview
+
+| Метод | Исходник |
+| --- | --- |
+| `playerPreview:SetModel(model)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L38) |
+| `playerPreview:Update(values)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L46) |
+| `playerPreview:SetColor(color)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L56) |
+| `playerPreview:SetBoxColor(color)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L57) |
+| `playerPreview:SetMode(mode)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L58) |
+| `playerPreview:SetEnabled(value)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L59) |
+| `playerPreview:SetRotation(degrees)` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L60) |
+| `playerPreview:GetState()` | [source](https://github.com/123ads213/WindUI-Remake-2/blob/main/src/elements/PlayerPreview.lua#L61) |
 
 ## Toggle
 

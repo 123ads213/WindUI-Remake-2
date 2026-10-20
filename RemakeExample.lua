@@ -239,6 +239,23 @@ kl:Button({Title='Show keylist',Callback=function()HUD:SetKeylistEnabled(true)en
 kl:Button({Title='Hide keylist',Callback=function()HUD:SetKeylistEnabled(false)end})
 kl:Button({Title='Reset positions',Callback=function()HUD:ResetPositions()end})
 
+-- Composable appearance controls. Only local mock data, no player tracking.
+local PreviewTab=Visuals:Tab({Title='Preview',Icon='box'})
+local previewColumns=PreviewTab:Columns({MinColumnWidth=260})
+local appearanceControls=previewColumns.Left:Section({Title='Enemy model'})
+local mock=previewColumns.Right:Section({Title='Local mock preview'})
+local PlayerMock=mock:PlayerPreview({Height=350,State={Color=Color3.fromHex('A4A738'),Name='Preview player'}})
+local ModelRow=appearanceControls:Compound({Title='Player',
+ Color={Flag='mock_color',Default=Color3.fromHex('A4A738'),AllowGradient=false,Callback=function(c)PlayerMock:SetColor(c)end},
+ Dropdown={Flag='mock_material',Values={'Solid','Neon','Ghost'},Value='Solid',Width=140,Callback=function(v)PlayerMock:SetMode(v)end}})
+local BoxRow=appearanceControls:Compound({Title='Box',
+ Color={Flag='mock_box_color',Default=Color3.fromHex('5957E3'),AllowGradient=false,Callback=function(c)PlayerMock:SetBoxColor(c) end},
+ Toggle={Flag='mock_box_enabled',Value=true,Callback=function(v)PlayerMock:Update({Box=v})end}})
+appearanceControls:Slider({Title='Health',Value={Min=0,Max=100,Default=75},Step=1,Callback=function(v)PlayerMock:Update({Health=v})end})
+appearanceControls:Slider({Title='Rotation',Value={Min=-180,Max=180,Default=0},Step=1,Callback=function(v)PlayerMock:SetRotation(v)end})
+appearanceControls:Dropdown({Title='Target',Values={'Hit Chance','Distance','Health'},Value='Hit Chance',Width=170})
+appearanceControls:Dropdown({Title='Hitboxes',Multi=true,Values={'Head','Chest','Stomach'},Value={'Head','Chest'},Width=170})
+
 local Presets,configError=Window:EnablePresets({Default='Default'})
 assert(Presets,configError)
 Env.WindUIForkDemoConfig=Window.CurrentConfig
@@ -246,6 +263,6 @@ Window:SelectTab(Visuals.Index) -- Selects the first unlocked child (Player).
 
 Env.WindUIForkDemo = { Library = WindUI, Window = Window, Big = Big, Billion = Billion,
     ShowPlayers = ShowPlayers, Fine = Fine, Calls = Calls, Visuals = Visuals, Player = Player, Players = Player,
-    World = World, General = General, Themes = Themes, Gravity = Gravity, Balance = Balance, Collection = Collection, Appearance = Appearance, Profile = Profile, HUD = HUD, Presets=Presets, AntiAFK=AntiAFK, Showcase=Showcase, PlayerOptions=PlayerOptions, PopupDistance=PopupDistance, PopupStyle=PopupStyle, Pages=Pages, Columns=PlayerColumns, ThemeDropdown=ThemeDropdown, Advanced=Advanced, Dependent=Unshortened, DependencyGroup=AdvancedGroup, WatermarkFields = WatermarkFields, SolidColor = SolidColor, GradientColor = GradientColor }
+    World = World, General = General, Themes = Themes, Gravity = Gravity, Balance = Balance, Collection = Collection, Appearance = Appearance, Profile = Profile, HUD = HUD, Presets=Presets, PlayerMock=PlayerMock, ModelRow=ModelRow, BoxRow=BoxRow, PreviewTab=PreviewTab, AntiAFK=AntiAFK, Showcase=Showcase, PlayerOptions=PlayerOptions, PopupDistance=PopupDistance, PopupStyle=PopupStyle, Pages=Pages, Columns=PlayerColumns, ThemeDropdown=ThemeDropdown, Advanced=Advanced, Dependent=Unshortened, DependencyGroup=AdvancedGroup, WatermarkFields = WatermarkFields, SolidColor = SolidColor, GradientColor = GradientColor }
 Env.__WindUIForkPendingLibrary = nil
 return "Full remake 2 menu started"

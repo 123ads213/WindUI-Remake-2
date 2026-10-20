@@ -1,4 +1,5 @@
 local Toggle = {}
+local CompactToggle=require("./CompactToggle")
 
 local Creator = require("../../modules/Creator")
 local New = Creator.New
@@ -7,6 +8,7 @@ local Tween = Creator.Tween
 local UserInputService = game:GetService("UserInputService")
 
 function Toggle.New(Value, Icon, IconSize, Parent, Callback, NewElement, Config)
+ if NewElement then return CompactToggle.New(Value,Icon,IconSize,Parent,Callback,NewElement,Config)end
 	local Toggle = {
 		GlassSpritesheet = {
 			Id = "rbxassetid://77297718671545",

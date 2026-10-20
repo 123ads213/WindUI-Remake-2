@@ -1,5 +1,7 @@
 return {
 	Elements = {
+        Compound = require("./Compound"),
+        PlayerPreview = require("./PlayerPreview"),
 		Paragraph = require("./Paragraph"),
 		Button = require("./Button"),
 		Toggle = require("./Toggle"),
@@ -119,7 +121,7 @@ return {
 				end
 
 				if frame and config.CompactRow and not config.Inline then require("../components/window/CompactRow")(content,frame,config)end
-                if frame and (config.VisibleWhen or config.Visible~=nil or config.CompactRow)then require("../components/window/Visibility").Attach(content,frame.UIElements.Main,config)end
+                if frame and not config.Embedded and (config.VisibleWhen or config.Visible~=nil or config.CompactRow)then require("../components/window/Visibility").Attach(content,frame.UIElements.Main,config)end
 
                 if frame and Window.FeatureUI then Window.FeatureUI:Register(content,frame,config)end
                 if frame then

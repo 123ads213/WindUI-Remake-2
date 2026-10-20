@@ -140,3 +140,8 @@ Window:Destroy()
 
 
 Alphabetical ставит названия с буквами перед чисто числовыми: `Default → Last → 231`. Повторный выбор меняет направление внутри групп: `Last → Default → 231`. Числовые имена сортируются по числу. Сортировка по датам по-прежнему использует реальные created/modified timestamps.
+
+
+## Compound appearance rows and mock player preview
+
+See [complete theme and composition guide](COMPOSITE.md) for `section:Compound`, `section:PlayerPreview`, native dropdowns with left labels, and the original WindUI Dark palette.

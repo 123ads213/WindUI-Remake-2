@@ -67,6 +67,13 @@ return function(Creator)
 
 		Toggle = "Button",
 		ToggleBar = "White",
+        ChoiceBackground = "Dialog",
+        ChoiceTransparency = 0,
+        ToggleTrack = "Background",
+        ToggleThumbOff = "Icon",
+        CardBorder = "Text",
+        CardBorderTransparency = 1,
+        CardTransparency = .1,
 
 		Checkbox = "Primary",
 		CheckboxIcon = "White",

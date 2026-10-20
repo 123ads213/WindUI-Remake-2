@@ -5,6 +5,7 @@ local RunService = cloneref(game:GetService("RunService"))
 local HttpService = cloneref(game:GetService("HttpService"))
 
 local Names=require("../modules/ConfigNames")
+local Creator=require("../modules/Creator")
 local Window 
 
 local ConfigManager
@@ -32,6 +33,7 @@ ConfigManager = {
                         local ok,err=element:Import(data.gradient)
                         if not ok then error(err)end
                     else local ok,err=element:Update(Color3.fromHex(data.value), data.transparency or nil);if ok==false then error(err)end end
+                    if element.Callback then Creator.SafeCallback(element.Callback,element.Default,element.Transparency,element.GetGradient and element:GetGradient())end
                 end
             end
         },

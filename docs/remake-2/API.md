@@ -1,6 +1,6 @@
 # WindUI Remake 2 — API and integration guide
 
-Version: `1.7.0-remake.2`. Original WindUI by Footagesus, MIT. This is a UI library: example settings do not implement ESP, targeting or gameplay logic.
+Version: `1.7.0-remake.3`. Original WindUI by Footagesus, MIT. This is a UI library: example settings do not implement ESP, targeting or gameplay logic.
 
 ## Start here (including AI coding assistants)
 
@@ -314,3 +314,8 @@ The demo no longer contains Media & code or the Try the HUD/Native containers ex
 
 
 Alphabetical ставит названия с буквами перед чисто числовыми: `Default → Last → 231`. Повторный выбор меняет направление внутри групп: `Last → Default → 231`. Числовые имена сортируются по числу. Сортировка по датам по-прежнему использует реальные created/modified timestamps.
+
+
+## Composed appearance controls and local model preview
+
+See [theme and composition guide](COMPOSITE.md): `section:Compound({Title,Color,Dropdown})`, `section:Compound({Title,Color,Toggle})` and `section:PlayerPreview({Height,Model,State})`. Children use independent native flags and callbacks. Mock preview is local-only and contains no ESP/player scanning. Compact dropdowns and preset toolbar do not add hover fills.

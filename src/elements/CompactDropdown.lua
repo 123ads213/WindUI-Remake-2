@@ -9,7 +9,7 @@ function D:New(config)
  local ef=require('../components/window/Element')({Title=obj.Title,Parent=config.Parent,Window=config.Window,Tab=config.Tab,Index=config.Index,ElementTable=obj,ParentConfig=config,TextOffset=160,Hover=false})
  obj.DropdownFrame=ef
  local width=config.Width or 140
- local trigger=U.button(ef.UIElements.Main,'',0,0,width,30,function()if obj.Opened then obj:Close()else obj:Open()end end);trigger.Name='Choice';trigger.AnchorPoint=Vector2.new(1,.5);trigger.Position=UDim2.new(1,-14,.5,0);trigger.BackgroundTransparency=.35
+ local trigger=U.button(ef.UIElements.Main,'',0,0,width,30,function()if obj.Opened then obj:Close()else obj:Open()end end);trigger.Name='Choice';trigger:SetAttribute('NoHover',true);trigger.AnchorPoint=Vector2.new(1,.5);trigger.Position=UDim2.new(1,-14,.5,0);trigger.BackgroundTransparency=.35;C.AddThemeObject(trigger,{BackgroundColor3="ChoiceBackground",BackgroundTransparency="ChoiceTransparency"})
  local clip=U.New('CanvasGroup',{Parent=trigger,Name='PreviewClip',Position=UDim2.fromOffset(10,0),Size=UDim2.fromOffset(width-40,30),BackgroundTransparency=1,ClipsDescendants=true,ZIndex=trigger.ZIndex+2})
  local display=U.text(clip,'Select',0,0,width-40,30);display.TextTruncate=Enum.TextTruncate.None
  local gradient=U.New('UIGradient',{Parent=display,Rotation=0})
