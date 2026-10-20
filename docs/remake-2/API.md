@@ -25,7 +25,8 @@ Use Luau/darklua installed on PATH. The built `dist/remake2.lua` embeds both lib
 
 ```lua
 local Window = WindUI:CreateWindow({
-    Title = 'WindUI', Author = 'Footagesus · Extended fork',
+    Title = 'Sirius', Author = 'Ui library', Icon = 'star',
+    HideSearchBar = false, SearchInTopbar = true, ToggleKey = Enum.KeyCode.RightShift,
     Folder = 'MyUI', Theme = 'Dark', NewElements = true,
     Size = UDim2.fromOffset(1000, 650),
     MinSize = Vector2.new(700, 420), MaxSize = Vector2.new(1200, 800),
@@ -44,6 +45,14 @@ local other = columns.Right:Section({Title = 'Other'})
 - `Columns` returns `.Left`, `.Right`, and `.UIElements` (`Root`, `Left`, `Right`).
 - Use `Section` on a column to create a card. Legacy `Tab:Section` still means the original section element.
 - Keep a reasonable minimum column width for long labels; labels truncate, not overlap. Customize control `Width` when necessary.
+
+## Header search and profile actions
+
+`SearchInTopbar = true` places the existing working search in the top-right button group, before minimize/fullscreen/close; it removes the old sidebar search gap. Keep `HideSearchBar = false` to enable search. Omit `SearchInTopbar` for legacy sidebar search.
+
+`Window:CreateProfile(...)` now includes **Menu bind** above **Unload**. Click Menu bind and press a keyboard key; Escape cancels, Backspace/Delete clears it. Capturing does not also toggle the window. The example defaults to RightShift. `Window:SetToggleKey(Enum.KeyCode.F8)` changes it programmatically; nil unbinds. This window preference is session-local, not an element flag. Unload invokes the existing `Window:Destroy()` lifecycle and removes the library GUIs and connections. Do not replace it with a visual-only hide.
+
+Preset Create/Rename forms are 306×148 logical pixels; JSON forms expand only when required. Actions and metadata rows use native themed icons. A click on the config trigger immediately dismisses its hover information before opening the preset list; editors replace rather than stack with the list.
 
 ## Horizontal icon subtabs (not sidebar children)
 

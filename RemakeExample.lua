@@ -48,10 +48,10 @@ for _,root in ipairs(WindUI.ScreenGui.Parent:GetChildren()) do
     end
 end
 local Window = WindUI:CreateWindow({
-    Title = 'WindUI', Author = 'Footagesus · Extended fork',
-    Folder = 'Sirius-Remake2', Icon = 'panels-top-left', Theme = 'Dark',
+    Title = 'Sirius', Author = 'Ui library',
+    Folder = 'Sirius-Remake2', Icon = 'star', Theme = 'Dark',
     CustomCursor = { Enabled = true, Size = 10 }, DragSmoothness = 0.045,
-    DescriptionMode = 'Tooltip', ContentPaddingTop = 10, HideSearchBar = false, LockOffscreen = true, NewElements = true, Size = UDim2.fromOffset(1000, 650), MinSize=Vector2.new(700,420), MaxSize=Vector2.new(1200,800),
+    DescriptionMode = 'Tooltip', ContentPaddingTop = 10, HideSearchBar = false, SearchInTopbar = true, ToggleKey=Enum.KeyCode.RightShift, LockOffscreen = true, NewElements = true, Size = UDim2.fromOffset(1000, 650), MinSize=Vector2.new(700,420), MaxSize=Vector2.new(1200,800),
 })
 -- Register immediately: even a later setup error remains cleanable on rerun.
 Env.WindUIForkDemo = { Library = WindUI, Window = Window }

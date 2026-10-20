@@ -55,6 +55,7 @@ return function(Config)
 		Radius = Config.Radius or 16,
 		Transparent = Config.Transparent or false,
 		HideSearchBar = Config.HideSearchBar ~= false,
+        SearchInTopbar = Config.SearchInTopbar == true,
 		ScrollBarEnabled = Config.ScrollBarEnabled or false,
 		SideBarWidth = Config.SideBarWidth or 200,
 		Acrylic = Config.Acrylic or false,
@@ -211,7 +212,7 @@ return function(Config)
 			1,
 			Window.ScrollBarEnabled and -3 - (Window.UIPadding / 2) or 0,
 			1,
-			not Window.HideSearchBar and -39 - 6 or 0
+			(not Window.HideSearchBar and not Window.SearchInTopbar) and -39 - 6 or 0
 		),
 		Position = UDim2.new(0, 0, 1, 0),
 		AnchorPoint = Vector2.new(0, 1),
@@ -264,7 +265,7 @@ return function(Config)
 		New("Frame", {
 			Name = "Content",
 			BackgroundTransparency = 1,
-			Size = UDim2.new(1, 0, 1, not Window.HideSearchBar and -39 - 6 - Window.UIPadding or -Window.UIPadding / 2),
+			Size = UDim2.new(1, 0, 1, (not Window.HideSearchBar and not Window.SearchInTopbar) and -39 - 6 - Window.UIPadding or -Window.UIPadding / 2),
 			Position = UDim2.new(0, 0, 1, -Window.UIPadding / 2),
 			AnchorPoint = Vector2.new(0, 1),
 		}),
@@ -1701,7 +1702,7 @@ return function(Config)
 			return
 		end
 
-		if Window.ToggleKey then
+		if Window.ToggleKey and not Window.CapturingMenuBind then
 			if input.KeyCode == Window.ToggleKey then
 				Window:Toggle()
 			end
@@ -2189,28 +2190,15 @@ return function(Config)
 		local IsOpen = false
 		local CurrentSearchBar
 
-		-- local SearchButton
-		-- SearchButton = Window:CreateTopbarButton("search", function()
-		--     if IsOpen then return end
-
-		--     SearchBar.new(Window.TabModule, Window.UIElements.Main, function()
-		--         -- OnClose
-		--         IsOpen = false
-		--         Window.CanResize = true
-
-		--         Tween(FullScreenBlur, 0.1, {ImageTransparency = 1}):Play()
-		--         FullScreenBlur.Active = false
-		--     end)
-		--     Tween(FullScreenBlur, 0.1, {ImageTransparency = .65}):Play()
-		--     FullScreenBlur.Active = true
-
-		--     IsOpen = true
-		--     Window.CanResize = false
-		-- end, 996)
-
-		local SearchLabel = CreateLabel("Search", "search", Window.UIElements.SideBarContainer, true)
-		SearchLabel.Size = UDim2.new(1, -Window.UIPadding / 2, 0, 39)
-		SearchLabel.Position = UDim2.new(0, Window.UIPadding / 2, 0,--[[Window.UIPadding/2]] 0)
+        local SearchLabel
+        if Window.SearchInTopbar then
+            SearchLabel=Window:CreateTopbarButton('Search','search',function()end,996)
+        else
+            SearchLabel=CreateLabel('Search','search',Window.UIElements.SideBarContainer,true)
+            SearchLabel.Size=UDim2.new(1,-Window.UIPadding/2,0,39)
+            SearchLabel.Position=UDim2.fromOffset(Window.UIPadding/2,0)
+        end
+        Window.UIElements.SearchButton=SearchLabel
 
 		Creator.AddSignal(SearchLabel.MouseButton1Click, function()
 			if IsOpen then

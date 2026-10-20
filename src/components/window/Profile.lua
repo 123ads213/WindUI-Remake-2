@@ -54,7 +54,7 @@ function Profile.New(Window, WindUI, Config)
     local days=text(card,'Remaining','',56,31,-82,18,12,true)
     icon(card,'chevron-right',Window.SideBarWidth-37,22,16)
 
-    local menu=New('CanvasGroup',{Parent=parent,Name='ProfileMenu',Visible=false,Size=UDim2.fromOffset(304,304),
+    local menu=New('CanvasGroup',{Parent=parent,Name='ProfileMenu',Visible=false,Size=UDim2.fromOffset(304,396),
         GroupTransparency=1,ThemeTag={BackgroundColor3='Dialog'},ZIndex=200,Active=true})
     corner(menu,14)
     Shadow.New(menu)
@@ -84,6 +84,31 @@ function Profile.New(Window, WindUI, Config)
     local historyButton=button(header,'History','History','history',244)
     icon(historyButton,'chevron-right',252,13,16)
 
+    local bindButton=button(header,'MenuBind','Menu bind','keyboard',290)
+    local bindValue=text(bindButton,'Value',Window.ToggleKey and Window.ToggleKey.Name or 'Unbound',154,0,104,42,13,true)
+    bindValue.TextXAlignment='Right'
+    local unloadButton=button(header,'Unload','Unload','power',336)
+    self.UIElements.MenuBindButton=bindButton;self.UIElements.MenuBindValue=bindValue;self.UIElements.UnloadButton=unloadButton
+    local oldBind
+    function self:BeginMenuBind()
+        if Window.CapturingMenuBind then return end
+        oldBind=Window.ToggleKey;Window.CapturingMenuBind=true;bindValue.Text='Press a key…'
+    end
+    function self:CancelMenuBind()
+        Window.CapturingMenuBind=false
+        bindValue.Text=Window.ToggleKey and Window.ToggleKey.Name or 'Unbound'
+    end
+    connect(bindButton.MouseButton1Click,function()self:BeginMenuBind()end)
+    connect(Input.InputBegan,function(input)
+        if not Window.CapturingMenuBind or input.UserInputType~=Enum.UserInputType.Keyboard then return end
+        local key=input.KeyCode
+        if key==Enum.KeyCode.Escape then Window:SetToggleKey(oldBind)
+        elseif key==Enum.KeyCode.Backspace or key==Enum.KeyCode.Delete then Window:SetToggleKey(nil)
+        elseif key~=Enum.KeyCode.Unknown then Window:SetToggleKey(key)end
+        -- Keep capture active until every listener has received this key.
+        task.defer(function()if not self.Destroyed then self:CancelMenuBind()end end)
+    end)
+    connect(unloadButton.MouseButton1Click,function()Window:Destroy()end)
     local scheduleClose
     local transparencyButton=button(header,'Transparency','Transparency','blend',198)
     transparencyButton.Label.Size=UDim2.fromOffset(120,42)
@@ -96,7 +121,7 @@ function Profile.New(Window, WindUI, Config)
         ThemeTag={BackgroundColor3='Slider'},ZIndex=205})
     corner(fill,2)
     local tip=New('TextLabel',{Parent=transparencyButton,Name='HoverValue',Text='0',Visible=false,
-        AnchorPoint=Vector2.new(.5,1),Size=UDim2.fromOffset(44,24),Position=UDim2.fromOffset(188,3),
+        AnchorPoint=Vector2.new(.5,1),Size=UDim2.fromOffset(44,24),Position=UDim2.fromOffset(188,10),
         BackgroundTransparency=0,TextSize=13,FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),
         ThemeTag={BackgroundColor3='Dialog',TextColor3='Text'},ZIndex=208})
     corner(tip,7)
@@ -118,7 +143,7 @@ function Profile.New(Window, WindUI, Config)
         Window:SetBackgroundTransparency(transparency)
         fill.Size=UDim2.fromScale(transparency,1)
         tip.Text=string.format('%.2f',transparency):gsub('0+$',''):gsub('%.$','')
-        tip.Position=UDim2.fromOffset(166+math.clamp(transparency*100,22,78),3)
+        tip.Position=UDim2.fromOffset(166+math.clamp(transparency*100,22,78),10)
         return transparency
     end
     function self:GetTransparency()return transparency end
@@ -214,6 +239,9 @@ function Profile.New(Window, WindUI, Config)
         if not table.find(choices,mode)then return end
         self.Value=mode;scaleValue.Text=mode;applyScale(mode);updateChecks('Scale',mode)
     end
+    function self:SyncTheme()
+        local theme=WindUI:GetCurrentTheme();themeControl.Value=theme;styleValue.Text=theme;updateChecks('Style',theme)
+    end
     function themeControl:Select(theme)
         if not WindUI:GetThemes()[theme]then return end
         self.Value=theme;styleValue.Text=theme;WindUI:SetTheme(theme);updateChecks('Style',theme)
@@ -260,6 +288,7 @@ function Profile.New(Window, WindUI, Config)
         task.delay(.16,function()if not self.Destroyed and flySerial==id and not self.FlyoutKind then flyout.Visible=false end end)
     end
     function self:OpenFlyout(kind)
+        self:SyncTheme()
         if not lists[kind]or self.Destroyed then return end
         if not self.Opened then self:Open()end
         if self.FlyoutKind==kind then return end
@@ -317,7 +346,7 @@ function Profile.New(Window, WindUI, Config)
     function self:Open()
         if Window.ActiveColorPopup then Window.ActiveColorPopup:Close()end
         if self.Destroyed or self.Opened then return end
-        serial+=1;self.Opened=true;place();self:ShowPage('Main');highlight(true)
+        serial+=1;self.Opened=true;self:SyncTheme();self:CancelMenuBind();place();self:ShowPage('Main');highlight(true)
         if anim then anim:Cancel()end;if move then move:Cancel()end
         local position=menu.Position
         menu.Position=position+UDim2.fromOffset(0,8);menu.Visible=true;menu.GroupTransparency=1
@@ -326,7 +355,7 @@ function Profile.New(Window, WindUI, Config)
         anim:Play();move:Play()
     end
     function self:Close()
-        serial+=1;local id=serial;self.Opened=false;stopDrag();overTrack=false;showTip(false);highlight(false)
+        serial+=1;local id=serial;self.Opened=false;self:CancelMenuBind();stopDrag();overTrack=false;showTip(false);highlight(false)
         self:CloseFlyout()
         if anim then anim:Cancel()end;if move then move:Cancel()end
         anim=Tween(menu,.18,{GroupTransparency=1});anim:Play()
@@ -335,7 +364,7 @@ function Profile.New(Window, WindUI, Config)
     scheduleClose=function()
         serial+=1;local id=serial
         task.delay(.3,function()
-            if not self.Destroyed and serial==id and not hoverCard and not hoverMenu and not hoverFlyout and not hoverRow and not dragging then self:Close()end
+            if not self.Destroyed and serial==id and not hoverCard and not hoverMenu and not hoverFlyout and not hoverRow and not dragging and not Window.CapturingMenuBind then self:Close()end
         end)
     end
     connect(card.MouseEnter,function()hoverCard=true;serial+=1;self:Open()end)
@@ -359,7 +388,7 @@ function Profile.New(Window, WindUI, Config)
         return ok
     end
     connect(renew.MouseButton1Click,function()self:Renew()end)
-    connect(Input.InputBegan,function(input)if self.Opened and input.KeyCode==Enum.KeyCode.Escape then self:Close()end end)
+    connect(Input.InputBegan,function(input)if self.Opened and not Window.CapturingMenuBind and input.KeyCode==Enum.KeyCode.Escape then self:Close()end end)
     connect(main:GetPropertyChangedSignal('AbsolutePosition'),function()if self.Opened then place();if self.FlyoutKind then placeFlyout()end end end)
     connect(main:GetPropertyChangedSignal('AbsoluteSize'),function()if self.Opened then place();if self.FlyoutKind then placeFlyout()end end end)
     connect(WindUI.UIScaleObj:GetPropertyChangedSignal('Scale'),function()if self.Opened then place();if self.FlyoutKind then placeFlyout()end end end)
@@ -383,7 +412,7 @@ function Profile.New(Window, WindUI, Config)
     self:SetSubscription(Config)
     function self:Destroy()
         if self.Destroyed then return end
-        stopDrag();self.Destroyed=true;serial+=1
+        Window.CapturingMenuBind=false;stopDrag();self.Destroyed=true;serial+=1
         if tipTween then tipTween:Cancel()end
         if anim then anim:Cancel()end;if move then move:Cancel()end
         if pageTween then pageTween:Cancel()end

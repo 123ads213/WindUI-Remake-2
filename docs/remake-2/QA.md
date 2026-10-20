@@ -26,3 +26,12 @@ Actual Roblox OS screenshots inspected, not generated mockups:
 - Compact dropdown: nearby checked single-select popup inspected in the first integration pass; current implementation retains the same popup component.
 
 Limitations are explicit in API.md: no fake cloud service; Recent is modified-order local presets, not version backups; unflagged arbitrary state is not serialized; file writes are not crash-atomic; external callback side effects cannot be rolled back.
+
+## Chrome polish follow-up
+
+- Sirius / Ui library / star branding; search moved to the existing top-right button group without reserving sidebar search space.
+- Compact 306×148 Create/Rename forms, icon title/actions, 132px action list; Import/Export expand only for JSON. Metadata has file/user/clock icons. Trigger click hides the information panel immediately; forms replace the list.
+- Profile Menu bind above Unload. Keyboard capture supports Escape cancellation and Backspace/Delete clearing without accidentally toggling the menu. Transparency value moved 7 logical pixels nearer the track.
+- Re-ran 33 integration checks and 17 new `tests/Chrome.lua` checks. Pure suites pass.
+- Actual screenshots inspected: Dark compact editor and profile; Light profile with lower tooltip, native icons, readable labels, top-right Search and no overlap.
+- Final live smoke tests: Search opens from its header button, accepts `Distance`, and closes normally; Unload actually destroys the window and removes its root GUI. Latest menu relaunched afterward. Profile synchronizes the Style label when reopened after an external theme change.

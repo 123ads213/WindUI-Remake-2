@@ -2,6 +2,7 @@
 local C=require('../../modules/Creator')
 local Shadow=require('../ui/PopupShadow')
 local U={New=C.New,Tween=C.Tween}
+local fades=setmetatable({},{__mode='k'})
 function U.corner(p,r) C.New('UICorner',{Parent=p,CornerRadius=UDim.new(0,r or 8)}) end
 function U.text(p,text,x,y,w,h,secondary)
  return C.New('TextLabel',{Parent=p,Text=text,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1,TextSize=14,TextStrokeTransparency=1,TextXAlignment='Left',TextTruncate='AtEnd',RichText=false,FontFace=Font.new(C.Font,Enum.FontWeight.Medium),ThemeTag={TextColor3=secondary and 'Placeholder' or 'Text'},ZIndex=p.ZIndex+2})
@@ -34,7 +35,8 @@ end
 function U.show(p,v)
  if p:GetAttribute('TargetVisible')==v then return end;p:SetAttribute('TargetVisible',v)
  if v then p.Visible=true end
- C.Tween(p,.16,{GroupTransparency=v and 0 or 1}):Play()
+ if fades[p]then fades[p]:Cancel()end
+ fades[p]=C.Tween(p,.16,{GroupTransparency=v and 0 or 1});fades[p]:Play()
  if not v then task.delay(.17,function()if p.Parent and not p:GetAttribute('TargetVisible')then p.Visible=false end end)end
 end
 function U.inside(p,point)

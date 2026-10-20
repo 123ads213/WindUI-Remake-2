@@ -36,10 +36,11 @@ function P.New(window,wind,options)
  local sortButton=U.button(panel,'',282,54,36,34,function()self.Sort=self.Sort=='Name'and'Modified'or'Name';self:Refresh()end);U.icon(sortButton,'list-filter',10,9,16,window)
  local rows=U.New('ScrollingFrame',{Parent=panel,Name='PresetRows',Position=UDim2.fromOffset(12,98),Size=UDim2.fromOffset(306,274),BackgroundTransparency=1,CanvasSize=UDim2.new(),AutomaticCanvasSize='Y',ScrollBarThickness=2,BorderSizePixel=0,ZIndex=852})
  U.New('UIListLayout',{Parent=rows,Padding=UDim.new(0,6),SortOrder='LayoutOrder'})
- local editor=U.panel(window,'PresetEditor',330,228,870)
- local editorTitle=U.text(editor,'New preset',14,10,260,30)
- local nameInput=U.input(editor,'Preset name',14,50,302,34)
- local jsonInput=U.input(editor,'Paste preset JSON here',14,94,302,72);jsonInput.MultiLine=true;jsonInput.TextYAlignment='Top';jsonInput.TextWrapped=true
+ local editor=U.panel(window,'PresetEditor',306,148,870)
+ local editorIcon=U.icon(editor,'file-plus',14,15,18,window)
+ local editorTitle=U.text(editor,'New preset',42,9,250,28)
+ local nameInput=U.input(editor,'Preset name',14,48,278,34)
+ local jsonInput=U.input(editor,'Paste preset JSON here',14,92,278,86);jsonInput.MultiLine=true;jsonInput.TextYAlignment='Top';jsonInput.TextWrapped=true
  local mode='Create';local sourceName
  local function statusError(err)status.Text=tostring(err or 'Operation failed')end
  local function safe(fn)
@@ -91,16 +92,24 @@ function P.New(window,wind,options)
   if wasCurrent then self.Current=valid;trigger.Label.Text=valid end
   self:Refresh();return true
  end
- local actions=U.panel(window,'PresetActions',164,150,880)
+ local actions=U.panel(window,'PresetActions',164,132,880)
  local actionName
+ local info
+ local cancelButton,confirmButton
  local function edit(kind,name)
+  if info then U.show(info,false);info.Visible=false end
   mode=kind;sourceName=name;editorTitle.Text=kind..' preset';nameInput.Text=kind=='Rename'and name or'';jsonInput.Text='';jsonInput.Visible=kind=='Import'or kind=='Export';nameInput.Visible=kind~='Delete'and kind~='Export'
   if kind=='Export'then jsonInput.Text=self:Export(name)or'';editorTitle.Text='Select and copy JSON';if setclipboard then setclipboard(jsonInput.Text)end end
   if kind=='Delete'then editorTitle.Text='Delete '..name..'?'end
+  local tall=kind=='Import'or kind=='Export';local height=tall and 236 or(kind=='Delete'and 112 or 148)
+  editor.Size=UDim2.fromOffset(306,height)
+  cancelButton.Position=UDim2.fromOffset(14,height-48);confirmButton.Position=UDim2.fromOffset(184,height-48)
+  editorIcon:Destroy();editorIcon=U.icon(editor,({Create='file-plus',Rename='pencil',Import='upload',Export='download',Delete='trash-2'})[kind],14,15,18,window)
+  U.show(panel,false);self.Opened=false
   U.place(editor,trigger,wind);U.show(editor,true);U.show(actions,false)
  end
- U.button(editor,'Cancel',14,180,100,34,function()U.show(editor,false)end)
- U.button(editor,'Confirm',212,180,104,34,function()
+ cancelButton=U.button(editor,'Cancel',14,100,100,34,function()U.show(editor,false)end)
+ confirmButton=U.button(editor,'Confirm',184,100,108,34,function()
   local ok=safe(function()
    if mode=='Create'then return self:Create(nameInput.Text)
    elseif mode=='Import'then return self:Import(nameInput.Text,jsonInput.Text)
@@ -110,7 +119,9 @@ function P.New(window,wind,options)
   end)
   if ok then U.show(editor,false)else editorTitle.Text=status.Text end
  end)
- for i,action in ipairs({'Rename','Export','Delete'})do U.button(actions,action,6,6+(i-1)*44,152,42,function()edit(action,actionName)end)end
+ U.icon(cancelButton,'x',8,9,16,window);cancelButton.Label.Position=UDim2.fromOffset(32,0);cancelButton.Label.Size=UDim2.new(1,-36,1,0)
+ U.icon(confirmButton,'check',8,9,16,window);confirmButton.Label.Position=UDim2.fromOffset(32,0);confirmButton.Label.Size=UDim2.new(1,-36,1,0)
+ for i,action in ipairs({'Rename','Export','Delete'})do local b=U.button(actions,action,6,6+(i-1)*40,152,38,function()edit(action,actionName)end);b.Label.Position=UDim2.fromOffset(36,0);b.Label.Size=UDim2.new(1,-42,1,0);U.icon(b,({'pencil','download','trash-2'})[i],10,11,16,window)end
  local add=U.button(panel,'',282,10,36,32,function()edit('Create')end);U.icon(add,'plus',10,8,16,window)
  local imp=U.button(panel,'',202,10,34,32,function()edit('Import')end);U.icon(imp,'upload',9,8,16,window)
  recent=U.button(panel,'',242,10,34,32,function()self.View='Recent';self.Sort='Modified';self:Refresh()end);U.icon(recent,'folder-clock',9,8,16,window)
@@ -132,12 +143,15 @@ function P.New(window,wind,options)
   if self.Opened then U.place(panel,trigger,wind)end
  end
  function self:Toggle()
+  if info then U.show(info,false);info.Visible=false end
+  U.show(editor,false);U.show(actions,false)
   self.Opened=not self.Opened;if self.Opened then self:Refresh();U.place(panel,trigger,wind)end;U.show(panel,self.Opened)
  end
- local info=U.panel(window,'PresetInformation',274,114,860)
- local infoName=U.text(info,'',14,8,246,30);local author=U.text(info,'',14,40,246,28,true);local modified=U.text(info,'',14,70,246,28,true)
+ info=U.panel(window,'PresetInformation',294,114,860)
+ U.icon(info,'file-text',14,15,16,window);U.icon(info,'user-round',14,46,16,window);U.icon(info,'clock-3',14,76,16,window)
+ local infoName=U.text(info,'',40,8,240,30);local author=U.text(info,'',40,40,240,28,true);local modified=U.text(info,'',40,70,240,28,true)
  trigger.MouseEnter:Connect(function()
-  if not self.Current or self.Opened then return end
+  if not self.Current or self.Opened or editor:GetAttribute('TargetVisible')or actions:GetAttribute('TargetVisible')then return end
   local ok,data=pcall(function()return Http:JSONDecode(self:Export())end);local meta=ok and data.__meta or{}
   infoName.Text=self.Current;author.Text='Author: '..tostring(meta.author or'Unknown');modified.Text='Modified: '..(meta.modified and os.date('%d %b %Y, %H:%M',meta.modified)or'Unknown');U.place(info,trigger,wind);U.show(info,true)
  end)
