@@ -65,13 +65,53 @@ return function(content,frame,config)
   for _,control in ipairs(main:GetChildren())do if control:IsA('Frame')and control:FindFirstChild('ToggleFrame')then control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0)end end
  elseif content.__type=='Input'then
   width=config.Width or 140
-  for _,control in ipairs(main:GetChildren())do if control:IsA('GuiObject')and control~=title and control~=frame.UIElements.Container and control:FindFirstChildWhichIsA('TextBox',true)then control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0);control.Size=UDim2.fromOffset(width,30)end end
+  for _,control in ipairs(main:GetChildren())do
+   if control:IsA('GuiObject')and control~=title and control~=frame.UIElements.Container and control:FindFirstChildWhichIsA('TextBox',true)then
+    control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0);control.Size=UDim2.fromOffset(width,30)
+    for _,node in ipairs(control:GetDescendants())do if node:IsA('UICorner')then node.CornerRadius=UDim.new(0,7)end end
+   end
+  end
  elseif content.__type=='Dropdown'then width=config.Width or 140
- elseif content.__type=='Button'then width=24;local control=content.UIElements.ButtonIcon;if control then control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0)end end
+ elseif content.__type=='Button'then
+  width=24
+  local control=content.UIElements.ButtonIcon
+  if control then
+   if config.Icon then
+    control.AnchorPoint=Vector2.new(0,.5);control.Position=UDim2.new(0,14,.5,0)
+   else
+    control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0)
+   end
+  end
+ end
  local iconOffset=0
- if config.Icon then
+ if config.Icon and content.__type~='Button'then
   local icon=require('./RemakeUI').icon(main,config.Icon,14,15,20,config.Window);iconOffset=28
+ elseif config.Icon and content.__type=='Button'then
+  iconOffset=28
  end
  if title then title.Position=UDim2.fromOffset(14+iconOffset,0);title.Size=UDim2.new(1,-width-40-iconOffset,1,0)end
- C.New('Frame',{Parent=main,Name='RowDivider',Position=UDim2.new(0,14,1,-1),Size=UDim2.new(1,-28,0,1),BackgroundTransparency=.95,ThemeTag={BackgroundColor3='Text'}})
+ if content.__type=='Button'and config.Primary then
+  main.Size=UDim2.new(1,-28,0,34);main.Position=UDim2.fromOffset(14,4)
+  if main:IsA('ImageButton')or main:IsA('ImageLabel')then
+   main.ImageTransparency=0
+   C.AddThemeObject(main,{ImageColor3='Primary'})
+  else
+   main.BackgroundTransparency=0
+   C.AddThemeObject(main,{BackgroundColor3='Primary'})
+  end
+  local control=content.UIElements.ButtonIcon
+  if control then
+   control.Visible=true;control.Size=UDim2.fromOffset(16,16)
+   control.AnchorPoint=Vector2.new(0,.5);control.Position=UDim2.new(0,12,.5,0)
+   if control.ImageLabel then control.ImageLabel.ImageColor3=Color3.new(1,1,1);control.ImageLabel.ImageTransparency=0 end
+  end
+  if title then
+   title.Position=UDim2.fromOffset(0,0);title.Size=UDim2.fromScale(1,1)
+   title.TextXAlignment=Enum.TextXAlignment.Center;title.TextColor3=Color3.new(1,1,1);title.TextTransparency=0
+   if C.Objects[title]then C.Objects[title].Properties.TextColor3=nil end
+  end
+  local corner=main:FindFirstChildWhichIsA('UICorner',true);if corner then corner.CornerRadius=UDim.new(0,8)end
+ else
+  C.New('Frame',{Parent=main,Name='RowDivider',Position=UDim2.new(0,14,1,-1),Size=UDim2.new(1,-28,0,1),BackgroundTransparency=.95,ThemeTag={BackgroundColor3='Text'}})
+ end
 end

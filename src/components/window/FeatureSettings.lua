@@ -5,7 +5,7 @@ local Input=game:GetService('UserInputService')
 local Settings={}
 function Settings.New(content,frame,window,wind,elements,scale,config)
  config=config or{}
- local width=math.clamp(config.Width or 336,280,520)
+ local width=math.clamp(config.Width or 336,280,760)
  local panel=U.panel(window,'FeatureSettings',width,120,820)
  panel.ClipsDescendants=true
  local title=U.text(panel,config.Title or content.Title or 'Settings',12,7,width-50,28);title.TextSize=16
@@ -13,10 +13,10 @@ function Settings.New(content,frame,window,wind,elements,scale,config)
  local body=U.New('ScrollingFrame',{Parent=panel,Name='SettingsBody',Position=UDim2.fromOffset(12,42),Size=UDim2.new(1,-24,1,-54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize='Y',CanvasSize=UDim2.new(),ZIndex=822})
  local tab={Elements={},FeatureSettings=true,UIElements={ContainerFrame=body}}
  require('./RemakeLayout').Attach(tab,window,wind,elements,scale)
- local columns=tab:Columns({Gap=0,MinColumnWidth=1000})
+ local columns=tab:Columns({Gap=config.ColumnGap or 8,MinColumnWidth=config.MinColumnWidth or 1000})
  local button=U.button(frame.UIElements.Main,'',0,0,30,30)
  button.Name='FeatureSettingsButton';button.AnchorPoint=Vector2.new(0,.5);button.Position=UDim2.new(1,-108,.5,0)
- U.icon(button,'ellipsis',7,7,16,window)
+ U.icon(button,config.Icon or'ellipsis',7,7,16,window)
  if frame.UIElements.Title then frame.UIElements.Title.Size=UDim2.new(1,-132,1,0)end
  local self={Opened=false,Sections={},UIElements={Panel=panel,Button=button,Title=title,Body=body,Columns=columns}}
  local function fit()
@@ -25,10 +25,12 @@ function Settings.New(content,frame,window,wind,elements,scale,config)
   panel.Size=UDim2.fromOffset(width,math.clamp(height,110,math.min(620,wind.ScreenGui.AbsoluteSize.Y/math.max(.01,wind.UIScaleObj.Scale)-24)))
   if self.Opened then U.beside(panel,button,wind,8)end
  end
- function self:Section(cfg)
+ function self:Section(cfg,side)
   cfg=table.clone(cfg or{});if cfg.Outlined==nil then cfg.Outlined=true end;if cfg.Title==nil then cfg.Title=false end
-  local group=columns.Left:Section(cfg);table.insert(self.Sections,group);task.defer(fit);return group
+  local column=side=='Right'and columns.Right or columns.Left
+  local group=column:Section(cfg);table.insert(self.Sections,group);task.defer(fit);return group
  end
+ function self:RightSection(cfg)return self:Section(cfg,'Right')end
  self.Group=self.Section
  function self:Close()self.Opened=false;U.show(panel,false);if window.ActiveFeatureSettings==self then window.ActiveFeatureSettings=nil end end
  function self:Open()

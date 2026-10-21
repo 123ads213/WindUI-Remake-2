@@ -226,6 +226,7 @@ function Profile.New(Window, WindUI, Config)
     end
     self.UIElements.Flyout=flyout
     local optionRecords={Scale={},Style={}}
+    local themeChoices=Config.Themes or {'Dark','Light'}
     local hoverCard,hoverMenu=false,false
     local hoverFlyout,hoverRow=false,nil
     local flySerial=0
@@ -243,7 +244,10 @@ function Profile.New(Window, WindUI, Config)
         local theme=WindUI:GetCurrentTheme();themeControl.Value=theme;styleValue.Text=theme;updateChecks('Style',theme)
     end
     function themeControl:Select(theme)
-        if not WindUI:GetThemes()[theme]then return end
+        if not WindUI:GetThemes()[theme]then
+            if Config.OnThemeRequested then Creator.SafeCallback(Config.OnThemeRequested,theme)end
+            return
+        end
         self.Value=theme;styleValue.Text=theme;WindUI:SetTheme(theme);updateChecks('Style',theme)
         if Config.OnThemeChanged then Creator.SafeCallback(Config.OnThemeChanged,theme)end
     end
@@ -255,20 +259,38 @@ function Profile.New(Window, WindUI, Config)
             local label=text(row,'Label',value,10,0,-40,28,14);label.ZIndex=213
             local mark=icon(row,'check',126,6,16);mark.AnchorPoint=Vector2.new(1,0);mark.Position=UDim2.new(1,-10,0,6);mark.ZIndex=214;mark.ImageLabel.ZIndex=214
             mark.Visible=value==(kind=='Scale' and scaleControl.Value or themeControl.Value)
+            if kind=='Style'and Config.IsCustomTheme and Config.IsCustomTheme(value)then
+                label.Size=UDim2.new(1,-66,0,28)
+                local settings=New('TextButton',{Parent=row,Name='ThemeSettings',Text='',Position=UDim2.new(1,-55,0,2),Size=UDim2.fromOffset(24,24),BackgroundTransparency=1,AutoButtonColor=false,ZIndex=215})
+                local settingsIcon=icon(settings,'settings',4,4,16);settingsIcon.ZIndex=216;settingsIcon.ImageLabel.ZIndex=216
+                connect(settings.MouseButton1Click,function()if Config.OnThemeSettings then Creator.SafeCallback(Config.OnThemeSettings,value)end end)
+            elseif kind=='Style'and not WindUI:GetThemes()[value]then
+                mark.Visible=false
+                local add=icon(row,'plus',126,6,16);add.AnchorPoint=Vector2.new(1,0);add.Position=UDim2.new(1,-10,0,6);add.ZIndex=214;add.ImageLabel.ZIndex=214
+            end
             optionRecords[kind][value]={Row=row,Check=mark}
             connect(row.MouseEnter,function()Tween(row,.16,{BackgroundTransparency=0}):Play()end)
             connect(row.MouseLeave,function()Tween(row,.16,{BackgroundTransparency=1}):Play()end)
             connect(row.MouseButton1Click,function()if kind=='Scale'then scaleControl:Select(value)else themeControl:Select(value)end end)
         end
     end
-    options('Scale',choices);options('Style',Config.Themes or {'Dark','Light'})
+    options('Scale',choices);options('Style',themeChoices)
     self.UIElements.ScaleOptions,self.UIElements.ThemeOptions=optionRecords.Scale,optionRecords.Style
-    local function placeFlyout()
+    local placeFlyout
+    function self:SetThemes(values)
+        themeChoices=values or{}
+        for _,record in pairs(optionRecords.Style)do if record.Row then record.Row:Destroy()end end
+        optionRecords.Style={}
+        options('Style',themeChoices)
+        self.UIElements.ThemeOptions=optionRecords.Style
+        if self.FlyoutKind=='Style'and placeFlyout then placeFlyout()end
+    end
+    placeFlyout=function()
         local kind=self.FlyoutKind;if not kind then return end
         local scale=WindUI.UIScaleObj.Scale
         local origin,available=WindUI.ScreenGui.AbsolutePosition,WindUI.ScreenGui.AbsoluteSize
         local width=kind=='Scale' and 160 or 180
-        local values=kind=='Scale' and choices or (Config.Themes or {'Dark','Light'})
+        local values=kind=='Scale' and choices or themeChoices
         local height=16+#values*28
         flyout.Size=UDim2.fromOffset(width,height)
         local minX=(origin.X-main.AbsolutePosition.X)/scale+8

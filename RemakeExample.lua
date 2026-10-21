@@ -154,6 +154,9 @@ AdvancedGroup:Slider({ Flag='example_locked', Title = 'Locked', Locked = true, V
 AdvancedGroup:Slider({ Flag='example_fixed', Title = 'Fixed range', Value = { Min = 5, Max = 5, Default = 5 } })
 local ThemeDropdown=ThemeControls:Dropdown({ Flag='theme', Title = 'Theme', Values = { 'Dark', 'Light', 'Ocean', 'Forest', 'Ember', 'Orchid', 'Paper' }, Value = 'Dark',
     Callback = function(theme) WindUI:SetTheme(theme) end })
+local CustomThemes=Window:CreateThemeEditor(ThemeControls,{
+    Builtins={ 'Dark', 'Light', 'Ocean', 'Forest', 'Ember', 'Orchid', 'Paper' },
+})
 ThemeControls:Toggle({ Title = 'Preview toggle', Flag = 'preview_toggle', Value = true, Callback = function() end })
 ThemeControls:Slider({ Title = 'Preview slider', Value = { Min = 0, Max = 1e6, Default = 500000 }, IsTooltip = true })
 ThemeControls:Button({ Title = 'Preview button' })
@@ -165,10 +168,20 @@ local GradientColor = ThemeColors:Colorpicker({ Title = 'Gradient preview', Flag
     { Position=0, Color=Color3.fromRGB(0,170,255), Transparency=0 },
     { Position=1, Color=Color3.fromRGB(196,92,255), Transparency=.2 },
 }, Callback = function(color,transparency,gradient) Calls.GradientColor=gradient end })
+local BuiltinThemes={ 'Dark', 'Light', 'Ocean', 'Forest', 'Ember', 'Orchid', 'Paper' }
+local function profileThemeNames()
+    local values=table.clone(BuiltinThemes)
+    for _,name in ipairs(CustomThemes:GetNames())do table.insert(values,name)end
+    table.insert(values,'Custom')
+    return values
+end
 local Profile = Window:CreateProfile({
     DaysRemaining = 30, Mock = true, StoreLink = 'https://discord.gg/eqAEszZzHj',
-    Themes = { 'Dark', 'Light', 'Ocean', 'Forest', 'Ember', 'Orchid', 'Paper' },
-    OnThemeChanged = function(theme) ThemeDropdown:Select(theme) end,
+    Themes = profileThemeNames(),
+    IsCustomTheme=function(theme)return CustomThemes.Entries[theme]~=nil end,
+    OnThemeRequested=function(theme)if theme=='Custom'then CustomThemes:OpenCreate()end end,
+    OnThemeSettings=function(theme)CustomThemes:OpenEditor(theme)end,
+    OnThemeChanged = function(theme) if table.find(BuiltinThemes,theme)then ThemeDropdown:Select(theme)end end,
     History = {
         {Version='1.6.66-fork.14',Date='2026-10-19',Title='Sirius watermark labels',Description='Distinct FPS monitor icon, 8px icon-to-text gaps, full weekdays, Sirius branding and opaque themed keylist surfaces.'},
         {Version='1.6.66-fork.13',Date='2026-10-19',Title='Classic binds & opaque HUD',Description='Reference-size left-side hotkey indicators and compact labels. Solid black Dark-theme watermark with tighter spacing and neutral icons; selectable fields and transitions retained.'},
@@ -185,6 +198,7 @@ local Profile = Window:CreateProfile({
         { Version = '1.6.66-fork.2', Date = '2026-10-18', Title = 'Original WindUI layout', Description = 'Original inline controls and resize behavior, nested Player/World pages and optional Lock Offscreen.' },
     },
 })
+CustomThemes.OnChanged=function()if Profile then Profile:SetThemes(profileThemeNames())end end
 -- A functional element laboratory. These callbacks modify demo state, not gameplay.
 Window:Section({Title='LIBRARY EXAMPLES',HeaderSize=28})
 local Lab=Window:Tab({Title='Elements',Icon='blocks'})
@@ -263,6 +277,6 @@ Window:SelectTab(Visuals.Index) -- Selects the first unlocked child (Player).
 
 Env.WindUIForkDemo = { Library = WindUI, Window = Window, Big = Big, Billion = Billion,
     ShowPlayers = ShowPlayers, Fine = Fine, Calls = Calls, Visuals = Visuals, Player = Player, Players = Player,
-    World = World, General = General, Themes = Themes, Gravity = Gravity, Balance = Balance, Collection = Collection, Appearance = Appearance, Profile = Profile, HUD = HUD, Presets=Presets, PlayerMock=PlayerMock, ModelRow=ModelRow, BoxRow=BoxRow, PreviewTab=PreviewTab, AntiAFK=AntiAFK, Showcase=Showcase, PlayerOptions=PlayerOptions, PopupDistance=PopupDistance, PopupStyle=PopupStyle, Pages=Pages, Columns=PlayerColumns, ThemeDropdown=ThemeDropdown, Advanced=Advanced, Dependent=Unshortened, DependencyGroup=AdvancedGroup, WatermarkFields = WatermarkFields, SolidColor = SolidColor, GradientColor = GradientColor }
+    World = World, General = General, Themes = Themes, Gravity = Gravity, Balance = Balance, Collection = Collection, Appearance = Appearance, Profile = Profile, HUD = HUD, Presets=Presets, PlayerMock=PlayerMock, ModelRow=ModelRow, BoxRow=BoxRow, PreviewTab=PreviewTab, AntiAFK=AntiAFK, Showcase=Showcase, PlayerOptions=PlayerOptions, PopupDistance=PopupDistance, PopupStyle=PopupStyle, Pages=Pages, Columns=PlayerColumns, ThemeDropdown=ThemeDropdown, CustomThemes=CustomThemes, Advanced=Advanced, Dependent=Unshortened, DependencyGroup=AdvancedGroup, WatermarkFields = WatermarkFields, SolidColor = SolidColor, GradientColor = GradientColor }
 Env.__WindUIForkPendingLibrary = nil
 return "Full remake 2 menu started"

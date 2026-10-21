@@ -10,7 +10,7 @@ function D:New(config)
  obj.DropdownFrame=ef
  local width=config.Width or 140
  local trigger=U.button(ef.UIElements.Main,'',0,0,width,30,function()if obj.Opened then obj:Close()else obj:Open()end end);trigger.Name='Choice';trigger:SetAttribute('NoHover',true);trigger.AnchorPoint=Vector2.new(1,.5);trigger.Position=UDim2.new(1,-14,.5,0);trigger.BackgroundTransparency=.35;C.AddThemeObject(trigger,{BackgroundColor3="ChoiceBackground",BackgroundTransparency="ChoiceTransparency"})
- local clip=U.New('CanvasGroup',{Parent=trigger,Name='PreviewClip',Position=UDim2.fromOffset(10,0),Size=UDim2.fromOffset(width-40,30),BackgroundTransparency=1,ClipsDescendants=true,ZIndex=trigger.ZIndex+2})
+ local clip=U.New('Frame',{Parent=trigger,Name='PreviewClip',Position=UDim2.fromOffset(10,0),Size=UDim2.fromOffset(width-40,30),BackgroundTransparency=1,ClipsDescendants=true,ZIndex=trigger.ZIndex+2})
  local display=U.text(clip,'Select',0,0,width-40,30);display.TextTruncate=Enum.TextTruncate.None
  local gradient=U.New('UIGradient',{Parent=display,Rotation=0})
  local previewSerial=0;local previewTween
@@ -27,13 +27,13 @@ function D:New(config)
   if display.Text==text then fadeEdge();return end
   previewSerial+=1;local serial=previewSerial
   if previewTween then previewTween:Cancel()end
-  previewTween=U.Tween(clip,.08,{GroupTransparency=1});previewTween:Play()
-  task.delay(.08,function()if clip.Parent and serial==previewSerial then display.Text=text;fadeEdge();previewTween=U.Tween(clip,.14,{GroupTransparency=0});previewTween:Play()end end)
+  previewTween=U.Tween(display,.08,{TextTransparency=1});previewTween:Play()
+  task.delay(.08,function()if clip.Parent and serial==previewSerial then display.Text=text;fadeEdge();previewTween=U.Tween(display,.14,{TextTransparency=0});previewTween:Play()end end)
  end
  U.icon(trigger,'chevron-down',width-25,7,16,config.Window)
- local menu=U.panel(config.Window,'CompactChoices',config.MenuWidth or math.max(width,180),100,810)
+ local menu=U.panel(config.Window,'CompactChoices',config.MenuWidth or math.max(width,180),100,920)
  local search=U.input(menu,'Search...',8,8,menu.Size.X.Offset-16,30);search.Visible=config.SearchBarEnabled==true
- local scroll=U.New('ScrollingFrame',{Parent=menu,Name='Options',Position=UDim2.fromOffset(6,search.Visible and 44 or 6),Size=UDim2.new(1,-12,1,search.Visible and -50 or -12),BackgroundTransparency=1,CanvasSize=UDim2.new(),AutomaticCanvasSize='Y',ScrollBarThickness=2,BorderSizePixel=0,ZIndex=812})
+ local scroll=U.New('ScrollingFrame',{Parent=menu,Name='Options',Position=UDim2.fromOffset(6,search.Visible and 44 or 6),Size=UDim2.new(1,-12,1,search.Visible and -50 or -12),BackgroundTransparency=1,CanvasSize=UDim2.new(),AutomaticCanvasSize='Y',ScrollBarThickness=2,BorderSizePixel=0,ZIndex=922})
  U.New('UIListLayout',{Parent=scroll,SortOrder='LayoutOrder',Padding=UDim.new(0,2)})
  obj.UIElements.Dropdown=trigger;obj.UIElements.MenuCanvas=menu;obj.UIElements.Display=display;obj.UIElements.PreviewClip=clip;obj.UIElements.PreviewGradient=gradient
  local function title(v)return type(v)=='table'and tostring(v.Title or v.Value or '')or tostring(v)end

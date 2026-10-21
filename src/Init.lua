@@ -217,6 +217,14 @@ end
 function WindUI:GetCurrentTheme()
 	return WindUI.Theme.Name
 end
+function WindUI:GetThemeProperty(Property, Theme)
+	return Creator.GetThemeProperty(Property, Theme or WindUI.Theme)
+end
+function WindUI:RefreshTheme()
+	if not WindUI.Theme then return nil end
+	Creator.SetTheme(WindUI.Theme)
+	return WindUI.Theme
+end
 function WindUI:GetTransparency()
 	return WindUI.Transparent or false
 end

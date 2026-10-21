@@ -1781,6 +1781,10 @@ return function(Config)
         return Window.Profile
     end
 
+	function Window:CreateThemeEditor(parent, editorConfig)
+		return require("./ThemeEditor").New(Window, Config.WindUI, parent, editorConfig or {})
+	end
+
 	function Window:Divider()
 		local Divider = New("Frame", {
 			Size = UDim2.new(1, 0, 0, 1),
