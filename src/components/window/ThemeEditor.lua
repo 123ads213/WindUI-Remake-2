@@ -117,7 +117,7 @@ function ThemeEditor.New(window,wind,parent,config)
   local nameInput=basics:Input({Title='Name',Icon='type',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Flat=true,Value=isCreate and''or entry.Name,Placeholder='My theme'})
   local baseInput=basics:Dropdown({Title='Base theme',Icon='palette',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Values=builtins,Value=entry.Base or'Dark',MenuWidth=190})
   local actionTitle=isCreate and'Save theme'or'Save and overwrite'
-  local actionConfig={Title=actionTitle,Icon=isCreate and'check'or'save',Primary=true,Callback=function()
+  local actionConfig={Title=actionTitle,Icon=isCreate and'check'or'save',Callback=function()
    local name=normalizedName(nameInput.Value)
    if name==''then notify('Custom theme','Enter a theme name.','circle-alert');return end
    for _,builtin in ipairs(builtins)do if string.lower(builtin)==string.lower(name)then notify('Custom theme','That name belongs to a built-in theme.','circle-alert');return end end
@@ -168,11 +168,11 @@ function ThemeEditor.New(window,wind,parent,config)
  createThemeRow=function(entry)
   if self.Rows[entry.Name]then return self.Rows[entry.Name]end
   materialize(entry)
-  local row=parent:Button({Title=entry.Name,Icon='palette',Callback=function()apply(entry)end})
+  local row=parent:Button({Title=entry.Name,Icon='palette',ButtonStyle='Navigation',Callback=function()apply(entry)end})
   self.Rows[entry.Name]=row;self.Editors[entry.Name]=attachEditor(row,entry,false);return row
  end
 
- local addRow=parent:Button({Title=config.CreateTitle or'Custom',Icon='plus'})
+ local addRow=parent:Button({Title=config.CreateTitle or'Custom',Icon='plus',ButtonStyle='Navigation'})
  local draft={Name='',Base=config.DefaultBase or'Dark',Values={}}
  local createPanel=attachEditor(addRow,draft,true)
  addRow.Callback=function()createPanel:Open()end

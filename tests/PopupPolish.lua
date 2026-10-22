@@ -83,11 +83,13 @@ local function run()
  check(theme:OpenEditor(name),'new theme editor opens')
  task.wait(.4);checkThemeFields(theme.Editors[name])
  local edit=theme.Editors[name];local found
+ check(theme.CreateRow.UIElements.ButtonSurface==nil and theme.Rows[name].UIElements.ButtonSurface==nil,'theme navigation retains plain rows without nested cards')
  for _,element in ipairs(edit.Sections[1].Elements)do
   if element.__type=='Button'then
    local surface=element.UIElements.ButtonSurface;local row=element.ButtonFrame.UIElements.Main
-   check(surface~=nil and surface.BackgroundTransparency==0,'theme action has a visible button surface')
-   check(surface:FindFirstChild('ButtonBorder')~=nil,'theme action has explicit button bounds')
+   check(surface~=nil and surface.BackgroundTransparency<.3,'theme action has soft visible fill')
+   check(surface:FindFirstChildWhichIsA('UIStroke')==nil,'no outlined cards around buttons')
+   check(surface.Size.Y.Offset==30,'button height matches compact controls')
    check(element.UIElements.ButtonIcon.Parent==surface,'action icon inside button')
    check(element.ButtonFrame.UIElements.Title.Parent==surface,'action label inside button')
    local color=surface.BackgroundColor3

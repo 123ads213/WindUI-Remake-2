@@ -102,10 +102,9 @@ return function(content,frame,config)
   iconOffset=28
  end
  if title then title.Position=UDim2.fromOffset(14+iconOffset,0);title.Size=UDim2.new(1,-width-40-iconOffset,1,0)end
- if content.__type=='Button'then
-  local surface=C.New('Frame',{Parent=main,Name='ButtonSurface',Position=UDim2.fromOffset(10,4),Size=UDim2.new(1,-20,1,-8),BackgroundTransparency=0,BorderSizePixel=0,ThemeTag={BackgroundColor3=config.Primary and'Primary'or'ChoiceBackground'},ZIndex=main.ZIndex+1})
+ if content.__type=='Button'and config.ButtonStyle~='Navigation'then
+  local surface=C.New('Frame',{Parent=main,Name='ButtonSurface',AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,14,.5,0),Size=UDim2.new(1,-28,0,30),BackgroundTransparency=config.Primary and 0 or .2,BorderSizePixel=0,ThemeTag={BackgroundColor3=config.Primary and'Primary'or'Button'},ZIndex=main.ZIndex+1})
   C.New('UICorner',{Parent=surface,CornerRadius=UDim.new(0,7)})
-  C.New('UIStroke',{Parent=surface,Name='ButtonBorder',Thickness=1,ApplyStrokeMode='Border',Transparency=config.Primary and 1 or .82,ThemeTag={Color='Text'}})
   content.UIElements.ButtonSurface=surface
   local control=content.UIElements.ButtonIcon
   if control then

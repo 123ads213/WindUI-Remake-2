@@ -33667,10 +33667,9 @@ elseif ag.Icon and ae.__type=='Button'then
 am=28
 end
 if aj then aj.Position=UDim2.fromOffset(14+am,0);aj.Size=UDim2.new(1,-al-40-am,1,0)end
-if ae.__type=='Button'then
-local an=aa.New('Frame',{Parent=ah,Name='ButtonSurface',Position=UDim2.fromOffset(10,4),Size=UDim2.new(1,-20,1,-8),BackgroundTransparency=0,BorderSizePixel=0,ThemeTag={BackgroundColor3=ag.Primary and'Primary'or'ChoiceBackground'},ZIndex=ah.ZIndex+1})
+if ae.__type=='Button'and ag.ButtonStyle~='Navigation'then
+local an=aa.New('Frame',{Parent=ah,Name='ButtonSurface',AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,14,.5,0),Size=UDim2.new(1,-28,0,30),BackgroundTransparency=ag.Primary and 0 or.2,BorderSizePixel=0,ThemeTag={BackgroundColor3=ag.Primary and'Primary'or'Button'},ZIndex=ah.ZIndex+1})
 aa.New('UICorner',{Parent=an,CornerRadius=UDim.new(0,7)})
-aa.New('UIStroke',{Parent=an,Name='ButtonBorder',Thickness=1,ApplyStrokeMode='Border',Transparency=ag.Primary and 1 or.82,ThemeTag={Color='Text'}})
 ae.UIElements.ButtonSurface=an
 local ao=ae.UIElements.ButtonIcon
 if ao then
@@ -38063,7 +38062,7 @@ local az=ax:Section{Title=ay,Outlined=not aw}
 local aA=az:Input{Title='Name',Icon='type',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Flat=true,Value=aw and''or av.Name,Placeholder='My theme'}
 local aB=az:Dropdown{Title='Base theme',Icon='palette',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Values=ap,Value=av.Base or'Dark',MenuWidth=190}
 local aC=aw and'Save theme'or'Save and overwrite'
-local aD={Title=aC,Icon=aw and'check'or'save',Primary=true,Callback=function()
+local aD={Title=aC,Icon=aw and'check'or'save',Callback=function()
 local aD=normalizedName(aA.Value)
 if aD==''then notify('Custom theme','Enter a theme name.','circle-alert');return end
 for aE,aF in ipairs(ap)do if string.lower(aF)==string.lower(aD)then notify('Custom theme','That name belongs to a built-in theme.','circle-alert');return end end
@@ -38114,11 +38113,11 @@ end
 at=function(au)
 if ao.Rows[au.Name]then return ao.Rows[au.Name]end
 materialize(au)
-local av=am:Button{Title=au.Name,Icon='palette',Callback=function()apply(au)end}
+local av=am:Button{Title=au.Name,Icon='palette',ButtonStyle='Navigation',Callback=function()apply(au)end}
 ao.Rows[au.Name]=av;ao.Editors[au.Name]=attachEditor(av,au,false);return av
 end
 
-local au=am:Button{Title=an.CreateTitle or'Custom',Icon='plus'}
+local au=am:Button{Title=an.CreateTitle or'Custom',Icon='plus',ButtonStyle='Navigation'}
 local av={Name='',Base=an.DefaultBase or'Dark',Values={}}
 local aw=attachEditor(au,av,true)
 au.Callback=function()aw:Open()end
