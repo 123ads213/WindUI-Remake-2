@@ -1,0 +1,266 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Темы и интеграция · WindUI Remake 2</title><link rel="stylesheet" href="style.css"></head><body><header><a class="brand" href="index.html">WindUI <span>Remake 2 / Documentation</span></a><a class="repo" href="https://github.com/123ads213/WindUI-Remake-2">GitHub ↗</a></header><div class="shell"><aside><div class="search"><input id="search" type="search" aria-label="Поиск по документации" placeholder="Поиск методов…"></div><nav class="desktop-nav" aria-label="Документация"><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a><a href="composition.html">Тема и составные строки</a><a href="migration.html">Миграция для ИИ</a><a href="advanced.html" aria-current="page">Темы и интеграция</a><a href="source-config.html">Поля исходников</a><a href="ai-context.html">Всё в одном файле</a></nav><details class="mobile-nav"><summary>Разделы документации</summary><nav><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a><a href="composition.html">Тема и составные строки</a><a href="migration.html">Миграция для ИИ</a><a href="advanced.html" aria-current="page">Темы и интеграция</a><a href="source-config.html">Поля исходников</a><a href="ai-context.html">Всё в одном файле</a></nav></details><div class="desktop-nav eyebrow">На этой странице</div><nav class="toc" aria-label="Содержание"><div class="toc">
+<ul>
+<li><a href="#_1">Темы, редактор, курсор и полная интеграция</a><ul>
+<li><a href="#_2">Встроенные темы</a><ul>
+<li><a href="#neverlose-reloaded">Что именно совпадает с Neverlose-Reloaded</a></li>
+</ul>
+</li>
+<li><a href="#custom-cursor">Custom cursor</a></li>
+<li><a href="#api">Пользовательская тема через API</a></li>
+<li><a href="#custom-themes">Встроенный редактор custom themes</a></li>
+<li><a href="#custom-themes_1">Профиль + custom themes</a></li>
+<li><a href="#hud">HUD: точные поля и состояние</a></li>
+<li><a href="#low-level-configmanager">Low-level ConfigManager (существующие проекты)</a></li>
+<li><a href="#_3">Ограничения и диагностика</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></aside><main><div id="results" class="results" aria-live="polite"></div><article><h1 id="_1">Темы, редактор, курсор и полная интеграция</h1>
+<h2 id="_2">Встроенные темы</h2>
+<p><code>Dark</code>, <code>Light</code>, <code>Ocean</code>, <code>Forest</code>, <code>Ember</code>, <code>Orchid</code>, <code>Paper</code>, <code>Neverlose</code>.</p>
+<pre><code class="language-lua">WindUI:SetTheme('Neverlose')
+print(WindUI:GetCurrentTheme())
+local themes = WindUI:GetThemes()
+local textColor = WindUI:GetThemeProperty('Text')
+WindUI:RefreshTheme() -- только когда изменили содержимое текущей theme table
+</code></pre>
+<p>Темы зарегистрированы в библиотеке; профиль по умолчанию показывает лишь Dark/Light. Передайте <code>Themes</code>, если нужны все. Общая прозрачность окна (<code>ToggleTransparency</code> / профиль) и прозрачность отдельных theme properties — разные механизмы.</p>
+<h3 id="neverlose-reloaded">Что именно совпадает с Neverlose-Reloaded</h3>
+<p>Исходные значения взяты из <code>gui.hpp</code> / <code>c_gui::apply_theme(0)</code> приложенных C++ исходников. Сохраняются нормализованные RGB, без подбора пипеткой:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Назначение</th>
+<th>RGB [0..1] / RGB [0..255]</th>
+<th>Применение</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Акцент</td>
+<td><code>.318, .486, .992</code></td>
+<td>Primary, Toggle, Slider, Checkbox</td>
+</tr>
+<tr>
+<td>Текст</td>
+<td><code>.922, .922, .941</code></td>
+<td>Text</td>
+</tr>
+<tr>
+<td>Вторичный текст</td>
+<td><code>.51, .52, .56</code></td>
+<td>Icon, Placeholder</td>
+</tr>
+<tr>
+<td>Боковая поверхность/карточки</td>
+<td><code>.071, .078, .114</code></td>
+<td>WindowBackground, ElementBackground, Dialog</td>
+</tr>
+<tr>
+<td>Основная поверхность</td>
+<td><code>.043, .055, .086</code></td>
+<td>PanelBackground</td>
+</tr>
+<tr>
+<td>Поле</td>
+<td><code>25, 27, 36</code> (0..255)</td>
+<td>ChoiceBackground, LabelBackground</td>
+</tr>
+<tr>
+<td>Выбранный tab</td>
+<td><code>.153, .169, .212</code></td>
+<td>TabBackgroundActive, alpha 1</td>
+</tr>
+<tr>
+<td>Наведение tab</td>
+<td>тот же цвет</td>
+<td>TabBackgroundHover, alpha .4 (Roblox transparency .6)</td>
+</tr>
+<tr>
+<td>Выключенный toggle</td>
+<td><code>.055, .071, .098</code></td>
+<td>ToggleTrack</td>
+</tr>
+<tr>
+<td>Выключенная ручка</td>
+<td><code>.498, .529, .557</code></td>
+<td>ToggleThumbOff</td>
+</tr>
+</tbody>
+</table></div>
+<p>Дополнительные рамки обычных карточек скрыты: <code>CardBorderTransparency=1</code>. Редактор тем использует такие же обычные карточки, без отдельной светлой <code>GroupOutline</code>.</p>
+<p><strong>Не обещать 1:1 рендер всего C++ меню:</strong> разметка, шрифт, эффекты blur/shaders, прозрачность боковой/верхней/основной поверхности и временные кривые анимаций не перенесены буквально. Наши поверхности сейчас сплошные; выбранный tab и его hover используют исходные цвет/alpha. Настраиваемая прозрачность окна отдельная. Neverlose — отдельная палитра, остальные темы не заменены.</p>
+<h2 id="custom-cursor">Custom cursor</h2>
+<pre><code class="language-lua">Window:SetCustomCursor({Enabled=true,Size=10})
+Window:SetCustomCursor({Color=Color3.fromRGB(255,80,80)})
+Window:SetCustomCursor({Color='#12AB34'})
+Window:SetCustomCursor({Color=false}) -- вернуть цвет из темы
+Window:SetCustomCursor({Color='Auto'}) -- то же
+Window:SetCustomCursor(false) -- вернуть системный курсор
+</code></pre>
+<ul>
+<li>По умолчанию custom cursor выключен; включается через <code>CustomCursor</code> окна или метод.</li>
+<li>Это заполненная круглая точка, размер 4..24 экранных px, независимо от DPI окна.</li>
+<li><code>Cursor</code> берётся из темы, fallback — <code>Text</code>. Встроенные Light/Paper задают чёрный, Neverlose — белый.</li>
+<li>Явный <code>Color</code> перекрывает тему. Если менять только <code>Size</code>, override сохраняется.</li>
+<li>При скрытии/закрытии окна, потере фокуса и Destroy восстанавливается предыдущее состояние нативной иконки.</li>
+<li>Кастомный редактор имеет поле <strong>Cursor</strong>; RGB применяется к точке, прозрачность точки остаётся 0 (она не редактируется через alpha темы).</li>
+</ul>
+<h2 id="api">Пользовательская тема через API</h2>
+<pre><code class="language-lua">local custom = table.clone(WindUI:GetThemes().Neverlose)
+custom.Name = 'My palette'
+custom.Primary = Color3.fromRGB(180,120,255)
+custom.Toggle = custom.Primary
+custom.Slider = custom.Primary
+custom.Checkbox = custom.Primary
+custom.Cursor = Color3.fromRGB(255,255,255)
+WindUI:AddTheme(custom)
+WindUI:SetTheme(custom.Name)
+</code></pre>
+<p><code>Accent</code> — название одной из поверхностей старого WindUI, а не синоним <code>Primary</code>. Для смены интерактивного акцента используйте <code>Primary</code> и соответствующие явно заданные properties (<code>Toggle</code>, <code>Slider</code>, <code>Checkbox</code> и др.). <code>AddTheme</code> не пишет тему на диск сам по себе. Список всех реальных theme/fallback keys — в конце SOURCE-CONFIG.</p>
+<h2 id="custom-themes">Встроенный редактор custom themes</h2>
+<pre><code class="language-lua">local builtins={'Dark','Light','Ocean','Forest','Ember','Orchid','Paper','Neverlose'}
+local themePage=Window:Tab({Title='Themes',Icon='palette'})
+local columns=themePage:Columns()
+local controls=columns.Left:Section({Title='Appearance'})
+local selector=controls:Dropdown({Title='Theme',Flag='ui.theme',
+    Values=table.clone(builtins),Value='Neverlose',
+    Callback=function(name) WindUI:SetTheme(name) end})
+local editor=Window:CreateThemeEditor(controls,{
+    Builtins=table.clone(builtins),
+    FallbackTheme='Dark',
+    OnThemeChanged=function(name) selector:Select(name) end,
+})
+local function updateThemes()
+    local names=table.clone(builtins)
+    for _,name in ipairs(editor:GetNames()) do table.insert(names,name) end
+    selector:Refresh(names)
+end
+editor.OnChanged=updateThemes
+updateThemes()
+-- Действия, не обязательно вызывать при запуске:
+-- editor:OpenCreate()
+-- editor:OpenEditor('Existing custom theme') -- false, если такой нет
+</code></pre>
+<p>Публичный контроллер: <code>GetNames</code>, <code>OpenCreate</code>, <code>OpenEditor</code>; <code>.Entries</code>, <code>.Rows</code>, <code>.Editors</code>, <code>.CreatePanel</code> полезны для интеграции/диагностики, не нужны для обычного callback. <code>Fields={{property,label},...}</code> заменяет список редактируемых свойств; <code>Builtins</code> задаёт список исходных тем. <code>OnChanged(names)</code> уведомляет об изменении списка, <code>OnThemeChanged(name)</code> — о применении.</p>
+<p>Хранение: <code>(config.Folder or Window.Folder or 'Sirius-Remake2') .. '/' .. (config.FileName or 'custom-themes.json')</code>. Это <strong>не</strong> <code>WindUI/&lt;Folder&gt;/config/</code> обычных presets. <code>CreateWindow</code> с <code>Folder</code> создаёт нужные каталоги; для произвольного другого пути обеспечить каталог заранее. Нужны <code>writefile/readfile/isfile</code>; при недоступности UI может создать тему в памяти и сообщает об ошибке записи.</p>
+<p>Имя чистится от запрещённых символов и ограничено 32 байтами; имена built-in и существующие имена без учёта регистра не перезаписываются через Create. Save and overwrite обновляет существующую тему. Применение цветовых полей даёт live preview и не закрывает редактор. <strong>Для сохранения после перезапуска нажать Save and overwrite.</strong> Delete удаляет custom theme и переключает на <code>FallbackTheme</code>.</p>
+<p>Базовые цвета копируются в custom theme; смена Base theme не должна трактоваться как гарантированный сброс всех сохранённых overrides. Список custom themes и файлы не являются облачными, пользовательские темы не публикуются автоматически вместе с библиотекой.</p>
+<h2 id="custom-themes_1">Профиль + custom themes</h2>
+<pre><code class="language-lua">local function profileNames()
+    local names=table.clone(builtins)
+    for _,name in ipairs(editor:GetNames()) do table.insert(names,name) end
+    table.insert(names,'Custom') -- действие создания, не реальная theme
+    return names
+end
+local profile=Window:CreateProfile({
+    Name=game:GetService('Players').LocalPlayer.DisplayName,
+    Themes=profileNames(),
+    IsCustomTheme=function(name) return editor.Entries[name]~=nil end,
+    OnThemeRequested=function(name) if name=='Custom' then editor:OpenCreate() end end,
+    OnThemeSettings=function(name) editor:OpenEditor(name) end,
+    OnThemeChanged=function(name) selector:Select(name) end,
+    History={{Version='My build',Date='2026-01-01',Title='Migration',Description='Project update'}},
+})
+editor.OnChanged=function()
+    updateThemes()
+    profile:SetThemes(profileNames())
+end
+</code></pre>
+<p>Обновление списка после создания/удаления тем уже подключено через <code>profile:SetThemes(profileNames())</code> в callback выше (см. актуальный справочник и RemakeExample). Профиль имеет scale/style/transparency/history/menu bind/unload. Настройки лицензии/подписки — только предоставленные приложением данные; библиотека не проверяет оплату. Не переносить <code>Mock=true</code>/фиктивные DaysRemaining из демо в реальную систему подписок.</p>
+<p>Gear у custom theme стоит в правом слоте; выбранная тема сдвигает его влево и показывает check. Это уже реализовано внутри Profile; не добавляйте собственную поверхностную анимацию.</p>
+<h2 id="hud">HUD: точные поля и состояние</h2>
+<pre><code class="language-lua">local hud=Window:CreateHUD({Watermark=true,Keylist=true,Build='Release',
+    Fields={FPS=true,Ping=true,Username=true,Time=true,Day=true,Avatar=true,
+            Platform=true,Build=true,Executor=false,VAR=false,Memory=false,Uptime=false,Place=false}})
+hud:SetFields({'FPS','Ping','Username','Time','Weekday','Avatar','Logo','Build'})
+hud:SetField('Day',false)
+local saved=hud:Export()
+local ok,err=hud:Import(saved)
+</code></pre>
+<p><code>Config.Fields</code> и <code>SetField</code> используют <strong>ID</strong>, а <code>SetFields</code>/<code>GetFields</code> используют <strong>labels</strong>. Полное соответствие:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Label</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FPS</td>
+<td>FPS</td>
+</tr>
+<tr>
+<td>Ping</td>
+<td>Ping</td>
+</tr>
+<tr>
+<td>Username</td>
+<td>Username</td>
+</tr>
+<tr>
+<td>Time</td>
+<td>Time</td>
+</tr>
+<tr>
+<td>Day</td>
+<td>Weekday</td>
+</tr>
+<tr>
+<td>Avatar</td>
+<td>Avatar</td>
+</tr>
+<tr>
+<td>Platform</td>
+<td>Logo</td>
+</tr>
+<tr>
+<td>Build</td>
+<td>Build</td>
+</tr>
+<tr>
+<td>Executor</td>
+<td>Executor</td>
+</tr>
+<tr>
+<td>VAR</td>
+<td>Frame variance</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>Memory</td>
+</tr>
+<tr>
+<td>Uptime</td>
+<td>Session time</td>
+</tr>
+<tr>
+<td>Place</td>
+<td>Place ID</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>GetAvailableFields()</code> возвращает labels. <code>Builds={RobloxUsername='Nightly'}</code> задаёт build по имени, <code>Build</code> — fallback. Наличие Executor зависит от API среды. <code>SetKeylistMode</code> принимает старые <code>Key/Value/Classic</code> для совместимости, но текущая визуальная реализация нормализуется в Classic. Не обещать разные активные layouts. HUD двигается за header, имеет snap guides; позиции сохраняются в preset <code>__hud</code>, если HUD создан до сохранения/загрузки.</p>
+<h2 id="low-level-configmanager">Low-level ConfigManager (существующие проекты)</h2>
+<pre><code class="language-lua">local manager=Window.ConfigManager
+if manager then
+    local config,err=manager:CreateConfig('My config')
+    if config then
+        config:SetAsCurrent() -- зарегистрировать PendingFlags
+        config:Set('custom.key',{example=true})
+        local ok,saveErr=config:Save()
+        if not ok then warn(saveErr) end
+    else warn(err) end
+end
+</code></pre>
+<p>Публичные методы и определения — в REFERENCE. Нельзя использовать одновременно этот образец и автозагрузку другого менеджера без плана. Presets — UI-обёртка над этим хранением; они не мигрируют чужой формат JSON автоматически. <code>__custom</code> доступен через ConfigModule:Set/Get и не выполняет ваши восстановительные callbacks сам по себе.</p>
+<h2 id="_3">Ограничения и диагностика</h2>
+<ul>
+<li>UI library не реализует функциональность примеров ESP/aim/movement, синхронизацию с сервером или облачное хранилище.</li>
+<li><code>UIElements</code>/внутренние контроллеры нужны для диагностики; обычную интеграцию делать через методы.</li>
+<li>Не смешивать несколько разных загрузок WindUI в одном окне. Проверить cleanup перед rerun.</li>
+<li>Точные опции, встречающиеся в коде, перечислены в SOURCE-CONFIG. Это индекс для чтения кода, не обещание поддержки всех внутренних ключей как public API.</li>
+<li>Все действия с пользовательскими файлами тестировать на копиях. Live tests используют временные имена; не удалять пользовательские presets/themes для проверки.</li>
+</ul></article><footer>WindUI Remake 2 · Original WindUI by Footagesus · MIT<br>Сайт собран из Markdown и исходников в этом репозитории. <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/docs/remake-2/ADVANCED.md">Редактировать источник ↗</a></footer></main></div><script src="search-index.js"></script><script src="site.js"></script></body></html>

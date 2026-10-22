@@ -103,3 +103,12 @@ Final combined regression on the rebuilt standalone menu: Followup33, Remake2 in
 - Both pages crossfade for 0.22s; outgoing content remains visible until fade completion but immediately stops receiving input. Button width, label transparency and content height also tween rather than jump.
 - Rapid switches cancel prior page/label/width/height tweens. Cancelled completion handlers cannot hide the newly selected page.
 - Final full regression: eleven suites, 496 live assertions passed, including 20 dedicated transition checks. Both incoming/outgoing opacity, expanding/shrinking button widths and label opacity were measured at intermediate positions. Active clicks generated zero opacity changes. All pure suites passed.
+
+
+## Migration handoff / latest documentation checks
+
+- `docs/remake-2/AI-CONTEXT.md` bundles nine full documents, including the migration prompt/checklist, theme/editor/cursor integration and source-derived method/option indexes. Rebuild via `python build/build-docs.py` (also regenerates indexes and the bundle).
+- Documentation Lua snippets: 37 blocks compiled successfully with `luau-compile`. Local website links: 199 checked, no missing files at build time.
+- `tests/Documentation.lua` is a prepared live smoke test for documented APIs; it was **not executed** in this publication pass because the Roblox connector was disconnected. It must not be reported as passed.
+- Most recent connected-client results before disconnection: PopupPolish 94 assertions; ThemeCursor 40 assertions (Neverlose source colors/tab opacity, no extra card outlines, cursor contrast/override/reset and editor card style).
+- `npm test` passed in this publication pass. Syntax checks do not establish runtime behavior of an arbitrary migrated user script; preserve the per-project migration test checklist.

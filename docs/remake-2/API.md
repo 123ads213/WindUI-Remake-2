@@ -200,7 +200,7 @@ The original top window header, immediately right of the sidebar title block, co
 
 ```lua
 local hud=Window:CreateHUD({Watermark=true,Keylist=true,Builds={YourRobloxName='Nightly'}})
-hud:SetFields({'FPS','Ping','Username','Time','Day','Avatar','Platform','Build'})
+hud:SetFields({'FPS','Ping','Username','Time','Weekday','Avatar','Logo','Build'})
 hud:SetWatermarkEnabled(true)
 hud:SetKeylistEnabled(true)
 hud:ResetPositions()
@@ -287,7 +287,7 @@ The reference-style example puts six inline choices in the first outlined group,
 ## Screenshot review fixes
 
 - Click a preset row **once**, or its download icon, to load it. Both show a named success/failure notification. The download icon always reloads, even for the current preset; only the header save button saves.
-- Only the current preset has a persistent row highlight. Newest First sorts descending by creation time, Recently Modified descending by modification time, and Alphabetical by name. Identical relative ordering across criteria is valid; existing rows animate to their sorted positions. There is no sort/count footer. Re-selecting the active criterion reverses its direction; `:SetSort(key,reversed)` selects a direction explicitly.
+- Only the current preset has a persistent checkmark; the row fill is hover-only. Newest First sorts descending by creation time, Recently Modified descending by modification time, and Alphabetical by name. Identical relative ordering across criteria is valid; existing rows animate to their sorted positions. There is no sort/count footer. Re-selecting the active criterion reverses its direction; `:SetSort(key,reversed)` selects a direction explicitly.
 - Section cards and Group/HStack/VStack clip child surfaces through rounded CanvasGroups. Compact lock overlays fit their row instead of extending beyond it.
 - `Inline=true` is supported only in feature `:Settings()` groups; normal-page use raises a descriptive error. The obsolete Nested tabs explanation plate was removed from General.
 - All Hotkeys uses the library's custom draggable scrollbar, hidden when the content fits.
@@ -319,3 +319,8 @@ Alphabetical ставит названия с буквами перед чист
 ## Composed appearance controls and local model preview
 
 See [theme and composition guide](COMPOSITE.md): `section:Compound({Title,Color,Dropdown})`, `section:Compound({Title,Color,Toggle})` and `section:PlayerPreview({Height,Model,State})`. Children use independent native flags and callbacks. Mock preview is local-only and contains no ESP/player scanning. Compact dropdowns and preset toolbar do not add hover fills.
+
+
+## Latest themes, editor and migration
+
+See [migration guide for AI](MIGRATION.md) and [themes/editor/cursor/full integration](ADVANCED.md). Built-in themes: Dark, Light, Ocean, Forest, Ember, Orchid, Paper, Neverlose. `Window:CreateThemeEditor(parent,config)` provides persistent custom themes with live editing; `Cursor` can be themed or overridden with `Window:SetCustomCursor`. Light/Paper use black cursors. Neverlose uses source RGB and tab hover alpha .4; full C++ renderer/opacity is not a literal port. Presets header remains filled permanently; Recent is a local modified-sort view, not a cloud/history browser.

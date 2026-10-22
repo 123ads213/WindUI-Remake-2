@@ -4,6 +4,12 @@ Roblox UI library: adaptive columns, compact controls, per-feature settings, hot
 
 **[Documentation website](https://123ads213.github.io/WindUI-Remake-2/)** · **[Installation](docs/remake-2/INSTALL.md)** · **[API guide](docs/remake-2/API.md)** · **[Method reference](docs/remake-2/REFERENCE.md)** · **[Recipes](docs/remake-2/RECIPES.md)**
 
+## Migrating an existing WindUI script (including AI assistants)
+
+**[Single-file AI context](docs/remake-2/AI-CONTEXT.md)** · **[Migration checklist + ready-to-send prompt](docs/remake-2/MIGRATION.md)** · **[Themes, custom editor, cursor and integration](docs/remake-2/ADVANCED.md)**
+
+Give the AI your old script and `AI-CONTEXT.md`. It includes migration rules, the API guide, examples, source method/option indexes and limitations. Preserve callbacks and stable Flags; do not import the standalone demo as a library.
+
 ## Use as a library
 
 ```lua
@@ -39,6 +45,7 @@ Use `Theme="Dark"` and `NewElements=true` for the original WindUI Dark palette a
 - Readable expandable descriptions; per-feature Toggle/Hold/Always hotkeys and custom-scroll All Hotkeys.
 - Named local presets, quick-save, import/export, rename/delete, reversible sorting and frame-budgeted loading.
 - Profile theme/scale/transparency/menu-bind controls; watermark and draggable keylist.
+- Eight built-in themes including source-matched Neverlose; persistent custom-theme editor with live preview and theme-aware custom cursor.
 
 ## Build and test
 

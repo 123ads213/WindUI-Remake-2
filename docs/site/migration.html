@@ -1,0 +1,296 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Миграция для ИИ · WindUI Remake 2</title><link rel="stylesheet" href="style.css"></head><body><header><a class="brand" href="index.html">WindUI <span>Remake 2 / Documentation</span></a><a class="repo" href="https://github.com/123ads213/WindUI-Remake-2">GitHub ↗</a></header><div class="shell"><aside><div class="search"><input id="search" type="search" aria-label="Поиск по документации" placeholder="Поиск методов…"></div><nav class="desktop-nav" aria-label="Документация"><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a><a href="composition.html">Тема и составные строки</a><a href="migration.html" aria-current="page">Миграция для ИИ</a><a href="advanced.html">Темы и интеграция</a><a href="source-config.html">Поля исходников</a><a href="ai-context.html">Всё в одном файле</a></nav><details class="mobile-nav"><summary>Разделы документации</summary><nav><a href="index.html">Подключение</a><a href="api.html">API guide</a><a href="reference.html">Методы</a><a href="recipes.html">Примеры</a><a href="composition.html">Тема и составные строки</a><a href="migration.html" aria-current="page">Миграция для ИИ</a><a href="advanced.html">Темы и интеграция</a><a href="source-config.html">Поля исходников</a><a href="ai-context.html">Всё в одном файле</a></nav></details><div class="desktop-nav eyebrow">На этой странице</div><nav class="toc" aria-label="Содержание"><div class="toc">
+<ul>
+<li><a href="#windui-windui-remake-2">Миграция оригинального WindUI → WindUI Remake 2</a><ul>
+<li><a href="#_1">Что передать ИИ</a></li>
+<li><a href="#_2">Готовый запрос для ИИ</a></li>
+<li><a href="#1">1. Инвентаризация до редактирования</a></li>
+<li><a href="#2">2. Импорт и окно</a></li>
+<li><a href="#3">3. Соответствие старых и новых конструкций</a></li>
+<li><a href="#4-callback">4. Пример переноса группы без потери callback</a></li>
+<li><a href="#5-callbacks">5. Типы состояния и callbacks</a></li>
+<li><a href="#6">6. Флаги и конфиги</a></li>
+<li><a href="#7">7. Бинды</a></li>
+<li><a href="#8">8. Очистка</a></li>
+<li><a href="#9">9. Проверка результата</a></li>
+<li><a href="#_3">Дальше</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></aside><main><div id="results" class="results" aria-live="polite"></div><article><h1 id="windui-windui-remake-2">Миграция оригинального WindUI → WindUI Remake 2</h1>
+<p>Этот документ предназначен для ИИ, которому передают существующий скрипт на оригинальном WindUI. Задача — <strong>перенести интерфейс, сохранив поведение</strong>, а не написать другой скрипт по мотивам старого.</p>
+<h2 id="_1">Что передать ИИ</h2>
+<ol>
+<li>Старый Lua/Luau-скрипт целиком (без секретов).</li>
+<li>Один файл <a href="ai-context.html">AI-CONTEXT.md</a>: в него собраны миграция, API, темы, примеры, справочник методов и ограничения.</li>
+<li>При возможности — исходники текущей библиотеки или архив репозитория. Код в <code>src/</code> — окончательный источник истины; <code>dist/main.lua</code> — готовая библиотека.</li>
+<li>Скриншоты желаемой группировки, если старое меню нужно визуально перестроить.</li>
+</ol>
+<p>Не передавайте GitHub-токены, executor credentials, приватные ключи или пользовательские JSON с секретами. Библиотека не требует их в коде.</p>
+<h2 id="_2">Готовый запрос для ИИ</h2>
+<pre><code class="language-text">Перенеси приложенный скрипт с оригинального WindUI на WindUI Remake 2.
+Прочитай приложенный AI-CONTEXT.md полностью до начала изменений.
+
+Сохрани ВСЮ существующую бизнес-/игровую логику: callbacks, состояния,
+имена и типы сохранённых Flag, исходные значения, min/max/step, опции,
+цвета/прозрачность, зависимости, бинды, ошибки, очистку и порядок инициализации.
+Не добавляй функциональность из демо. Не заменяй рабочую логику заглушками.
+Не вставляй исходник библиотеки в проект: импортируй dist/main.lua один раз.
+Не импортируй dist/remake2.lua — это самостоятельное демонстрационное меню.
+
+Перестрой страницы на Columns().Left/Right:Section(), сохраняя все элементы.
+Используй Settings() для дополнительных настроек конкретной функции.
+Применяй IconTabs только для горизонтальных страниц; SubTab — для сайдбара.
+Сохрани все старые Flag. Новым элементам дай уникальные стабильные Flag.
+Сначала создай элементы и HUD, затем подключи существующие конфиги/EnablePresets.
+Не предполагай автоматическую совместимость чужого JSON: проверь формат и типы.
+Не смешивай два менеджера конфигов без явного плана перехода.
+
+Тема по умолчанию: Neverlose (если пользователь не указал другую).
+Сохрани текущие callbacks темы и при необходимости подключи CreateThemeEditor.
+Не рисуй собственные кнопки/переключатели поверх нативных контролов.
+Не изобретай API. Если метод отсутствует, опиши адаптацию и используй реальный.
+Не обещай точный перенос C++ blur/shaders или облачные конфиги.
+
+Выдай полный готовый скрипт без пропущенных частей, карту «старое → новое»,
+список несовместимостей/решений и чеклист тестов. Если исходник недоступен
+целиком или есть нерешаемый пробел, укажи это, не выдумывай пропущенную логику.
+</code></pre>
+<h2 id="1">1. Инвентаризация до редактирования</h2>
+<p>Составить таблицу всех вкладок, секций и элементов: путь, тип, <code>Title</code>, <code>Flag</code>, значение по умолчанию, опции, min/max/step, callback, зависимости, хоткеи и ссылки на элемент в остальном коде. Отдельно записать:</p>
+<ul>
+<li>библиотечный загрузчик, настройки окна и тему;</li>
+<li>внешние объекты рендера/модули/сервисы, которым callbacks передают значения;</li>
+<li>свой менеджер конфигов, автозагрузку и дополнительные поля JSON;</li>
+<li>одиночные и множественные бинды, обработку удержания и отпускания;</li>
+<li><code>RunService</code>/<code>UserInputService</code> соединения, задачи, GUI и очистку;</li>
+<li>асинхронные зависимости (персонаж, камера, загруженные модули);</li>
+<li>строковые ссылки на старые элементы, использование <code>.Value</code> и сеттеров.</li>
+</ul>
+<p>После переноса сверить <strong>каждый</strong> пункт. Нельзя удалять элементы, которые неудобно разместить.</p>
+<h2 id="2">2. Импорт и окно</h2>
+<pre><code class="language-lua">local WindUI = loadstring(game:HttpGet(
+    'https://raw.githubusercontent.com/123ads213/WindUI-Remake-2/main/dist/main.lua'
+))()
+local Window = WindUI:CreateWindow({
+    Title='My menu', Author='My project', Icon='settings',
+    Folder='MyProject', Theme='Neverlose', NewElements=true,
+    SearchInTopbar=true, HideSearchBar=false, DescriptionMode='Tooltip',
+    ToggleKey=Enum.KeyCode.RightShift,
+    Size=UDim2.fromOffset(1100,720),
+    MinSize=Vector2.new(700,420), MaxSize=Vector2.new(1400,950),
+    CustomCursor={Enabled=true,Size=10},
+})
+</code></pre>
+<p>Публичный raw URL работает только при публичном репозитории. Альтернатива: скачать <code>dist/main.lua</code> как <code>WindUI.lua</code>, загрузить <code>loadstring(readfile('WindUI.lua'))()</code>. В обычном Studio/LocalScript executor-функций нет; не выдавать этот загрузчик за универсальный Studio ModuleScript.</p>
+<p><code>Folder</code> влияет на локальное хранение. Если меняете его, предусмотрите перенос файлов. Для стабильной версии вместо <code>main</code> можно указать конкретный опубликованный commit SHA.</p>
+<h2 id="3">3. Соответствие старых и новых конструкций</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Было / задача</th>
+<th>Реальный вариант в Remake 2</th>
+<th>Что сохранить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Window:Tab({...})</code></td>
+<td>Тот же метод</td>
+<td>Название, иконка, порядок</td>
+</tr>
+<tr>
+<td>Вложенный sidebar tab</td>
+<td><code>Tab:SubTab({...})</code></td>
+<td>Иерархию; это не IconTabs</td>
+</tr>
+<tr>
+<td>Список элементов в Tab</td>
+<td><code>Tab:Columns()</code> → <code>.Left/.Right:Section()</code></td>
+<td>Все элементы и порядок внутри группы</td>
+</tr>
+<tr>
+<td><code>Tab:Section({...})</code></td>
+<td>Остался заголовком</td>
+<td>Для новой карточки использовать Section именно на колонке</td>
+</tr>
+<tr>
+<td>Toggle/Slider/Input/Dropdown/Colorpicker/Button</td>
+<td>Те же фабрики на карточке</td>
+<td><code>Flag</code>, callback и параметры</td>
+</tr>
+<tr>
+<td>Малые параметры одной функции</td>
+<td><code>element:Settings({...})</code> → <code>options:Section()</code></td>
+<td>Отдельные флаги дочерних элементов</td>
+</tr>
+<tr>
+<td>Горизонтальные страницы</td>
+<td><code>Tab:IconTabs()</code> → <code>pages:Tab({Id=...})</code></td>
+<td>Независимые состояния страниц</td>
+</tr>
+<tr>
+<td>Условная видимость</td>
+<td><code>VisibleWhen=function() ... end</code> / <code>:SetVisible()</code></td>
+<td>Не путать с удалением и блокировкой</td>
+</tr>
+<tr>
+<td>Бинд Boolean-функции</td>
+<td><code>Hotkeys={{Key='K',Mode='Toggle',Value=true}}</code></td>
+<td>Режим и семантику значения</td>
+</tr>
+<tr>
+<td>Отдельный старый <code>:Keybind()</code></td>
+<td>В текущей фабрике такого элемента нет</td>
+<td>Портировать явно через hotkeys или оставить собственный input-controller</td>
+</tr>
+<tr>
+<td>Обработчик глобальной клавиши меню</td>
+<td><code>Window:SetToggleKey(Enum.KeyCode.F8)</code></td>
+<td>Это не хоткей функции</td>
+</tr>
+<tr>
+<td>Своя панель профиля</td>
+<td><code>Window:CreateProfile({...})</code> при необходимости</td>
+<td>Не добавлять фальшивую подписку/лицензию</td>
+</tr>
+<tr>
+<td>Конфиги</td>
+<td>Существующий <code>ConfigManager</code> или <code>Window:EnablePresets()</code></td>
+<td>Не загружать дважды</td>
+</tr>
+<tr>
+<td>ESP/aim/game logic из старого скрипта</td>
+<td>Оставить в пользовательском коде</td>
+<td>Библиотека UI не реализует эти функции</td>
+</tr>
+<tr>
+<td>Плеер-превью</td>
+<td><code>section:PlayerPreview({...})</code></td>
+<td>Только локальный mock; не замена реальному renderer</td>
+</tr>
+</tbody>
+</table></div>
+<p>Нет методов <code>AddGroupbox</code>, <code>LeftColumn</code>, <code>SetDependency</code>, облачного preset API или <code>ThemeEditor:Save()</code> как общего публичного API. Проверять существование по справочнику/исходникам, а не по другой библиотеке.</p>
+<h2 id="4-callback">4. Пример переноса группы без потери callback</h2>
+<p>До:</p>
+<pre><code class="language-lua">local Main = Window:Tab({Title='Main',Icon='settings'})
+Main:Section({Title='Movement'})
+local Enabled = Main:Toggle({Title='Enabled',Flag='movement_enabled',Value=false,
+    Callback=function(value) Movement:SetEnabled(value) end})
+local Speed = Main:Slider({Title='Speed',Flag='movement_speed',Step=1,
+    Value={Min=1,Max=100,Default=20},
+    Callback=function(value) Movement:SetSpeed(value) end})
+</code></pre>
+<p>После (объект <code>Movement</code> остаётся тем же объектом вашего проекта):</p>
+<pre><code class="language-lua">local Main = Window:Tab({Title='Main',Icon='settings'})
+local columns = Main:Columns({MinColumnWidth=260,Gap=16})
+local movement = columns.Left:Section({Title='Movement'})
+local Enabled = movement:Toggle({Title='Enabled',Flag='movement_enabled',Value=false,
+    Callback=function(value) Movement:SetEnabled(value) end})
+local Speed = movement:Slider({Title='Speed',Flag='movement_speed',Step=1,
+    Value={Min=1,Max=100,Default=20},
+    Callback=function(value) Movement:SetSpeed(value) end})
+</code></pre>
+<p>Имена локальных ссылок <code>Enabled</code>, <code>Speed</code> сохранены: остальной код, вызывающий <code>Speed:Set(...)</code>, продолжит использовать нужный элемент. Не создавайте второй одноимённый элемент ради новой разметки.</p>
+<h2 id="5-callbacks">5. Типы состояния и callbacks</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Элемент</th>
+<th>Чтение</th>
+<th>Изменение</th>
+<th>Особенность</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Toggle</td>
+<td><code>.Value</code> Boolean</td>
+<td><code>:Set(bool)</code></td>
+<td><code>Hotkeys=false</code> отключает хоткеи</td>
+</tr>
+<tr>
+<td>Slider</td>
+<td><code>.Value.Default</code>, <code>:Get()</code></td>
+<td><code>:Set(number)</code>, <code>:SetRange(min,max)</code></td>
+<td><code>.Value</code> — таблица, не число</td>
+</tr>
+<tr>
+<td>Input</td>
+<td><code>.Value</code> строка</td>
+<td><code>:Set(text)</code></td>
+<td><code>Type='Textarea'</code> оставляет нативный большой ввод</td>
+</tr>
+<tr>
+<td>Dropdown</td>
+<td><code>.Value</code> строка/таблица</td>
+<td><code>:Select(value)</code>, <code>:Refresh(values)</code></td>
+<td>Multi возвращает таблицу</td>
+</tr>
+<tr>
+<td>Colorpicker</td>
+<td><code>.Default</code>, <code>.Transparency</code>, <code>:GetValue()</code></td>
+<td><code>:Set(color,alpha)</code>, <code>:SetState(state,callback)</code></td>
+<td><code>:Set</code>/<code>:Update</code> не вызывают callback автоматически</td>
+</tr>
+<tr>
+<td>ProgressBar</td>
+<td><code>.Value.Default</code></td>
+<td>Методы из REFERENCE</td>
+<td>Read-only UI, не slider</td>
+</tr>
+<tr>
+<td>Button</td>
+<td>Не постоянное состояние</td>
+<td>Действие <code>Callback</code></td>
+<td>Не хранить как Boolean</td>
+</tr>
+<tr>
+<td>Compound</td>
+<td><code>.Color/.Dropdown/.Toggle</code></td>
+<td>Сеттеры детей</td>
+<td>Flag только на детях</td>
+</tr>
+</tbody>
+</table></div>
+<p>Не обещать одинаковую callback-семантику всех сеттеров. Например <code>Colorpicker:Set</code> обновляет UI без callback; чтобы передать значение во внешний renderer, используйте его функцию напрямую или <code>SetState(state,true)</code>. При переносе проверить инициализацию внешней логики отдельно от визуальных defaults: создание UI не гарантирует, что все ваши побочные эффекты уже выполнены.</p>
+<h2 id="6">6. Флаги и конфиги</h2>
+<ul>
+<li>Существующие <code>Flag</code> сохранять побайтно и не менять тип элемента под тем же флагом.</li>
+<li>Флаги уникальны на <strong>всё окно</strong>, включая settings, icon tabs и compound children. Повторный Flag перезаписывает регистрацию.</li>
+<li>Для новых элементов использовать неймспейс, например <code>visuals.enemy.enabled</code>.</li>
+<li>Модель JSON: <code>__version</code>, <code>__elements</code>, <code>__custom</code>, <code>__autoload</code>, <code>__meta</code>, опционально <code>__hud</code>.</li>
+<li>Общие поля элементов старого WindUI часто читаются текущими parsers, но совместимость конкретного старого файла нужно проверить на копии. Чужой/самописный JSON не объявлять совместимым автоматически.</li>
+<li>Значения ProgressBar, Paragraph, mock preview, произвольные таблицы/глобальные переменные не становятся сохранёнными только из-за <code>Flag</code>: смотреть <code>src/config/Init.lua</code> → <code>Parser</code>.</li>
+<li>HUD создать до загрузки конфига. Элементы создать до <code>EnablePresets</code>; не рассчитывать на повторный callback для неизменённого значения.</li>
+<li><code>Preset:Load</code> может yield, отвергает конкурентную загрузку и пропускает неизменённые записи. Пользовательские внешние side effects не откатываются автоматически.</li>
+<li>Сохранение custom themes — отдельный файл, не часть обычного preset JSON. Не путать тему, выбранную flagged dropdown, и весь каталог custom themes.</li>
+<li>Всегда проверять <code>ok,error</code>; отсутствие файловых API должно отключить хранение, но не ломать UI.</li>
+</ul>
+<h2 id="7">7. Бинды</h2>
+<p><code>Toggle/Hold/Always</code> — режимы штатных hotkeys. Сохранять все привязки, не только первую. <code>Hold</code> должен корректно отпускаться при потере фокуса; не заменять его простым flip Boolean. В текущей библиотеке хоткеи встроены в toggle, а пользовательское действие может подключаться через <code>HotkeyCallback</code>; точные arguments/модель смотрите <code>FeatureUI.lua</code>/<code>HotkeyModel.lua</code>. Не переносить старый произвольный Keybind через выдуманный <code>:Keybind()</code>.</p>
+<p><code>Window:SetToggleKey</code> — отдельная настройка окна. При вводе в TextBox и захвате бинда не запускать действия второй раз своим дублирующим InputBegan.</p>
+<h2 id="8">8. Очистка</h2>
+<pre><code class="language-lua">Window:OnDestroy(function()
+    -- Отключить именно соединения/задачи вашего приложения.
+    for _,connection in ipairs(MyConnections) do connection:Disconnect() end
+    table.clear(MyConnections)
+    MyRenderer:Destroy()
+end)
+</code></pre>
+<p>В примере выше <code>MyConnections</code> и <code>MyRenderer</code> — объекты старого проекта, не библиотечные globals. Не копировать их как несуществующие зависимости. <code>Window:Close()</code> только скрывает UI; <code>Window:Destroy()</code> выполняет unload. Собственные циклы и игровые эффекты нужно завершать отдельно. Anti-AFK в большом демо не переносить автоматически.</p>
+<h2 id="9">9. Проверка результата</h2>
+<ul>
+<li>Сравнить инвентарь: число вкладок/элементов, flags, параметры и callbacks.</li>
+<li>Проверить каждый callback мышью, сеттером и загрузкой конфига, где применимо.</li>
+<li>Проверить dropdown single/multi, Color3/alpha/gradient, отрицательные/дробные slider values.</li>
+<li>Проверить зависимости: скрытие, повторное появление, бинды скрытых элементов.</li>
+<li>Проверить Settings + вложенный dropdown/color popup: дочернее окно не должно закрывать редактор.</li>
+<li>Проверить сохранение/загрузку/импорт/экспорт/rename на временных копиях, старый JSON не удалять.</li>
+<li>Проверить темы Dark/Light/Paper/Neverlose, курсор, масштаб, узкое окно и длинные названия.</li>
+<li>Проверить menu key, Toggle/Hold/Always, ввод текста, потерю фокуса, unload/rerun.</li>
+<li>Вернуть полный код, карту переноса и честный перечень непроверенных пунктов.</li>
+</ul>
+<h2 id="_3">Дальше</h2>
+<p><a href="api.html">API</a> · <a href="advanced.html">Темы, редактор, курсор и интеграция</a> · <a href="recipes.html">Примеры</a> · <a href="composition.html">Составные строки</a> · <a href="reference.html">Точные методы</a> · <a href="source-config.html">Наблюдаемые поля исходников</a></p></article><footer>WindUI Remake 2 · Original WindUI by Footagesus · MIT<br>Сайт собран из Markdown и исходников в этом репозитории. <a href="https://github.com/123ads213/WindUI-Remake-2/blob/main/docs/remake-2/MIGRATION.md">Редактировать источник ↗</a></footer></main></div><script src="search-index.js"></script><script src="site.js"></script></body></html>
