@@ -31040,6 +31040,13 @@ if ar+ap>an.X+ao.X-8 then ar=al.X-ap-ai end
 ar=math.clamp(ar,an.X+8,math.max(an.X+8,an.X+ao.X-ap-8));as=math.clamp(as,an.Y+8,math.max(an.Y+8,an.Y+ao.Y-aq-8))
 af.Position=UDim2.fromOffset((ar-af.Parent.AbsolutePosition.X)/aj,(as-af.Parent.AbsolutePosition.Y)/aj)
 end
+function ac.center(af,ag)
+local ah=math.max(.01,ag.UIScaleObj.Scale)
+local ai,aj=ag.ScreenGui.AbsolutePosition,ag.ScreenGui.AbsoluteSize
+local al=ai.X+(aj.X-af.Size.X.Offset*ah)/2
+local am=ai.Y+(aj.Y-af.Size.Y.Offset*ah)/2
+af.Position=UDim2.fromOffset((al-af.Parent.AbsolutePosition.X)/ah,(am-af.Parent.AbsolutePosition.Y)/ah)
+end
 function ac.tooltip(af,ag,ah,ai)
 local aj=ac.panel(af,'ButtonHint',math.max(100,#ai*7.5+24),36,1100);aj.Active=false
 ac.text(aj,ai,12,0,aj.Size.X.Offset-24,36)
@@ -36197,6 +36204,11 @@ local at=aa.panel(an,'FeatureSettings',as,120,820)
 at.ClipsDescendants=true
 local au=aa.text(at,ar.Title or al.Title or'Settings',12,7,as-50,28);au.TextSize=16
 local av=aa.button(at,'',as-36,7,26,26);aa.icon(av,'x',7,7,14,an)
+if ar.Centered then av:SetAttribute('NoHover',true)end
+if ar.HeaderIcon then
+aa.icon(at,ar.HeaderIcon,16,13,18,an)
+au.Position=UDim2.fromOffset(42,7);au.Size=UDim2.fromOffset(as-84,28)
+end
 local aw=aa.New('ScrollingFrame',{Parent=at,Name='SettingsBody',Position=UDim2.fromOffset(12,42),Size=UDim2.new(1,-24,1,-54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize='Y',CanvasSize=UDim2.new(),ZIndex=822})
 local ax={Elements={},FeatureSettings=true,UIElements={ContainerFrame=aw}}a.at()
 .Attach(ax,an,ao,ap,aq)
@@ -36207,30 +36219,37 @@ aa.icon(az,ar.Icon or'ellipsis',7,7,16,an)
 if am.UIElements.Title then am.UIElements.Title.Size=UDim2.new(1,-132,1,0)end
 local aA={Opened=false,Sections={},UIElements={Panel=at,Button=az,Title=au,Body=aw,Columns=ay}}
 local aB=0
+local function place()
+if ar.Centered then aa.center(at,ao)else aa.beside(at,az,ao,8)end
+end
 local function fit()
 if not at.Parent then return end
 local b=ay.UIElements.Root.Size.Y.Offset+54+aB
 at.Size=UDim2.fromOffset(as,math.clamp(b,110,math.min(620,ao.ScreenGui.AbsoluteSize.Y/math.max(.01,ao.UIScaleObj.Scale)-24)))
-if aA.Opened then aa.beside(at,az,ao,8)end
+if aA.Opened then place()end
 end
 
 function aA.Footer(b,d)
 assert(not b.UIElements.Footer,'A settings panel has only one footer')
-aB=48;aw.Size=UDim2.new(1,-24,1,-54-aB)
-local f=aa.New('Frame',{Parent=at,Name='SettingsFooter',Position=UDim2.new(0,12,1,-52),Size=UDim2.new(1,-24,0,40),BackgroundTransparency=1,ZIndex=824})
-local g=aa.button(f,'Cancel',0,4,76,32,function()b:Close()end)
-local h=aa.button(f,d.Title or'Save',as-24-126,4,126,32,d.Callback)
-h.Name='ConfirmAction';h.BackgroundTransparency=0;h:SetAttribute('NoHover',true)
-af.AddThemeObject(h,{BackgroundColor3='Primary'})
-af.AddThemeObject(h.Label,{TextColor3='Text'})
-if af.Objects[h.Label]then af.Objects[h.Label].Properties.TextColor3=nil end
-h.Label.TextColor3=Color3.new(1,1,1);h.Label.TextSize=14
-h.Label.Position=UDim2.fromOffset(34,0);h.Label.Size=UDim2.new(1,-42,1,0)
-local i=aa.icon(h,d.Icon or'check',12,8,16,an)
-if af.Objects[i.ImageLabel]then af.Objects[i.ImageLabel].Properties.ImageColor3=nil end
-i.ImageLabel.ImageColor3=Color3.new(1,1,1)
-b.UIElements.Footer=f;b.UIElements.Confirm=h;b.UIElements.Cancel=g
-task.defer(fit);return h
+aB=56;aw.Size=UDim2.new(1,-24,1,-54-aB)
+local f=aa.New('Frame',{Parent=at,Name='SettingsFooter',Position=UDim2.new(0,16,1,-52),Size=UDim2.new(1,-32,0,36),BackgroundTransparency=1,ZIndex=824})
+local g=(as-40)/2
+local h=aa.button(f,'Cancel',0,0,g,36,function()b:Close()end)
+h.Name='CancelAction';h.BackgroundTransparency=.15;h:SetAttribute('NoHover',true)
+aa.icon(h,'x',14,10,16,an)
+h.Label.Position=UDim2.fromOffset(38,0);h.Label.Size=UDim2.new(1,-48,1,0);h.Label.TextSize=14
+local i=aa.button(f,d.Title or'Save',g+8,0,g,36,d.Callback)
+i.Name='ConfirmAction';i.BackgroundTransparency=0;i:SetAttribute('NoHover',true)
+af.AddThemeObject(i,{BackgroundColor3='Primary'})
+af.AddThemeObject(i.Label,{TextColor3='Text'})
+if af.Objects[i.Label]then af.Objects[i.Label].Properties.TextColor3=nil end
+i.Label.TextColor3=Color3.new(1,1,1);i.Label.TextSize=14
+i.Label.Position=UDim2.fromOffset(38,0);i.Label.Size=UDim2.new(1,-48,1,0)
+local l=aa.icon(i,d.Icon or'check',14,10,16,an)
+if af.Objects[l.ImageLabel]then af.Objects[l.ImageLabel].Properties.ImageColor3=nil end
+l.ImageLabel.ImageColor3=Color3.new(1,1,1)
+b.UIElements.Footer=f;b.UIElements.Confirm=i;b.UIElements.Cancel=h
+task.defer(fit);return i
 end
 function aA.Section(b,d,f)
 d=table.clone(d or{});if d.Outlined==nil then d.Outlined=true end;if d.Title==nil then d.Title=false end
@@ -36239,24 +36258,37 @@ local h=g:Section(d);table.insert(b.Sections,h);task.defer(fit);return h
 end
 function aA.RightSection(b,d)return b:Section(d,'Right')end
 aA.Group=aA.Section
-function aA.Close(b)b.Opened=false;aa.show(at,false);if an.ActiveFeatureSettings==b then an.ActiveFeatureSettings=nil end end
+local function ownedDropdown()
+local b=an._CompactDropdown
+return b and b.UIElements.Dropdown:IsDescendantOf(at)and b
+end
+function aA.Close(b)
+local d=ownedDropdown();if d then d:Close()end
+b.Opened=false;aa.show(at,false);if an.ActiveFeatureSettings==b then an.ActiveFeatureSettings=nil end
+end
 function aA.Open(b)
 if an.ActiveFeatureSettings and an.ActiveFeatureSettings~=b then an.ActiveFeatureSettings:Close()end
 if an.FeatureUI then an.FeatureUI:HideDescription()end
-an.ActiveFeatureSettings=b;b.Opened=true;fit();aa.beside(at,az,ao,8);aa.show(at,true)
+if ar.Centered and an.Profile then an.Profile:Close()end
+an.ActiveFeatureSettings=b;b.Opened=true;fit();place();aa.show(at,true)
 end
 function aA.Toggle(b)if b.Opened then b:Close()else b:Open()end end
 az.MouseButton1Click:Connect(function()aA:Toggle()end)
 av.MouseButton1Click:Connect(function()aA:Close()end)
 ay.UIElements.Root:GetPropertyChangedSignal'Size':Connect(fit)
-local b=ag.InputBegan:Connect(function(b)
-if b.KeyCode==Enum.KeyCode.Escape then aA:Close()
-elseif b.UserInputType==Enum.UserInputType.MouseButton1 or b.UserInputType==Enum.UserInputType.Touch then
-if aA.Opened and not aa.inside(at,b.Position)and not aa.inside(az,b.Position)then aA:Close()end
+local b=at.Parent:GetPropertyChangedSignal'AbsolutePosition':Connect(function()if aA.Opened and ar.Centered then place()end end)
+local d=ao.ScreenGui:GetPropertyChangedSignal'AbsoluteSize':Connect(function()if aA.Opened then fit()end end)
+local f=ao.UIScaleObj:GetPropertyChangedSignal'Scale':Connect(function()if aA.Opened then fit()end end)
+local g=ag.InputBegan:Connect(function(g)
+if g.KeyCode==Enum.KeyCode.Escape then aA:Close()
+elseif g.UserInputType==Enum.UserInputType.MouseButton1 or g.UserInputType==Enum.UserInputType.Touch then
+local h=ownedDropdown()
+local i=h and h.Opened and aa.inside(h.UIElements.MenuCanvas,g.Position)
+if aA.Opened and not aa.inside(at,g.Position)and not aa.inside(az,g.Position)and not i then aA:Close()end
 end
 end)
-function aA.Destroy(d)b:Disconnect();d:Close();at:Destroy();az:Destroy()end
-az.Destroying:Connect(function()b:Disconnect();aA:Close();at:Destroy()end)
+function aA.Destroy(h)g:Disconnect();h:Close();at:Destroy();az:Destroy()end
+az.Destroying:Connect(function()g:Disconnect();b:Disconnect();d:Disconnect();f:Disconnect();aA:Close();at:Destroy()end)
 return aA
 end
 return ai end function a.au():typeof(__modImpl())local aa=a.cache.au if not aa then aa={c=__modImpl()}a.cache.au=aa end return aa.c end end do local function __modImpl()
@@ -37950,7 +37982,9 @@ local at
 local function attachEditor(au,av,aw)
 local ax=au:Settings{
 Title=aw and'New custom theme'or(av.Name..' theme'),
-Width=aw and 344 or 700,
+Width=aw and 360 or 700,
+Centered=true,
+HeaderIcon='palette',
 Icon='settings',
 MinColumnWidth=aw and 1000 or 285,
 ColumnGap=8,
@@ -39592,7 +39626,7 @@ as.Right:GetPropertyChangedSignal'AbsolutePosition':Connect(fitTrigger)
 av.Label:GetPropertyChangedSignal'TextBounds':Connect(fitTrigger);task.defer(fitTrigger)
 local ax=aa.panel(am,'Presets',330,414,850)
 local ay
-local az=aa.button(ax,'Presets',10,8,142,36,function()aq.Sort='Name';aq.SortReversed=false;aq.View='Presets';aq:Refresh()end);az.Label.Position=UDim2.fromOffset(38,0);az.Label.Size=UDim2.new(1,-44,1,0);aa.icon(az,'cloud',10,9,18,am)
+local az=aa.button(ax,'Presets',10,8,142,36,function()aq.Sort='Created';aq.SortReversed=false;aq.View='Presets';aq:Refresh()end);az:SetAttribute('NoHover',true);az.Label.Position=UDim2.fromOffset(38,0);az.Label.Size=UDim2.new(1,-44,1,0);aa.icon(az,'cloud',10,9,18,am)
 aa.New('Frame',{Parent=ax,Position=UDim2.fromOffset(12,48),Size=UDim2.new(1,-24,0,1),BackgroundTransparency=.94,ThemeTag={BackgroundColor3='Text'},ZIndex=852})
 local aA=aa.text(ax,'',14,384,302,22,true);aA.Name='ErrorMessage';aA.TextSize=12;aA.Visible=false
 local aB=aa.input(ax,'Search presets',12,54,266,34)
@@ -39706,9 +39740,8 @@ for aS,aT in ipairs{'Rename','Export','Delete'}do local aU=aa.button(aN,aT,6,6+(
 local aS=aa.button(ax,'',282,10,36,32,function()edit'Create'end);aa.icon(aS,'plus',10,8,16,am)
 local aT=aa.button(ax,'',202,10,34,32,function()edit'Import'end);aa.icon(aT,'upload',9,8,16,am)
 ay=aa.button(ax,'',242,10,34,32,function()
-local aU=aq.View=='Recent'
-aq.View=aU and'Presets'or'Recent';aq.Sort=aU and'Created'or'Modified';aq.SortReversed=false;aq:Refresh()
-end);aa.icon(ay,'folder-clock',9,8,16,am)
+aq.View='Recent';aq.Sort='Modified';aq.SortReversed=false;aq:Refresh()
+end);ay:SetAttribute('NoHover',true);aa.icon(ay,'folder-clock',9,8,16,am)
 function aq.Refresh(aU)
 for aV,aW in ipairs{{az,aU.View~='Recent'},{ay,aU.View=='Recent'}}do
 aW[1]:SetAttribute('IdleTransparency',aW[2]and.15 or 1)

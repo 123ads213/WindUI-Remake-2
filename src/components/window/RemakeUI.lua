@@ -53,6 +53,13 @@ function U.beside(p,anchor,wind,gap)
  x=math.clamp(x,origin.X+8,math.max(origin.X+8,origin.X+size.X-w-8));y=math.clamp(y,origin.Y+8,math.max(origin.Y+8,origin.Y+size.Y-h-8))
  p.Position=UDim2.fromOffset((x-p.Parent.AbsolutePosition.X)/s,(y-p.Parent.AbsolutePosition.Y)/s)
 end
+function U.center(p,wind)
+ local s=math.max(.01,wind.UIScaleObj.Scale)
+ local origin,size=wind.ScreenGui.AbsolutePosition,wind.ScreenGui.AbsoluteSize
+ local x=origin.X+(size.X-p.Size.X.Offset*s)/2
+ local y=origin.Y+(size.Y-p.Size.Y.Offset*s)/2
+ p.Position=UDim2.fromOffset((x-p.Parent.AbsolutePosition.X)/s,(y-p.Parent.AbsolutePosition.Y)/s)
+end
 function U.tooltip(window,wind,anchor,title)
  local tip=U.panel(window,'ButtonHint',math.max(100,#title*7.5+24),36,1100);tip.Active=false
  U.text(tip,title,12,0,tip.Size.X.Offset-24,36)

@@ -105,7 +105,9 @@ function ThemeEditor.New(window,wind,parent,config)
  local function attachEditor(row,entry,isCreate)
   local panel=row:Settings({
    Title=isCreate and'New custom theme'or(entry.Name..' theme'),
-   Width=isCreate and 344 or 700,
+   Width=isCreate and 360 or 700,
+   Centered=true,
+   HeaderIcon='palette',
    Icon='settings',
    MinColumnWidth=isCreate and 1000 or 285,
    ColumnGap=8,

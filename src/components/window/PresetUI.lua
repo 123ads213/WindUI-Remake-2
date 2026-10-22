@@ -32,7 +32,7 @@ function P.New(window,wind,options)
  trigger.Label:GetPropertyChangedSignal('TextBounds'):Connect(fitTrigger);task.defer(fitTrigger)
  local panel=U.panel(window,'Presets',330,414,850)
  local recent
- local viewButton=U.button(panel,'Presets',10,8,142,36,function()self.Sort='Name';self.SortReversed=false;self.View='Presets';self:Refresh()end);viewButton.Label.Position=UDim2.fromOffset(38,0);viewButton.Label.Size=UDim2.new(1,-44,1,0);U.icon(viewButton,'cloud',10,9,18,window)
+ local viewButton=U.button(panel,'Presets',10,8,142,36,function()self.Sort='Created';self.SortReversed=false;self.View='Presets';self:Refresh()end);viewButton:SetAttribute('NoHover',true);viewButton.Label.Position=UDim2.fromOffset(38,0);viewButton.Label.Size=UDim2.new(1,-44,1,0);U.icon(viewButton,'cloud',10,9,18,window)
  U.New('Frame',{Parent=panel,Position=UDim2.fromOffset(12,48),Size=UDim2.new(1,-24,0,1),BackgroundTransparency=.94,ThemeTag={BackgroundColor3='Text'},ZIndex=852})
  local status=U.text(panel,'',14,384,302,22,true);status.Name='ErrorMessage';status.TextSize=12;status.Visible=false
  local search=U.input(panel,'Search presets',12,54,266,34)
@@ -146,9 +146,8 @@ function P.New(window,wind,options)
  local add=U.button(panel,'',282,10,36,32,function()edit('Create')end);U.icon(add,'plus',10,8,16,window)
  local imp=U.button(panel,'',202,10,34,32,function()edit('Import')end);U.icon(imp,'upload',9,8,16,window)
  recent=U.button(panel,'',242,10,34,32,function()
-  local active=self.View=='Recent'
-  self.View=active and'Presets'or'Recent';self.Sort=active and'Created'or'Modified';self.SortReversed=false;self:Refresh()
- end);U.icon(recent,'folder-clock',9,8,16,window)
+  self.View='Recent';self.Sort='Modified';self.SortReversed=false;self:Refresh()
+ end);recent:SetAttribute('NoHover',true);U.icon(recent,'folder-clock',9,8,16,window)
  function self:Refresh()
   for _,choice in ipairs({{viewButton,self.View~='Recent'},{recent,self.View=='Recent'}})do
    choice[1]:SetAttribute('IdleTransparency',choice[2]and .15 or 1)

@@ -19,12 +19,31 @@ local function run()
  local all=u.Panel:FindFirstChildWhichIsA('TextButton')
  check(all:GetAttribute('IdleTransparency')==1,'all not highlighted in recent')
  firesignal(u.Recent.MouseLeave);task.wait(.2);check(u.Recent.BackgroundTransparency<1,'recent state survives mouse leave')
- click(u.Recent);check(p.View=='Presets'and p.Sort=='Created','recent toggles off')
+ for i=1,3 do
+  firesignal(all.MouseLeave);firesignal(u.Recent.MouseEnter);click(u.Recent);firesignal(u.Recent.MouseLeave);task.wait(.2)
+  check(p.View=='Recent'and p.Sort=='Modified','repeated click keeps recent selected')
+  check(all.BackgroundTransparency==1 and math.abs(u.Recent.BackgroundTransparency-.15)<.001,'only clicked destination selected after hover')
+ end
+ firesignal(u.Recent.MouseLeave);firesignal(all.MouseEnter);click(all);firesignal(all.MouseLeave);task.wait(.2)
+ check(p.View=='Presets'and p.Sort=='Created','only Presets button returns to Presets')
+ check(math.abs(all.BackgroundTransparency-.15)<.001 and u.Recent.BackgroundTransparency==1,'no stale hover tween overrides selection')
  check(p.Current==oldCurrent,'sorting does not load another preset')
- p:Toggle();d.Themes:Select();theme:OpenCreate();task.wait(.4)
+ p:Toggle();d.Themes:Select();d.Profile:Open();d.Profile.ThemeControl:Open();d.Profile.ThemeControl:Select('Custom');task.wait(.4)
  local panel=theme.CreatePanel;local ui=panel.UIElements
  check(panel.Sections[1].Title==false,'no redundant Theme heading')
- check(ui.Panel.Size.X.Offset==344 and ui.Panel.Size.Y.Offset<=220,'compact create dialog')
+ check(ui.Panel.Size.X.Offset==360 and ui.Panel.Size.Y.Offset<=230,'compact create dialog')
+ local screen=d.Library.ScreenGui
+ local center=ui.Panel.AbsolutePosition+ui.Panel.AbsoluteSize/2
+ local target=screen.AbsolutePosition+screen.AbsoluteSize/2
+ check((center-target).Magnitude<2,'theme dialog centered in screen')
+ check(not d.Profile.Opened,'profile closed behind dialog')
+ check(ui.Cancel.Size==ui.Confirm.Size and ui.Confirm.Size.Y.Offset==36,'equal action button sizes')
+ for _,b in ipairs({ui.Cancel,ui.Confirm})do
+  local idle=b.BackgroundTransparency;firesignal(b.MouseEnter);task.wait(.2)
+  check(b.BackgroundTransparency==idle,'no hover fill on dialog actions')
+  firesignal(b.MouseLeave);task.wait(.2);check(b.BackgroundTransparency==idle,'no mouse-leave change')
+  check(b:FindFirstChildWhichIsA('ImageLabel',true)~=nil,'action has icon')
+ end
  check(not ui.Confirm:IsDescendantOf(panel.Sections[1].UIElements.Card),'action outside clipped card')
  local a,z=ui.Confirm.AbsolutePosition,ui.Confirm.AbsoluteSize;local b,s=ui.Panel.AbsolutePosition,ui.Panel.AbsoluteSize
  check(a.X>=b.X and a.Y>=b.Y and a.X+z.X<=b.X+s.X and a.Y+z.Y<=b.Y+s.Y,'button fully inside panel')
