@@ -152,10 +152,11 @@ local Unshortened=AdvancedGroup:Slider({ Flag='example_unshortened', Title = 'Un
     Value = { Min = 0, Max = 1e6, Default = 500000 } })
 AdvancedGroup:Slider({ Flag='example_locked', Title = 'Locked', Locked = true, Value = { Min = 0, Max = 1e6, Default = 500000 } })
 AdvancedGroup:Slider({ Flag='example_fixed', Title = 'Fixed range', Value = { Min = 5, Max = 5, Default = 5 } })
-local ThemeDropdown=ThemeControls:Dropdown({ Flag='theme', Title = 'Theme', Values = { 'Dark', 'Light', 'Ocean', 'Forest', 'Ember', 'Orchid', 'Paper' }, Value = 'Dark',
+local BuiltinThemes={ 'Dark', 'Light', 'Ocean', 'Forest', 'Ember', 'Orchid', 'Paper', 'Neverlose' }
+local ThemeDropdown=ThemeControls:Dropdown({ Flag='theme', Title = 'Theme', Values = table.clone(BuiltinThemes), Value = 'Dark',
     Callback = function(theme) WindUI:SetTheme(theme) end })
 local CustomThemes=Window:CreateThemeEditor(ThemeControls,{
-    Builtins={ 'Dark', 'Light', 'Ocean', 'Forest', 'Ember', 'Orchid', 'Paper' },
+    Builtins=table.clone(BuiltinThemes),
 })
 ThemeControls:Toggle({ Title = 'Preview toggle', Flag = 'preview_toggle', Value = true, Callback = function() end })
 ThemeControls:Slider({ Title = 'Preview slider', Value = { Min = 0, Max = 1e6, Default = 500000 }, IsTooltip = true })
@@ -168,7 +169,6 @@ local GradientColor = ThemeColors:Colorpicker({ Title = 'Gradient preview', Flag
     { Position=0, Color=Color3.fromRGB(0,170,255), Transparency=0 },
     { Position=1, Color=Color3.fromRGB(196,92,255), Transparency=.2 },
 }, Callback = function(color,transparency,gradient) Calls.GradientColor=gradient end })
-local BuiltinThemes={ 'Dark', 'Light', 'Ocean', 'Forest', 'Ember', 'Orchid', 'Paper' }
 local function profileThemeNames()
     local values=table.clone(BuiltinThemes)
     for _,name in ipairs(CustomThemes:GetNames())do table.insert(values,name)end

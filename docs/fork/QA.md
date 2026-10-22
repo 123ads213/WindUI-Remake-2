@@ -125,7 +125,7 @@ A cleanup regression surfaced queued native-shape property events after a UICorn
 
 - Corrected revision 7's root-only alpha: window-scoped theme background surfaces now retain their own base alpha and apply `base + (1-base)*value`. This includes the content panel, element cards, search and profile backgrounds. Text, icons and control fills are not faded. At zero the exact theme/hover base is restored; overlapping translucent layers naturally composite.
 - Main-window dragging uses a frame-rate-independent follower (default 0.045 seconds). A floating-point accumulator avoids Roblox UDim2 integer-offset stalling. Release settles exactly at the constrained target; setting position, focus loss, disabling and destruction cancel ownership safely. No default window size, resize implementation or palette changes.
-- Optional `CustomCursor = {Enabled=true, Size=10}` creates a filled white circle independent of DPI/theme/transparency. It is off by default and enabled in ForkExample. Hidden/closed/unfocused UI restores the previous native cursor state. Destroying the window destroys its separate cursor ScreenGui.
+- Optional `CustomCursor = {Enabled=true, Size=10}` creates a filled circle independent of DPI/transparency. Its color follows the theme (`Cursor`, falling back to `Text`); Light/Paper use black. `Window:SetCustomCursor({Color=Color3.fromRGB(255,80,80)})` or a hex string overrides the color; `Color=false` or `Color="Auto"` restores theme control. It is off by default and enabled in ForkExample. Hidden/closed/unfocused UI restores the previous native cursor state. Destroying the window destroys its separate cursor ScreenGui.
 - Final sequential live suites: Runtime 65, Visual 86, Selection 10, Profile 39, Polish 18, Flyout 13, Preferences 33, Interaction 28 — **292 assertions passed**. Cursor QA explicitly controls synthetic focus rather than assuming the host remains focused during automation.
 - Local number formatting, 2001 signed decimal-lattice cases and tab routing passed; **91 Lua files compiled**. Tests use APIs/synthetic GUI signals, not a physical mouse/device matrix.
 - Fixed a queued native-renderer update after parent removal, and removed a duplicate theme subscription so controller destruction disconnects it correctly.
@@ -152,3 +152,11 @@ A cleanup regression surfaced queued native-shape property events after a UICorn
 ![Dark right-click hotkeys and side editor with Value switch](Hotkeys-Dark-v9.jpg)
 
 ![Light All Hotkeys panel](Hotkeys-All-v9.jpg)
+
+
+### Neverlose theme and cursor contrast
+
+- `Neverlose` maps the original normalized dark palette from the supplied Neverlose-Reloaded `gui.hpp` / `c_gui::apply_theme(0)` to supported WindUI surfaces and controls. Menu structure stays WindUI; this does not port the C++ blur/shader renderer.
+- Available in the demo theme selector, profile styles and custom-theme base selector. Custom-theme editors expose `Cursor`.
+- Live regression `tests/ThemeCursor.lua`: 31 checks for source colors, selector routing, themed card fills, black Light/Paper cursor, dark-theme cursor, Color3/hex overrides, size-only updates, reset and editor field.
+- Existing `tests/PopupPolish.lua`: 94 checks passed after the addition.

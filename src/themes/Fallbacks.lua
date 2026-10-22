@@ -3,6 +3,7 @@ return function(Creator)
 		-- More soon!
 
 		Primary = "Icon",
+        Cursor = "Text",
 
 		White = Color3.new(1, 1, 1),
 		Black = Color3.new(0, 0, 0),

@@ -5,7 +5,7 @@ local ThemeEditor={}
 local DEFAULT_FIELDS={
  {'Accent','Accent'},{'Dialog','Dialog'},{'Outline','Outline'},{'Text','Text'},
  {'Placeholder','Placeholder'},{'Background','Background'},{'Button','Button'},{'Icon','Icon'},
- {'Primary','Primary'},{'Toggle','Toggle'},{'Slider','Slider'},{'SliderThumb','Slider thumb'},
+ {'Cursor','Cursor'},{'Primary','Primary'},{'Toggle','Toggle'},{'Slider','Slider'},{'SliderThumb','Slider thumb'},
  {'Checkbox','Checkbox'},{'CheckboxIcon','Checkbox icon'},{'CheckboxBorder','Checkbox border'},
  {'ProgressBar','Progress bar'},{'PanelBackground','Panel background'},{'ElementBackground','Element background'},
  {'TabBackground','Tab background'},{'TabBackgroundHover','Tab hover'},{'TabBackgroundActive','Tab active'},
@@ -36,7 +36,7 @@ end
 function ThemeEditor.New(window,wind,parent,config)
  assert(parent and type(parent.Button)=='function','CreateThemeEditor requires a section-like parent')
  local self={Entries={},Rows={},Editors={},Config=config}
- local builtins=config.Builtins or{'Dark','Light','Ocean','Forest','Ember','Orchid','Paper'}
+ local builtins=config.Builtins or{'Dark','Light','Ocean','Forest','Ember','Orchid','Paper','Neverlose'}
  local fields=config.Fields or DEFAULT_FIELDS
  local path=(config.Folder or window.Folder or'Sirius-Remake2')..'/'..(config.FileName or'custom-themes.json')
  local canPersist=type(writefile)=='function'and type(readfile)=='function'and type(isfile)=='function'

@@ -1,4 +1,4 @@
--- Optional filled white cursor; independent of menu DPI and theme.
+-- Filled cursor: follows theme contrast unless Color explicitly overrides it.
 local Cursor={}
 function Cursor.New(Window,WindUI,Creator)
     local Input=game:GetService('UserInputService')
@@ -27,6 +27,8 @@ function Cursor.New(Window,WindUI,Creator)
         end
         if not owned then previousIcon=Input.MouseIconEnabled;owned=true end
         Input.MouseIconEnabled=false
+        local color=self.Color or WindUI:GetThemeProperty("Cursor")
+        dot.BackgroundColor3=typeof(color)=="Color3" and color or Color3.new(1,1,1)
         local point=Input:GetMouseLocation()
         dot.Position=UDim2.fromOffset(point.X,point.Y);dot.Size=UDim2.fromOffset(self.Size,self.Size);dot.Visible=true
     end
@@ -34,6 +36,13 @@ function Cursor.New(Window,WindUI,Creator)
         if self.Destroyed then return end
         if type(config)=='table'then
             self.Enabled=config.Enabled~=false
+            -- Color=false (or "Auto") restores the theme color; omitted Color preserves an override.
+            if config.Color==false or config.Color=="Auto" then self.Color=nil
+            elseif typeof(config.Color)=="Color3" then self.Color=config.Color
+            elseif type(config.Color)=="string" then
+                local ok,color=pcall(Color3.fromHex,config.Color)
+                if ok then self.Color=color end
+            end
             local size=tonumber(config.Size)
             if size and size==size then self.Size=math.clamp(size,4,24)end
         else self.Enabled=config==true end

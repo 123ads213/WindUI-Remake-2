@@ -24804,6 +24804,7 @@ return{
 
 
 Primary="Icon",
+Cursor="Text",
 
 White=Color3.new(1,1,1),
 Black=Color3.new(0,0,0),
@@ -28437,8 +28438,56 @@ ElementBackground=Color3.fromHex"#2A2A2C",
 ElementBackgroundTransparency=0,
 },
 
+
+
+Neverlose={
+Name="Neverlose",CleanShapes=true,
+Accent=Color3.new(.071,.078,.114),
+Background=Color3.new(.071,.078,.114),
+WindowBackground=Color3.new(.071,.078,.114),
+PanelBackground=Color3.new(.043,.055,.086),
+PanelBackgroundTransparency=0,
+Dialog=Color3.new(.071,.078,.114),
+Outline=Color3.new(.118,.129,.173),
+Text=Color3.new(.922,.922,.941),
+Placeholder=Color3.new(.51,.52,.56),
+Icon=Color3.new(.51,.52,.56),
+Cursor=Color3.new(1,1,1),
+Primary=Color3.new(.318,.486,.992),
+Button=Color3.new(.102,.102,.133),
+ElementBackground=Color3.new(.071,.078,.114),
+ElementBackgroundTransparency=0,CardTransparency=0,
+CardBorder=Color3.new(.118,.129,.173),CardBorderTransparency=0,
+ChoiceBackground=Color3.fromRGB(25,27,36),ChoiceTransparency=0,
+Toggle=Color3.new(.318,.486,.992),
+ToggleTrack=Color3.new(.055,.071,.098),
+ToggleThumbOff=Color3.new(.498,.529,.557),
+ToggleBar=Color3.new(1,1,1),
+Slider=Color3.new(.318,.486,.992),SliderThumb=Color3.new(1,1,1),
+SliderIcon=Color3.new(.51,.52,.56),
+Checkbox=Color3.new(.318,.486,.992),CheckboxIcon=Color3.new(1,1,1),
+CheckboxBorder=Color3.new(.118,.129,.173),CheckboxBorderTransparency=0,
+ProgressBar=Color3.new(.318,.486,.992),
+TabBackground=Color3.new(.071,.078,.114),
+TabBackgroundHover=Color3.new(.153,.169,.212),TabBackgroundHoverTransparency=0,
+TabBackgroundActive=Color3.new(.153,.169,.212),TabBackgroundActiveTransparency=0,
+TabBorder=Color3.new(.118,.129,.173),TabBorderTransparency=1,TabBorderTransparencyActive=1,
+TabIconActive="Primary",
+DropdownBackground=Color3.new(.071,.078,.114),
+DropdownTabBackground=Color3.new(.153,.169,.212),
+DropdownTabBorder=Color3.new(.165,.180,.235),
+LabelBackground=Color3.fromRGB(25,27,36),LabelBackgroundTransparency=0,
+SearchBarBorder=Color3.new(.165,.180,.235),SearchBarBorderTransparency=0,
+NotificationBorder=Color3.new(.165,.180,.235),NotificationBorderTransparency=0,
+SectionBoxBackground=Color3.new(.071,.078,.114),
+SectionBoxBorder=Color3.new(.118,.129,.173),SectionBoxBorderTransparency=0,
+Tooltip=Color3.new(.071,.078,.114),TooltipText=Color3.new(.922,.922,.941),
+TooltipSecondary=Color3.new(.318,.486,.992),TooltipSecondaryText=Color3.new(1,1,1),
+},
+
 Light={
 Name="Light",
+Cursor=Color3.new(0,0,0),
 CleanShapes=true,
 Accent=Color3.fromHex"#FFFFFF",
 Dialog=Color3.fromHex"#FFFFFF",
@@ -28694,6 +28743,7 @@ CheckboxBorderTransparency=0,
 
 Paper={
 Name="Paper",
+Cursor=Color3.new(0,0,0),
 CleanShapes=true,
 Accent=Color3.fromHex"#FAF5E9",
 Dialog=Color3.fromHex"#FFFFFF",
@@ -37950,7 +38000,7 @@ local af={}
 local ag={
 {'Accent','Accent'},{'Dialog','Dialog'},{'Outline','Outline'},{'Text','Text'},
 {'Placeholder','Placeholder'},{'Background','Background'},{'Button','Button'},{'Icon','Icon'},
-{'Primary','Primary'},{'Toggle','Toggle'},{'Slider','Slider'},{'SliderThumb','Slider thumb'},
+{'Cursor','Cursor'},{'Primary','Primary'},{'Toggle','Toggle'},{'Slider','Slider'},{'SliderThumb','Slider thumb'},
 {'Checkbox','Checkbox'},{'CheckboxIcon','Checkbox icon'},{'CheckboxBorder','Checkbox border'},
 {'ProgressBar','Progress bar'},{'PanelBackground','Panel background'},{'ElementBackground','Element background'},
 {'TabBackground','Tab background'},{'TabBackgroundHover','Tab hover'},{'TabBackgroundActive','Tab active'},
@@ -37981,7 +38031,7 @@ end
 function af.New(ai,al,am,an)
 assert(am and type(am.Button)=='function','CreateThemeEditor requires a section-like parent')
 local ao={Entries={},Rows={},Editors={},Config=an}
-local ap=an.Builtins or{'Dark','Light','Ocean','Forest','Ember','Orchid','Paper'}
+local ap=an.Builtins or{'Dark','Light','Ocean','Forest','Ember','Orchid','Paper','Neverlose'}
 local aq=an.Fields or ag
 local ar=(an.Folder or ai.Folder or'Sirius-Remake2')..'/'..(an.FileName or'custom-themes.json')
 local as=type(writefile)=='function'and type(readfile)=='function'and type(isfile)=='function'
@@ -39632,13 +39682,22 @@ an.UIElements={Gui=as,Dot=at}
 end
 if not aq then ar=al.MouseIconEnabled;aq=true end
 al.MouseIconEnabled=false
-local av=al:GetMouseLocation()
-at.Position=UDim2.fromOffset(av.X,av.Y);at.Size=UDim2.fromOffset(an.Size,an.Size);at.Visible=true
+local av=an.Color or ag:GetThemeProperty"Cursor"
+at.BackgroundColor3=typeof(av)=="Color3"and av or Color3.new(1,1,1)
+local aw=al:GetMouseLocation()
+at.Position=UDim2.fromOffset(aw.X,aw.Y);at.Size=UDim2.fromOffset(an.Size,an.Size);at.Visible=true
 end
 function an.Set(au,av)
 if au.Destroyed then return end
 if type(av)=='table'then
 au.Enabled=av.Enabled~=false
+
+if av.Color==false or av.Color=="Auto"then au.Color=nil
+elseif typeof(av.Color)=="Color3"then au.Color=av.Color
+elseif type(av.Color)=="string"then
+local aw,ax=pcall(Color3.fromHex,av.Color)
+if aw then au.Color=ax end
+end
 local aw=tonumber(av.Size)
 if aw and aw==aw then au.Size=math.clamp(aw,4,24)end
 else au.Enabled=av==true end
