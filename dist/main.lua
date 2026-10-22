@@ -38108,7 +38108,7 @@ MinColumnWidth=aw and 1000 or 285,
 ColumnGap=8,
 }
 local ay='Theme';if aw then ay=false end
-local az=ax:Section{Title=ay,Outlined=not aw}
+local az=ax:Section{Title=ay,Outlined=false}
 local aA=az:Input{Title='Name',Icon='type',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Flat=true,Value=aw and''or av.Name,Placeholder='My theme'}
 local aB=az:Dropdown{Title='Base theme',Icon='palette',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Values=ap,Value=av.Base or'Dark',MenuWidth=190}
 local aC=aw and'Save theme'or'Save and overwrite'
@@ -38144,8 +38144,8 @@ if an.OnThemeChanged then an.OnThemeChanged(an.FallbackTheme or'Dark')end
 notify('Theme deleted',aE,'trash-2')
 end}
 ensureValues(av)
-local aE=ax:Section{Title='Interface colors',Outlined=true}
-local aF=ax:RightSection{Title='Element colors',Outlined=true}
+local aE=ax:Section{Title='Interface colors',Outlined=false}
+local aF=ax:RightSection{Title='Element colors',Outlined=false}
 for aG,aH in ipairs(aq)do
 local aI,aJ=aH[1],aH[2]
 local aK=av.Values[aI]

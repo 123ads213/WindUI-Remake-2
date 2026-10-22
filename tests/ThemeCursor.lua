@@ -39,6 +39,11 @@ local function run()
  check(#cards>=2,'theme cards visible')
  for _,entry in pairs(d.CustomThemes.Entries)do
   local edit=d.CustomThemes.Editors[entry.Name];local found=false
+  for _,section in ipairs(edit.Sections)do
+   local card=section.UIElements.Card
+   check(not card:FindFirstChild('GroupOutline'),'no extra white editor outline')
+   check(card:FindFirstChildOfClass('UICorner').CornerRadius.Offset==12,'editor uses standard card corners')
+  end
   for _,section in ipairs(edit.Sections)do for _,element in ipairs(section.Elements)do if element.Title=='Cursor'then found=true end end end
   check(found,'custom editor exposes Cursor')
  end

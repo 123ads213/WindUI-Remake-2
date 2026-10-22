@@ -113,7 +113,7 @@ function ThemeEditor.New(window,wind,parent,config)
    ColumnGap=8,
   })
   local sectionTitle='Theme';if isCreate then sectionTitle=false end
-  local basics=panel:Section({Title=sectionTitle,Outlined=not isCreate})
+  local basics=panel:Section({Title=sectionTitle,Outlined=false})
   local nameInput=basics:Input({Title='Name',Icon='type',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Flat=true,Value=isCreate and''or entry.Name,Placeholder='My theme'})
   local baseInput=basics:Dropdown({Title='Base theme',Icon='palette',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Values=builtins,Value=entry.Base or'Dark',MenuWidth=190})
   local actionTitle=isCreate and'Save theme'or'Save and overwrite'
@@ -149,8 +149,8 @@ function ThemeEditor.New(window,wind,parent,config)
     notify('Theme deleted',deleted,'trash-2')
    end})
    ensureValues(entry)
-   local left=panel:Section({Title='Interface colors',Outlined=true})
-   local right=panel:RightSection({Title='Element colors',Outlined=true})
+   local left=panel:Section({Title='Interface colors',Outlined=false})
+   local right=panel:RightSection({Title='Element colors',Outlined=false})
    for index,definition in ipairs(fields)do
     local key,label=definition[1],definition[2]
     local stored=entry.Values[key]
