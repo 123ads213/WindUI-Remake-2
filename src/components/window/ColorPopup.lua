@@ -6,37 +6,43 @@ local Input=game:GetService('UserInputService')
 local New,Tween=Creator.New,Creator.Tween
 local Popup={}
 function Popup.New(Element,Window,WindUI)
- local self={Opened=false,Destroyed=false,Selected=1,Format='HEX',UIElements={}}
+ local self={Opened=false,Destroyed=false,Selected=1,Format='HEX',UIElements={},Owner=Element}
  local host=Window.UIElements.Main.Main
+ local layer=700
+ local ancestor=Element.UIElements.Colorpicker.Parent
+ while ancestor and ancestor~=host do
+  if ancestor:IsA('GuiObject')and ancestor.Name=='FeatureSettings'then layer=math.max(layer,ancestor.ZIndex+20)end
+  ancestor=ancestor.Parent
+ end
  local signals={}
  local function connect(signal,fn)local c=signal:Connect(fn);signals[#signals+1]=c;return c end
  local function corner(p,n)New('UICorner',{Parent=p,CornerRadius=UDim.new(0,n)})end
  local function label(p,name,text,x,y,w,h,size,secondary)
-  return New('TextLabel',{Parent=p,Name=name,Text=text,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1,TextSize=size or 15,TextStrokeTransparency=1,TextXAlignment='Left',TextTruncate='AtEnd',FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),ThemeTag={TextColor3=secondary and'Placeholder'or'Text'},ZIndex=704})
+  return New('TextLabel',{Parent=p,Name=name,Text=text,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1,TextSize=size or 15,TextStrokeTransparency=1,TextXAlignment='Left',TextTruncate='AtEnd',FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),ThemeTag={TextColor3=secondary and'Placeholder'or'Text'},ZIndex=layer+4})
  end
  local function icon(p,name,x,y,size)
-  local im=Creator.Image(name,name,0,Window.Folder,'ColorIcon',true,false,'Icon');im.Parent=p;im.Position=UDim2.fromOffset(x,y);im.Size=UDim2.fromOffset(size,size);im.ZIndex=705;im.ImageLabel.ZIndex=705;return im
+  local im=Creator.Image(name,name,0,Window.Folder,'ColorIcon',true,false,'Icon');im.Parent=p;im.Position=UDim2.fromOffset(x,y);im.Size=UDim2.fromOffset(size,size);im.ZIndex=layer+5;im.ImageLabel.ZIndex=layer+5;return im
  end
- local panel=New('CanvasGroup',{Parent=host,Name='GradientColorpicker',Size=UDim2.fromOffset(292,396),BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},GroupTransparency=1,Visible=false,ZIndex=700,Active=true});corner(panel,14);Shadow.New(panel,{Opacity=.6})
+ local panel=New('CanvasGroup',{Parent=host,Name='GradientColorpicker',Size=UDim2.fromOffset(292,396),BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},GroupTransparency=1,Visible=false,ZIndex=layer,Active=true});corner(panel,14);Shadow.New(panel,{Opacity=.6})
  local function button(parent,name,title,x,y,w,h,fn,symbol)
-  local b=New('TextButton',{Parent=parent,Name=name,Text='',Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1,BorderSizePixel=0,TextStrokeTransparency=1,AutoButtonColor=false,ThemeTag={BackgroundColor3='ElementBackground'},ZIndex=703});corner(b,7)
+  local b=New('TextButton',{Parent=parent,Name=name,Text='',Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1,BorderSizePixel=0,TextStrokeTransparency=1,AutoButtonColor=false,ThemeTag={BackgroundColor3='ElementBackground'},ZIndex=layer+3});corner(b,7)
   if title~=''then local t=label(b,'Label',title,8,0,w-16,h,14);t.TextXAlignment='Center'end
   if symbol then icon(b,symbol,(w-18)/2,(h-18)/2,18)end
   b.MouseEnter:Connect(function()if name=='Format'then Tween(b.Label,.12,{TextTransparency=0}):Play()else Tween(b,.12,{BackgroundTransparency=0}):Play()end end)
   b.MouseLeave:Connect(function()if name=='Format'then Tween(b.Label,.12,{TextTransparency=.12}):Play()else Tween(b,.12,{BackgroundTransparency=1}):Play()end end)
   if fn then b.MouseButton1Click:Connect(fn)end;return b
  end
- local stops=New('ScrollingFrame',{Parent=panel,Name='Stops',Position=UDim2.fromOffset(14,10),Size=UDim2.fromOffset(226,32),CanvasSize=UDim2.new(),AutomaticCanvasSize='X',ScrollingDirection='X',ScrollBarThickness=2,BackgroundTransparency=1,BorderSizePixel=0,ZIndex=703})
+ local stops=New('ScrollingFrame',{Parent=panel,Name='Stops',Position=UDim2.fromOffset(14,10),Size=UDim2.fromOffset(226,32),CanvasSize=UDim2.new(),AutomaticCanvasSize='X',ScrollingDirection='X',ScrollBarThickness=2,BackgroundTransparency=1,BorderSizePixel=0,ZIndex=layer+3})
  local add=button(panel,'AddStop','',252,10,26,28,function()self:AddStop()end,'plus')
- local map=New('ImageButton',{Parent=panel,Name='SV',Position=UDim2.fromOffset(14,48),Size=UDim2.fromOffset(264,252),Image='rbxassetid://4155801252',AutoButtonColor=false,BackgroundColor3=Color3.fromHSV(0,1,1),BorderSizePixel=0,ZIndex=703});corner(map,8)
- local cursor=New('Frame',{Parent=map,Name='Cursor',Size=UDim2.fromOffset(10,10),AnchorPoint=Vector2.new(.5,.5),BackgroundTransparency=1,ZIndex=705});corner(cursor,5);New('UIStroke',{Parent=cursor,Thickness=2,Color=Color3.new(1,1,1)})
+ local map=New('ImageButton',{Parent=panel,Name='SV',Position=UDim2.fromOffset(14,48),Size=UDim2.fromOffset(264,252),Image='rbxassetid://4155801252',AutoButtonColor=false,BackgroundColor3=Color3.fromHSV(0,1,1),BorderSizePixel=0,ZIndex=layer+3});corner(map,8)
+ local cursor=New('Frame',{Parent=map,Name='Cursor',Size=UDim2.fromOffset(10,10),AnchorPoint=Vector2.new(.5,.5),BackgroundTransparency=1,ZIndex=layer+5});corner(cursor,5);New('UIStroke',{Parent=cursor,Thickness=2,Color=Color3.new(1,1,1)})
  local function bar(name,y,checker)
-  local b=New('TextButton',{Parent=panel,Name=name,Text='',AutoButtonColor=false,Position=UDim2.fromOffset(14,y-7),Size=UDim2.fromOffset(264,24),BackgroundTransparency=1,ZIndex=703})
-  local track=New('Frame',{Parent=b,Name='Track',Position=UDim2.fromOffset(0,7),Size=UDim2.new(1,0,0,10),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=703});corner(track,5)
-  if checker then local check=New('ImageLabel',{Parent=track,Name='Checker',Image='rbxassetid://14204231522',ScaleType='Tile',TileSize=UDim2.fromOffset(10,10),Size=UDim2.fromScale(1,1),BackgroundTransparency=1,ZIndex=703});corner(check,5)end
-  local fill=New('Frame',{Parent=track,Name='Fill',Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=704});corner(fill,5)
+  local b=New('TextButton',{Parent=panel,Name=name,Text='',AutoButtonColor=false,Position=UDim2.fromOffset(14,y-7),Size=UDim2.fromOffset(264,24),BackgroundTransparency=1,ZIndex=layer+3})
+  local track=New('Frame',{Parent=b,Name='Track',Position=UDim2.fromOffset(0,7),Size=UDim2.new(1,0,0,10),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=layer+3});corner(track,5)
+  if checker then local check=New('ImageLabel',{Parent=track,Name='Checker',Image='rbxassetid://14204231522',ScaleType='Tile',TileSize=UDim2.fromOffset(10,10),Size=UDim2.fromScale(1,1),BackgroundTransparency=1,ZIndex=layer+3});corner(check,5)end
+  local fill=New('Frame',{Parent=track,Name='Fill',Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=layer+4});corner(fill,5)
   local grad=New('UIGradient',{Parent=fill})
-  local thumb=New('Frame',{Parent=track,Name='Thumb',Size=UDim2.fromOffset(5,16),Position=UDim2.new(0,0,.5,-8),AnchorPoint=Vector2.new(.5,0),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=705});corner(thumb,2)
+  local thumb=New('Frame',{Parent=track,Name='Thumb',Size=UDim2.fromOffset(5,16),Position=UDim2.new(0,0,.5,-8),AnchorPoint=Vector2.new(.5,0),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=layer+5});corner(thumb,2)
   New('UIStroke',{Parent=thumb,Thickness=1,Color=Color3.new(0,0,0),Transparency=.5})
   return b,grad,thumb
  end
@@ -47,11 +53,11 @@ function Popup.New(Element,Window,WindUI)
  local format=button(panel,'Format','HEX',14,356,54,32,function()self:ShowFormats(true)end)
  local arrow=icon(format,'chevron-down',0,8,16)
  format.Label.Position=UDim2.fromOffset(18,0);format.Label.Size=UDim2.new(1,-18,1,0);format.Label.TextSize=14;format.Label.TextTransparency=.12
- local input=New('TextBox',{Parent=panel,Name='ColorText',Position=UDim2.fromOffset(72,356),Size=UDim2.fromOffset(132,32),BackgroundTransparency=.45,BorderSizePixel=0,TextStrokeTransparency=1,ThemeTag={BackgroundColor3='LabelBackground',TextColor3='Text',PlaceholderColor3='Placeholder'},ClipsDescendants=true,ClearTextOnFocus=false,FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),TextSize=14,Text='',TextXAlignment='Left',ZIndex=704});corner(input,6);New('UIPadding',{Parent=input,PaddingLeft=UDim.new(0,7),PaddingRight=UDim.new(0,5)})
- local opacity=New('TextBox',{Parent=panel,Name='Opacity',Position=UDim2.fromOffset(208,356),Size=UDim2.fromOffset(44,32),BackgroundTransparency=.45,BorderSizePixel=0,TextStrokeTransparency=1,ThemeTag={BackgroundColor3='LabelBackground',TextColor3='Text'},ClipsDescendants=true,ClearTextOnFocus=false,FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),TextSize=14,Text='',ZIndex=704});corner(opacity,6)
+ local input=New('TextBox',{Parent=panel,Name='ColorText',Position=UDim2.fromOffset(72,356),Size=UDim2.fromOffset(132,32),BackgroundTransparency=.45,BorderSizePixel=0,TextStrokeTransparency=1,ThemeTag={BackgroundColor3='LabelBackground',TextColor3='Text',PlaceholderColor3='Placeholder'},ClipsDescendants=true,ClearTextOnFocus=false,FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),TextSize=14,Text='',TextXAlignment='Left',ZIndex=layer+4});corner(input,6);New('UIPadding',{Parent=input,PaddingLeft=UDim.new(0,7),PaddingRight=UDim.new(0,5)})
+ local opacity=New('TextBox',{Parent=panel,Name='Opacity',Position=UDim2.fromOffset(208,356),Size=UDim2.fromOffset(44,32),BackgroundTransparency=.45,BorderSizePixel=0,TextStrokeTransparency=1,ThemeTag={BackgroundColor3='LabelBackground',TextColor3='Text'},ClipsDescendants=true,ClearTextOnFocus=false,FontFace=Font.new(Creator.Font,Enum.FontWeight.Medium),TextSize=14,Text='',ZIndex=layer+4});corner(opacity,6)
  -- Unfocused preview is ellipsized, while the TextBox always retains full editable data.
  local preview=label(input,'Preview','',0,0,0,32,14,false)
- preview.Size=UDim2.fromScale(1,1);preview.ClipsDescendants=true;preview.ZIndex=705
+ preview.Size=UDim2.fromScale(1,1);preview.ClipsDescendants=true;preview.ZIndex=layer+5
  local function previewText()
   preview.Text=input.Text;preview.Visible=not input:IsFocused()
   input.TextTransparency=preview.Visible and 1 or 0
@@ -61,14 +67,14 @@ function Popup.New(Element,Window,WindUI)
  previewText()
  local status=label(panel,'Status','',14,396,264,20,14,true);status.Visible=false
  local reset=button(panel,'Reset','',256,356,22,32,function()Element:Reset();self.Selected=1;self:Refresh()end,'rotate-ccw')
- local formats=New('CanvasGroup',{Parent=host,Name='ColorFormats',Size=UDim2.fromOffset(100,140),GroupTransparency=1,Visible=false,BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},ZIndex=710,Active=true});corner(formats,9);Shadow.New(formats,{Opacity=.6})
- local context=New('CanvasGroup',{Parent=host,Name='ColorActions',Size=UDim2.fromOffset(148,116),GroupTransparency=1,Visible=false,BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},ZIndex=720,Active=true});corner(context,9);Shadow.New(context,{Opacity=.6})
+ local formats=New('CanvasGroup',{Parent=host,Name='ColorFormats',Size=UDim2.fromOffset(100,140),GroupTransparency=1,Visible=false,BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},ZIndex=layer+10,Active=true});corner(formats,9);Shadow.New(formats,{Opacity=.6})
+ local context=New('CanvasGroup',{Parent=host,Name='ColorActions',Size=UDim2.fromOffset(148,116),GroupTransparency=1,Visible=false,BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},ZIndex=layer+20,Active=true});corner(context,9);Shadow.New(context,{Opacity=.6})
  local copy=button(context,'Copy','Copy',6,6,136,32,function()self:Copy();self:ShowActions(false)end,'copy')
  local paste=button(context,'Paste','Paste',6,42,136,32,function()self:Paste();self:ShowActions(false)end,'clipboard-paste')
  local remove=button(context,'Remove','Delete color',6,78,136,32,function()self:RemoveStop();self:ShowActions(false)end,'trash-2')
  for _,b in ipairs({copy,paste,remove})do
-  b.ZIndex=721;b.Label.ZIndex=723;b.Label.TextXAlignment='Left';b.Label.Position=UDim2.fromOffset(36,0);b.Label.Size=UDim2.new(1,-42,1,0);b.Label.TextSize=15
-  for _,im in ipairs(b:GetChildren())do if im:IsA('Frame')then im.Position=UDim2.fromOffset(10,8);im.ZIndex=722;if im:FindFirstChild('ImageLabel')then im.ImageLabel.ZIndex=722 end end end
+  b.ZIndex=layer+21;b.Label.ZIndex=layer+23;b.Label.TextXAlignment='Left';b.Label.Position=UDim2.fromOffset(36,0);b.Label.Size=UDim2.new(1,-42,1,0);b.Label.TextSize=15
+  for _,im in ipairs(b:GetChildren())do if im:IsA('Frame')then im.Position=UDim2.fromOffset(10,8);im.ZIndex=layer+22;if im:FindFirstChild('ImageLabel')then im.ImageLabel.ZIndex=layer+22 end end end
  end
  status:GetPropertyChangedSignal('Text'):Connect(function()
   status.Visible=status.Text~=''
@@ -107,7 +113,7 @@ function Popup.New(Element,Window,WindUI)
  end
  for i,name in ipairs({'HEX','RGB','HSV','HSL'})do
   local b=button(formats,name,name,6,6+(i-1)*32,88,30,function()self.Format=name;self:Refresh();self:ShowFormats(false)end)
-  b.ZIndex=711;b.Label.ZIndex=712;b.Label.TextSize=15
+  b.ZIndex=layer+11;b.Label.ZIndex=layer+12;b.Label.TextSize=15
  end
  connect(format.MouseEnter,function()self:ShowFormats(true)end)
  local overFormat,overFormats=false,false
@@ -120,9 +126,9 @@ function Popup.New(Element,Window,WindUI)
  local h,s,v=0,0,1
  local refreshing=false
  local function checker(parent,name,x,color,t)
-  local b=New('TextButton',{Parent=parent,Name=name,Text='',AutoButtonColor=false,Position=UDim2.fromOffset(x,2),Size=UDim2.fromOffset(24,24),BackgroundTransparency=1,ZIndex=704})
-  local c=New('ImageLabel',{Parent=b,Image='rbxassetid://14204231522',ScaleType='Tile',TileSize=UDim2.fromOffset(10,10),Size=UDim2.fromScale(1,1),BackgroundTransparency=1,ZIndex=704});corner(c,6)
-  local f=New('Frame',{Parent=c,Size=UDim2.fromScale(1,1),BackgroundColor3=color,BackgroundTransparency=t,BorderSizePixel=0,ZIndex=705});corner(f,6)
+  local b=New('TextButton',{Parent=parent,Name=name,Text='',AutoButtonColor=false,Position=UDim2.fromOffset(x,2),Size=UDim2.fromOffset(24,24),BackgroundTransparency=1,ZIndex=layer+4})
+  local c=New('ImageLabel',{Parent=b,Image='rbxassetid://14204231522',ScaleType='Tile',TileSize=UDim2.fromOffset(10,10),Size=UDim2.fromScale(1,1),BackgroundTransparency=1,ZIndex=layer+4});corner(c,6)
+  local f=New('Frame',{Parent=c,Size=UDim2.fromScale(1,1),BackgroundColor3=color,BackgroundTransparency=t,BorderSizePixel=0,ZIndex=layer+5});corner(f,6)
   return b,f
  end
  function self:Refresh()
@@ -137,7 +143,7 @@ function Popup.New(Element,Window,WindUI)
    for _,child in ipairs(stops:GetChildren())do child:Destroy()end;table.clear(chips)
    for i,item in ipairs(state.Stops)do
     local chip,fill=checker(stops,'Stop_'..i,(i-1)*36,item.Color,item.Transparency)
-    local selected=New('Frame',{Parent=chip,Name='Selected',Position=UDim2.new(.5,-7,1,2),Size=UDim2.fromOffset(14,2),BackgroundTransparency=0,BorderSizePixel=0,ThemeTag={BackgroundColor3='Text'},ZIndex=706});corner(selected,1)
+    local selected=New('Frame',{Parent=chip,Name='Selected',Position=UDim2.new(.5,-7,1,2),Size=UDim2.fromOffset(14,2),BackgroundTransparency=0,BorderSizePixel=0,ThemeTag={BackgroundColor3='Text'},ZIndex=layer+6});corner(selected,1)
     chips[i]={Button=chip,Fill=fill,Selected=selected}
     chip.MouseButton1Click:Connect(function()self.Selected=i;self:ShowActions(false);self:Refresh()end)
     chip.MouseButton2Click:Connect(function()self.Selected=i;self:Refresh();self:ShowActions(true,chip)end)
@@ -236,9 +242,17 @@ function Popup.New(Element,Window,WindUI)
  connect(Input.InputChanged,function(inputObject)if drag and((dragInput.UserInputType==Enum.UserInputType.Touch and inputObject==dragInput)or(dragInput.UserInputType==Enum.UserInputType.MouseButton1 and inputObject.UserInputType==Enum.UserInputType.MouseMovement))then read(inputObject)end end)
  connect(Input.InputEnded,function(inputObject)if drag and(inputObject==dragInput or(dragInput.UserInputType==Enum.UserInputType.MouseButton1 and inputObject.UserInputType==Enum.UserInputType.MouseButton1))then stopDrag()end end)
  local function inside(p,at)return p.Visible and at.X>=p.AbsolutePosition.X and at.X<=p.AbsolutePosition.X+p.AbsoluteSize.X and at.Y>=p.AbsolutePosition.Y and at.Y<=p.AbsolutePosition.Y+p.AbsoluteSize.Y end
+ function self:ContainsPoint(at)
+  return self.Opened and(inside(panel,at)or inside(formats,at)or inside(context,at))
+ end
  connect(Input.InputBegan,function(inputObject)
   if not self.Opened then return end
-  if inputObject.KeyCode==Enum.KeyCode.Escape then self:Close();return end
+  if inputObject.KeyCode==Enum.KeyCode.Escape then
+   local consumed={Input=inputObject,Anchor=Element.UIElements.Colorpicker}
+   Window._ChildPopupEscape=consumed
+   task.delay(.05,function()if Window._ChildPopupEscape==consumed then Window._ChildPopupEscape=nil end end)
+   self:Close();return
+  end
   if inputObject.UserInputType==Enum.UserInputType.MouseButton1 or inputObject.UserInputType==Enum.UserInputType.MouseButton2 then
    local at=point(inputObject);if not inside(panel,at)and not inside(formats,at)and not inside(context,at)and not inside(Element.UIElements.Colorpicker,at)then self:Close()end
   end

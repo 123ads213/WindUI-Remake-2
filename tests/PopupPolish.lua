@@ -83,6 +83,51 @@ local function run()
  check(theme:OpenEditor(name),'new theme editor opens')
  task.wait(.4);checkThemeFields(theme.Editors[name])
  local edit=theme.Editors[name];local found
+ local inputService=game:GetService('UserInputService')
+ local function press(node,userType)
+  local at=node.AbsolutePosition+node.AbsoluteSize/2
+  local event={Position=Vector3.new(at.X,at.Y,0),UserInputType=userType or Enum.UserInputType.MouseButton1,KeyCode=Enum.KeyCode.Unknown}
+  firesignal(inputService.InputBegan,event,false);task.wait(.04);return event
+ end
+ local picker
+ for _,element in ipairs(edit.Sections[3].Elements)do if element.__type=='Colorpicker'then picker=element;break end end
+ check(picker~=nil,'theme editor exposes color controls')
+ local palette=picker:Open();task.wait(.25)
+ check(edit.Opened and palette.Opened,'opening child palette keeps editor open')
+ check(palette.UIElements.Panel.ZIndex>edit.UIElements.Panel.ZIndex,'palette above editor')
+ local dragEvent=press(palette.UIElements.SV)
+ check(edit.Opened,'map click does not dismiss editor')
+ firesignal(palette.UIElements.SV.InputBegan,dragEvent)
+ local move={Position=dragEvent.Position+Vector3.new(16,-12,0),UserInputType=Enum.UserInputType.MouseMovement,KeyCode=Enum.KeyCode.Unknown}
+ firesignal(inputService.InputChanged,move,false);firesignal(inputService.InputEnded,dragEvent,false);task.wait(.1)
+ check(edit.Opened and palette.Opened,'live color drag keeps both windows open')
+ press(palette.UIElements.Hue);press(palette.UIElements.Alpha)
+ check(edit.Opened,'hue and alpha clicks stay inside editor interaction')
+ press(palette.UIElements.ColorText);palette.UIElements.ColorText.Text='#4488CCFF';firesignal(palette.UIElements.ColorText.FocusLost,true);task.wait(.1)
+ check(edit.Opened and palette.Opened,'HEX commit keeps editor open')
+ press(palette.UIElements.Opacity);palette.UIElements.Opacity.Text='75%';firesignal(palette.UIElements.Opacity.FocusLost,true);task.wait(.1)
+ check(edit.Opened and math.abs(picker.Transparency-.25)<.001,'opacity edit commits without dismissing editor')
+ palette:ShowFormats(true);press(palette.UIElements.Formats:FindFirstChild('RGB'))
+ click(palette.UIElements.Formats:FindFirstChild('RGB'))
+ check(edit.Opened and palette.Opened and palette.Format=='RGB','format submenu belongs to editor')
+ local chip=palette.UIElements.Stops:FindFirstChild('Stop_1');palette:ShowActions(true,chip)
+ press(palette.UIElements.Copy);palette:ShowActions(false)
+ check(edit.Opened and palette.Opened,'color action submenu belongs to editor')
+ firesignal(inputService.InputBegan,{UserInputType=Enum.UserInputType.Keyboard,KeyCode=Enum.KeyCode.Escape},false);task.wait(.2)
+ check(edit.Opened and not palette.Opened,'Escape closes child palette, not editor')
+ palette=picker:Open();task.wait(.2);edit:Close()
+ check(not edit.Opened and not palette.Opened,'closing editor also closes its palette')
+ edit:Open();task.wait(.2)
+ local base=edit.UIElements.BaseInput;base:Open();task.wait(.2)
+ press(base.UIElements.MenuCanvas:FindFirstChild('Options'):FindFirstChildWhichIsA('TextButton'))
+ check(edit.Opened,'base dropdown option click preserves editor')
+ firesignal(inputService.InputBegan,{UserInputType=Enum.UserInputType.Keyboard,KeyCode=Enum.KeyCode.Escape},false);task.wait(.2)
+ check(edit.Opened and not base.Opened,'Escape closes only base dropdown')
+ firesignal(inputService.InputBegan,{UserInputType=Enum.UserInputType.Keyboard,KeyCode=Enum.KeyCode.Escape},false);task.wait(.2)
+ check(not edit.Opened,'next Escape closes editor normally')
+ edit:Open();task.wait(.2)
+ for _,element in ipairs(edit.Sections[1].Elements)do if element.Title=='Save and overwrite'then element.Callback();break end end
+ check(edit.Opened,'save and overwrite keeps editor open for continued editing')
  for _,element in ipairs(edit.Sections[1].Elements)do if element.Title=='Delete theme'then element.Callback();found=true;break end end
  check(found and not theme.Entries[name],'test theme removed')
 end

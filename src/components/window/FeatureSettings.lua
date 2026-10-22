@@ -68,8 +68,14 @@ function Settings.New(content,frame,window,wind,elements,scale,config)
   local dropdown=window._CompactDropdown
   return dropdown and dropdown.UIElements.Dropdown:IsDescendantOf(panel)and dropdown
  end
+ local function ownedColorPopup()
+  local popup=window.ActiveColorPopup
+  local preview=popup and popup.Owner and popup.Owner.UIElements.Colorpicker
+  return preview and preview:IsDescendantOf(panel)and popup
+ end
  function self:Close()
   local dropdown=ownedDropdown();if dropdown then dropdown:Close()end
+  local color=ownedColorPopup();if color then color:Close()end
   self.Opened=false;U.show(panel,false);if window.ActiveFeatureSettings==self then window.ActiveFeatureSettings=nil end
  end
  function self:Open()
@@ -86,11 +92,18 @@ function Settings.New(content,frame,window,wind,elements,scale,config)
  local screenConn=wind.ScreenGui:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()if self.Opened then fit()end end)
  local scaleConn=wind.UIScaleObj:GetPropertyChangedSignal('Scale'):Connect(function()if self.Opened then fit()end end)
  local conn=Input.InputBegan:Connect(function(input)
-  if input.KeyCode==Enum.KeyCode.Escape then self:Close()
+  if input.KeyCode==Enum.KeyCode.Escape then
+   local consumed=window._ChildPopupEscape
+   if consumed and consumed.Input==input and consumed.Anchor:IsDescendantOf(panel)then return end
+   local dropdown=ownedDropdown();local color=ownedColorPopup()
+   if (dropdown and dropdown.Opened)or(color and color.Opened)then return end
+   self:Close()
   elseif input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
    local dropdown=ownedDropdown()
    local inChoices=dropdown and dropdown.Opened and U.inside(dropdown.UIElements.MenuCanvas,input.Position)
-   if self.Opened and not U.inside(panel,input.Position)and not U.inside(button,input.Position)and not inChoices then self:Close()end
+   local color=ownedColorPopup()
+   local inColor=color and color:ContainsPoint(input.Position)
+   if self.Opened and not U.inside(panel,input.Position)and not U.inside(button,input.Position)and not inChoices and not inColor then self:Close()end
   end
  end)
  function self:Destroy()conn:Disconnect();self:Close();panel:Destroy();button:Destroy()end

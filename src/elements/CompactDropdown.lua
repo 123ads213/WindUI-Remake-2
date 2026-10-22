@@ -80,7 +80,12 @@ function D:New(config)
  search:GetPropertyChangedSignal('Text'):Connect(render)
  local conn=Input.InputBegan:Connect(function(input)
   if not obj.Opened then return end
-  if input.KeyCode==Enum.KeyCode.Escape then obj:Close()end
+  if input.KeyCode==Enum.KeyCode.Escape then
+   local consumed={Input=input,Anchor=trigger}
+   config.Window._ChildPopupEscape=consumed
+   task.delay(.05,function()if config.Window._ChildPopupEscape==consumed then config.Window._ChildPopupEscape=nil end end)
+   obj:Close()
+  end
   if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
    if not U.inside(menu,input.Position)and not U.inside(trigger,input.Position)then obj:Close()end
   end
