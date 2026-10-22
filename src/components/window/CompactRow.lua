@@ -102,27 +102,33 @@ return function(content,frame,config)
   iconOffset=28
  end
  if title then title.Position=UDim2.fromOffset(14+iconOffset,0);title.Size=UDim2.new(1,-width-40-iconOffset,1,0)end
- if content.__type=='Button'and config.Primary then
-  main.Size=UDim2.new(1,-28,0,34);main.Position=UDim2.fromOffset(14,4)
-  if main:IsA('ImageButton')or main:IsA('ImageLabel')then
-   main.ImageTransparency=0
-   C.AddThemeObject(main,{ImageColor3='Primary'})
-  else
-   main.BackgroundTransparency=0
-   C.AddThemeObject(main,{BackgroundColor3='Primary'})
-  end
+ if content.__type=='Button'then
+  local surface=C.New('Frame',{Parent=main,Name='ButtonSurface',Position=UDim2.fromOffset(10,4),Size=UDim2.new(1,-20,1,-8),BackgroundTransparency=0,BorderSizePixel=0,ThemeTag={BackgroundColor3=config.Primary and'Primary'or'ChoiceBackground'},ZIndex=main.ZIndex+1})
+  C.New('UICorner',{Parent=surface,CornerRadius=UDim.new(0,7)})
+  C.New('UIStroke',{Parent=surface,Name='ButtonBorder',Thickness=1,ApplyStrokeMode='Border',Transparency=config.Primary and 1 or .82,ThemeTag={Color='Text'}})
+  content.UIElements.ButtonSurface=surface
   local control=content.UIElements.ButtonIcon
   if control then
-   control.Visible=true;control.Size=UDim2.fromOffset(16,16)
-   control.AnchorPoint=Vector2.new(0,.5);control.Position=UDim2.new(0,12,.5,0)
-   if control.ImageLabel then control.ImageLabel.ImageColor3=Color3.new(1,1,1);control.ImageLabel.ImageTransparency=0 end
+   control.Parent=surface;control.Visible=true;control.Size=UDim2.fromOffset(16,16);control.ZIndex=surface.ZIndex+1
+   control.AnchorPoint=Vector2.new(config.Icon and 0 or 1,.5);control.Position=UDim2.new(config.Icon and 0 or 1,config.Icon and 12 or -12,.5,0)
+   if control.ImageLabel then
+    control.ImageLabel.ZIndex=control.ZIndex;control.ImageLabel.ImageTransparency=0
+    C.AddThemeObject(control.ImageLabel,{ImageColor3='Icon'})
+    if config.Primary or typeof(config.Color)=='Color3' then
+     if C.Objects[control.ImageLabel]then C.Objects[control.ImageLabel].Properties.ImageColor3=nil end
+     control.ImageLabel.ImageColor3=config.Primary and Color3.new(1,1,1)or config.Color
+    end
+   end
   end
   if title then
-   title.Position=UDim2.fromOffset(0,0);title.Size=UDim2.fromScale(1,1)
-   title.TextXAlignment=Enum.TextXAlignment.Center;title.TextColor3=Color3.new(1,1,1);title.TextTransparency=0
-   if C.Objects[title]then C.Objects[title].Properties.TextColor3=nil end
+   title.Parent=surface;title.ZIndex=surface.ZIndex+1;title.Position=UDim2.fromOffset(config.Icon and 38 or 12,0);title.Size=UDim2.new(1,-50,1,0)
+   title.TextSize=14;title.TextXAlignment=Enum.TextXAlignment.Left;title.TextTransparency=0
+   C.AddThemeObject(title,{TextColor3='Text'})
+   if config.Primary then
+    if C.Objects[title]then C.Objects[title].Properties.TextColor3=nil end
+    title.TextColor3=Color3.new(1,1,1)
+   end
   end
-  local corner=main:FindFirstChildWhichIsA('UICorner',true);if corner then corner.CornerRadius=UDim.new(0,8)end
  else
   C.New('Frame',{Parent=main,Name='RowDivider',Position=UDim2.new(0,14,1,-1),Size=UDim2.new(1,-28,0,1),BackgroundTransparency=.95,ThemeTag={BackgroundColor3='Text'}})
  end

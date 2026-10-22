@@ -83,6 +83,21 @@ local function run()
  check(theme:OpenEditor(name),'new theme editor opens')
  task.wait(.4);checkThemeFields(theme.Editors[name])
  local edit=theme.Editors[name];local found
+ for _,element in ipairs(edit.Sections[1].Elements)do
+  if element.__type=='Button'then
+   local surface=element.UIElements.ButtonSurface;local row=element.ButtonFrame.UIElements.Main
+   check(surface~=nil and surface.BackgroundTransparency==0,'theme action has a visible button surface')
+   check(surface:FindFirstChild('ButtonBorder')~=nil,'theme action has explicit button bounds')
+   check(element.UIElements.ButtonIcon.Parent==surface,'action icon inside button')
+   check(element.ButtonFrame.UIElements.Title.Parent==surface,'action label inside button')
+   local color=surface.BackgroundColor3
+   firesignal(row.MouseEnter);firesignal(row.MouseMoved,0,0);task.wait(.2)
+   check(surface.BackgroundColor3==color,'no hover recoloring on action buttons')
+   for _,node in ipairs(row:GetDescendants())do
+    if node:IsA('UIGradient')and node.Name=='HoverGradient'then check(node.Parent.ImageTransparency==1,'no gradient glow on compact button')end
+   end
+  end
+ end
  local inputService=game:GetService('UserInputService')
  local function press(node,userType)
   local at=node.AbsolutePosition+node.AbsoluteSize/2

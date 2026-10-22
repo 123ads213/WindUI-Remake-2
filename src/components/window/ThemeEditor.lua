@@ -117,7 +117,7 @@ function ThemeEditor.New(window,wind,parent,config)
   local nameInput=basics:Input({Title='Name',Icon='type',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Flat=true,Value=isCreate and''or entry.Name,Placeholder='My theme'})
   local baseInput=basics:Dropdown({Title='Base theme',Icon='palette',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Values=builtins,Value=entry.Base or'Dark',MenuWidth=190})
   local actionTitle=isCreate and'Save theme'or'Save and overwrite'
-  local actionConfig={Title=actionTitle,Icon=isCreate and'check'or'save',Callback=function()
+  local actionConfig={Title=actionTitle,Icon=isCreate and'check'or'save',Primary=true,Callback=function()
    local name=normalizedName(nameInput.Value)
    if name==''then notify('Custom theme','Enter a theme name.','circle-alert');return end
    for _,builtin in ipairs(builtins)do if string.lower(builtin)==string.lower(name)then notify('Custom theme','That name belongs to a built-in theme.','circle-alert');return end end

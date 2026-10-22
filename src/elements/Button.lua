@@ -34,7 +34,7 @@ function Element:New(Config)
 		Color = Button.Color,
 		Justify = Button.Justify,
 		TextOffset = 20,
-		Hover = true,
+		Hover = not Config.CompactRow,
 		Scalable = true,
 		Tab = Config.Tab,
 		Index = Config.Index,

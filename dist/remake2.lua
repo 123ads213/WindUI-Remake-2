@@ -31225,7 +31225,7 @@ Window=ae.Window,
 Color=af.Color,
 Justify=af.Justify,
 TextOffset=20,
-Hover=true,
+Hover=not ae.CompactRow,
 Scalable=true,
 Tab=ae.Tab,
 Index=ae.Index,
@@ -33670,27 +33670,33 @@ elseif ag.Icon and ae.__type=='Button'then
 am=28
 end
 if aj then aj.Position=UDim2.fromOffset(14+am,0);aj.Size=UDim2.new(1,-al-40-am,1,0)end
-if ae.__type=='Button'and ag.Primary then
-ah.Size=UDim2.new(1,-28,0,34);ah.Position=UDim2.fromOffset(14,4)
-if ah:IsA'ImageButton'or ah:IsA'ImageLabel'then
-ah.ImageTransparency=0
-aa.AddThemeObject(ah,{ImageColor3='Primary'})
-else
-ah.BackgroundTransparency=0
-aa.AddThemeObject(ah,{BackgroundColor3='Primary'})
+if ae.__type=='Button'then
+local an=aa.New('Frame',{Parent=ah,Name='ButtonSurface',Position=UDim2.fromOffset(10,4),Size=UDim2.new(1,-20,1,-8),BackgroundTransparency=0,BorderSizePixel=0,ThemeTag={BackgroundColor3=ag.Primary and'Primary'or'ChoiceBackground'},ZIndex=ah.ZIndex+1})
+aa.New('UICorner',{Parent=an,CornerRadius=UDim.new(0,7)})
+aa.New('UIStroke',{Parent=an,Name='ButtonBorder',Thickness=1,ApplyStrokeMode='Border',Transparency=ag.Primary and 1 or.82,ThemeTag={Color='Text'}})
+ae.UIElements.ButtonSurface=an
+local ao=ae.UIElements.ButtonIcon
+if ao then
+ao.Parent=an;ao.Visible=true;ao.Size=UDim2.fromOffset(16,16);ao.ZIndex=an.ZIndex+1
+ao.AnchorPoint=Vector2.new(ag.Icon and 0 or 1,.5);ao.Position=UDim2.new(ag.Icon and 0 or 1,ag.Icon and 12 or-12,.5,0)
+if ao.ImageLabel then
+ao.ImageLabel.ZIndex=ao.ZIndex;ao.ImageLabel.ImageTransparency=0
+aa.AddThemeObject(ao.ImageLabel,{ImageColor3='Icon'})
+if ag.Primary or typeof(ag.Color)=='Color3'then
+if aa.Objects[ao.ImageLabel]then aa.Objects[ao.ImageLabel].Properties.ImageColor3=nil end
+ao.ImageLabel.ImageColor3=ag.Primary and Color3.new(1,1,1)or ag.Color
 end
-local an=ae.UIElements.ButtonIcon
-if an then
-an.Visible=true;an.Size=UDim2.fromOffset(16,16)
-an.AnchorPoint=Vector2.new(0,.5);an.Position=UDim2.new(0,12,.5,0)
-if an.ImageLabel then an.ImageLabel.ImageColor3=Color3.new(1,1,1);an.ImageLabel.ImageTransparency=0 end
+end
 end
 if aj then
-aj.Position=UDim2.fromOffset(0,0);aj.Size=UDim2.fromScale(1,1)
-aj.TextXAlignment=Enum.TextXAlignment.Center;aj.TextColor3=Color3.new(1,1,1);aj.TextTransparency=0
+aj.Parent=an;aj.ZIndex=an.ZIndex+1;aj.Position=UDim2.fromOffset(ag.Icon and 38 or 12,0);aj.Size=UDim2.new(1,-50,1,0)
+aj.TextSize=14;aj.TextXAlignment=Enum.TextXAlignment.Left;aj.TextTransparency=0
+aa.AddThemeObject(aj,{TextColor3='Text'})
+if ag.Primary then
 if aa.Objects[aj]then aa.Objects[aj].Properties.TextColor3=nil end
+aj.TextColor3=Color3.new(1,1,1)
 end
-local ao=ah:FindFirstChildWhichIsA('UICorner',true);if ao then ao.CornerRadius=UDim.new(0,8)end
+end
 else
 aa.New('Frame',{Parent=ah,Name='RowDivider',Position=UDim2.new(0,14,1,-1),Size=UDim2.new(1,-28,0,1),BackgroundTransparency=.95,ThemeTag={BackgroundColor3='Text'}})
 end
@@ -38060,7 +38066,7 @@ local az=ax:Section{Title=ay,Outlined=not aw}
 local aA=az:Input{Title='Name',Icon='type',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Flat=true,Value=aw and''or av.Name,Placeholder='My theme'}
 local aB=az:Dropdown{Title='Base theme',Icon='palette',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Values=ap,Value=av.Base or'Dark',MenuWidth=190}
 local aC=aw and'Save theme'or'Save and overwrite'
-local aD={Title=aC,Icon=aw and'check'or'save',Callback=function()
+local aD={Title=aC,Icon=aw and'check'or'save',Primary=true,Callback=function()
 local aD=normalizedName(aA.Value)
 if aD==''then notify('Custom theme','Enter a theme name.','circle-alert');return end
 for aE,aF in ipairs(ap)do if string.lower(aF)==string.lower(aD)then notify('Custom theme','That name belongs to a built-in theme.','circle-alert');return end end
