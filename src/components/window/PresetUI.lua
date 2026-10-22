@@ -149,7 +149,7 @@ function P.New(window,wind,options)
   self.View='Recent';self.Sort='Modified';self.SortReversed=false;self:Refresh()
  end);recent:SetAttribute('NoHover',true);U.icon(recent,'folder-clock',9,8,16,window)
  function self:Refresh()
-  for _,choice in ipairs({{viewButton,self.View~='Recent'},{recent,self.View=='Recent'}})do
+  for _,choice in ipairs({{viewButton,true},{recent,self.View=='Recent'}})do
    choice[1]:SetAttribute('IdleTransparency',choice[2]and .15 or 1)
    choice[1]:SetAttribute('HoverTransparency',choice[2]and .15 or .65)
    choice[1].BackgroundTransparency=choice[2]and .15 or 1

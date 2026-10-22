@@ -39746,7 +39746,7 @@ ay=aa.button(ax,'',242,10,34,32,function()
 aq.View='Recent';aq.Sort='Modified';aq.SortReversed=false;aq:Refresh()
 end);ay:SetAttribute('NoHover',true);aa.icon(ay,'folder-clock',9,8,16,am)
 function aq.Refresh(aU)
-for aV,aW in ipairs{{az,aU.View~='Recent'},{ay,aU.View=='Recent'}}do
+for aV,aW in ipairs{{az,true},{ay,aU.View=='Recent'}}do
 aW[1]:SetAttribute('IdleTransparency',aW[2]and.15 or 1)
 aW[1]:SetAttribute('HoverTransparency',aW[2]and.15 or.65)
 aW[1].BackgroundTransparency=aW[2]and.15 or 1
