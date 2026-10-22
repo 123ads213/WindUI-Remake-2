@@ -10,6 +10,9 @@ local function selectTheme(name)d.ThemeDropdown:Select(name);task.wait(.15)end
 local function run()
  local source={Primary=Color3.new(.318,.486,.992),Text=Color3.new(.922,.922,.941),Icon=Color3.new(.51,.52,.56),Outline=Color3.new(.118,.129,.173),Button=Color3.new(.102,.102,.133),ElementBackground=Color3.new(.071,.078,.114),PanelBackground=Color3.new(.043,.055,.086),ChoiceBackground=Color3.fromRGB(25,27,36),ToggleTrack=Color3.new(.055,.071,.098),ToggleThumbOff=Color3.new(.498,.529,.557),TabBackgroundActive=Color3.new(.153,.169,.212)}
  local theme=assert(wind:GetThemes().Neverlose)
+ check(theme.TabBackgroundHoverTransparency==.6,'source tab hover alpha 40 percent')
+ check(theme.TabBackgroundActiveTransparency==0,'source selected tab alpha 100 percent')
+ check(theme.CardBorderTransparency==1,'no extra card outline strips')
  for key,color in pairs(source)do check(near(theme[key],color),'source color '..key)end
  check(table.find(d.ThemeDropdown.Values,'Neverlose')~=nil,'theme selector includes Neverlose')
  check(table.find(d.CustomThemes.CreatePanel.UIElements.BaseInput.Values,'Neverlose')~=nil,'custom base includes Neverlose')
