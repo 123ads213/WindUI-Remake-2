@@ -37,7 +37,7 @@ function Settings.New(content,frame,window,wind,elements,scale,config)
  -- Actions live outside the scrolling cards, never inside a clipped element row.
  function self:Footer(cfg)
   assert(not self.UIElements.Footer,'A settings panel has only one footer')
-  footerHeight=56;body.Size=UDim2.new(1,-24,1,-54-footerHeight)
+  footerHeight=36;body.Size=UDim2.new(1,-24,1,-54-footerHeight)
   local footer=U.New('Frame',{Parent=panel,Name='SettingsFooter',Position=UDim2.new(0,16,1,-52),Size=UDim2.new(1,-32,0,36),BackgroundTransparency=1,ZIndex=824})
   local actionWidth=(width-40)/2
   local cancel=U.button(footer,'Cancel',0,0,actionWidth,36,function()self:Close()end)

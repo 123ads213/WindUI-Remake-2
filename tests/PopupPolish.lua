@@ -31,7 +31,10 @@ local function run()
  p:Toggle();d.Themes:Select();d.Profile:Open();d.Profile.ThemeControl:Open();d.Profile.ThemeControl:Select('Custom');task.wait(.4)
  local panel=theme.CreatePanel;local ui=panel.UIElements
  check(panel.Sections[1].Title==false,'no redundant Theme heading')
- check(ui.Panel.Size.X.Offset==360 and ui.Panel.Size.Y.Offset<=230,'compact create dialog')
+ check(ui.Panel.Size.X.Offset==360 and ui.Panel.Size.Y.Offset<=200,'compact create dialog')
+ local card=panel.Sections[1].UIElements.Card
+ local gap=(ui.Confirm.AbsolutePosition.Y-card.AbsolutePosition.Y-card.AbsoluteSize.Y)/d.Library.UIScaleObj.Scale
+ check(gap>=8 and gap<=16,'actions close to fields without overlap')
  local screen=d.Library.ScreenGui
  local center=ui.Panel.AbsolutePosition+ui.Panel.AbsoluteSize/2
  local target=screen.AbsolutePosition+screen.AbsoluteSize/2

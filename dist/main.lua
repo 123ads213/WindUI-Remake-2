@@ -36231,7 +36231,7 @@ end
 
 function aA.Footer(b,d)
 assert(not b.UIElements.Footer,'A settings panel has only one footer')
-aB=56;aw.Size=UDim2.new(1,-24,1,-54-aB)
+aB=36;aw.Size=UDim2.new(1,-24,1,-54-aB)
 local f=aa.New('Frame',{Parent=at,Name='SettingsFooter',Position=UDim2.new(0,16,1,-52),Size=UDim2.new(1,-32,0,36),BackgroundTransparency=1,ZIndex=824})
 local g=(as-40)/2
 local h=aa.button(f,'Cancel',0,0,g,36,function()b:Close()end)
