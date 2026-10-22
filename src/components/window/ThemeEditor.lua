@@ -114,7 +114,7 @@ function ThemeEditor.New(window,wind,parent,config)
   })
   local sectionTitle='Theme';if isCreate then sectionTitle=false end
   local basics=panel:Section({Title=sectionTitle,Outlined=not isCreate})
-  local nameInput=basics:Input({Title='Name',Icon='type',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Flat=isCreate,Value=isCreate and''or entry.Name,Placeholder='My theme'})
+  local nameInput=basics:Input({Title='Name',Icon='type',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Flat=true,Value=isCreate and''or entry.Name,Placeholder='My theme'})
   local baseInput=basics:Dropdown({Title='Base theme',Icon='palette',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Values=builtins,Value=entry.Base or'Dark',MenuWidth=190})
   local actionTitle=isCreate and'Save theme'or'Save and overwrite'
   local actionConfig={Title=actionTitle,Icon=isCreate and'check'or'save',Callback=function()

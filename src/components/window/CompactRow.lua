@@ -70,7 +70,8 @@ return function(content,frame,config)
     control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0);control.Size=UDim2.fromOffset(width,30)
     for _,node in ipairs(control:GetDescendants())do if node:IsA('UICorner')then node.CornerRadius=UDim.new(0,7)end end
     if config.Flat then
-     control.BackgroundTransparency=0;C.AddThemeObject(control,{BackgroundColor3='LabelBackground'})
+     control.BackgroundTransparency=.35;C.AddThemeObject(control,{BackgroundColor3='ChoiceBackground',BackgroundTransparency='ChoiceTransparency'})
+     control.Name='CompactInput';content.UIElements.Input=control
      C.New('UICorner',{Parent=control,CornerRadius=UDim.new(0,7)})
      for _,node in ipairs(control:GetDescendants())do
       if node:IsA('ImageLabel')then
@@ -95,7 +96,8 @@ return function(content,frame,config)
  end
  local iconOffset=0
  if config.Icon and content.__type~='Button'then
-  local icon=require('./RemakeUI').icon(main,config.Icon,14,15,20,config.Window);iconOffset=28
+  local icon=require('./RemakeUI').icon(main,config.Icon,14,0,20,config.Window)
+  icon.AnchorPoint=Vector2.new(0,.5);icon.Position=UDim2.new(0,14,.5,0);content.UIElements.RowIcon=icon;iconOffset=28
  elseif config.Icon and content.__type=='Button'then
   iconOffset=28
  end

@@ -33635,7 +33635,8 @@ if an:IsA'GuiObject'and an~=aj and an~=af.UIElements.Container and an:FindFirstC
 an.AnchorPoint=Vector2.new(1,.5);an.Position=UDim2.new(1,-14,.5,0);an.Size=UDim2.fromOffset(al,30)
 for ao,ap in ipairs(an:GetDescendants())do if ap:IsA'UICorner'then ap.CornerRadius=UDim.new(0,7)end end
 if ag.Flat then
-an.BackgroundTransparency=0;aa.AddThemeObject(an,{BackgroundColor3='LabelBackground'})
+an.BackgroundTransparency=.35;aa.AddThemeObject(an,{BackgroundColor3='ChoiceBackground',BackgroundTransparency='ChoiceTransparency'})
+an.Name='CompactInput';ae.UIElements.Input=an
 aa.New('UICorner',{Parent=an,CornerRadius=UDim.new(0,7)})
 for ao,ap in ipairs(an:GetDescendants())do
 if ap:IsA'ImageLabel'then
@@ -33659,8 +33660,9 @@ end
 end
 end
 local am=0
-if ag.Icon and ae.__type~='Button'then a.P()
-.icon(ah,ag.Icon,14,15,20,ag.Window);am=28
+if ag.Icon and ae.__type~='Button'then
+local an=a.P().icon(ah,ag.Icon,14,0,20,ag.Window)
+an.AnchorPoint=Vector2.new(0,.5);an.Position=UDim2.new(0,14,.5,0);ae.UIElements.RowIcon=an;am=28
 elseif ag.Icon and ae.__type=='Button'then
 am=28
 end
@@ -37659,7 +37661,35 @@ local aI,aJ
 local aK={Value=ap:GetCurrentTheme(),Opened=false,UIElements={}}
 W={Value='100%',Opened=false,UIElements={}}
 local function updateChecks(aL,aM)
-for aN,aO in pairs(Y[aL])do aO.Check.Visible=aN==aM end
+for aN,aO in pairs(Y[aL])do
+local aP=aN==aM
+if not aO.Settings then
+aO.Check.Visible=aP
+elseif aO.Selected~=aP then
+aO.Selected=aP;aO.Serial=(aO.Serial or 0)+1
+local aQ=aO.Serial
+if aO.GearTween then aO.GearTween:Cancel()end
+if aO.CheckTween then aO.CheckTween:Cancel()end
+if aO.LabelTween then aO.LabelTween:Cancel()end
+aO.GearTween=ag(aO.Settings,.2,{Position=UDim2.new(1,aP and-55 or-30,0,2)},Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
+aO.LabelTween=ag(aO.Label,.2,{Size=UDim2.new(1,aP and-66 or-40,0,28)})
+aO.LabelTween:Play()
+if aP then
+aO.GearTween:Play()
+aO.Check.Visible=true;aO.Check.ImageLabel.ImageTransparency=1
+task.delay(.1,function()
+if aO.Row.Parent and aO.Serial==aQ then
+aO.CheckTween=ag(aO.Check.ImageLabel,.14,{ImageTransparency=0});aO.CheckTween:Play()
+end
+end)
+else
+aO.CheckTween=ag(aO.Check.ImageLabel,.1,{ImageTransparency=1});aO.CheckTween:Play()
+task.delay(.11,function()
+if aO.Row.Parent and aO.Serial==aQ then aO.Check.Visible=false;aO.GearTween:Play()end
+end)
+end
+end
+end
 end
 function W.Select(aL,aM)
 if not table.find(U,aM)then return end
@@ -37684,16 +37714,17 @@ corner(aP,7)
 local aQ=text(aP,'Label',aO,10,0,-40,28,14);aQ.ZIndex=213
 local aR=icon(aP,'check',126,6,16);aR.AnchorPoint=Vector2.new(1,0);aR.Position=UDim2.new(1,-10,0,6);aR.ZIndex=214;aR.ImageLabel.ZIndex=214
 aR.Visible=aO==(aL=='Scale'and W.Value or aK.Value)
+local aS
 if aL=='Style'and aq.IsCustomTheme and aq.IsCustomTheme(aO)then
-aQ.Size=UDim2.new(1,-66,0,28)
-local aS=af('TextButton',{Parent=aP,Name='ThemeSettings',Text='',Position=UDim2.new(1,-55,0,2),Size=UDim2.fromOffset(24,24),BackgroundTransparency=1,AutoButtonColor=false,ZIndex=215})
+aQ.Size=UDim2.new(1,aR.Visible and-66 or-40,0,28)
+aS=af('TextButton',{Parent=aP,Name='ThemeSettings',Text='',Position=UDim2.new(1,aR.Visible and-55 or-30,0,2),Size=UDim2.fromOffset(24,24),BackgroundTransparency=1,AutoButtonColor=false,ZIndex=215})
 local aT=icon(aS,'settings',4,4,16);aT.ZIndex=216;aT.ImageLabel.ZIndex=216
 connect(aS.MouseButton1Click,function()if aq.OnThemeSettings then aa.SafeCallback(aq.OnThemeSettings,aO)end end)
 elseif aL=='Style'and not ap:GetThemes()[aO]then
 aR.Visible=false
-local aS=icon(aP,'plus',126,6,16);aS.AnchorPoint=Vector2.new(1,0);aS.Position=UDim2.new(1,-10,0,6);aS.ZIndex=214;aS.ImageLabel.ZIndex=214
+local aT=icon(aP,'plus',126,6,16);aT.AnchorPoint=Vector2.new(1,0);aT.Position=UDim2.new(1,-10,0,6);aT.ZIndex=214;aT.ImageLabel.ZIndex=214
 end
-Y[aL][aO]={Row=aP,Check=aR}
+Y[aL][aO]={Row=aP,Label=aQ,Check=aR,Settings=aS,Selected=aR.Visible}
 connect(aP.MouseEnter,function()ag(aP,.16,{BackgroundTransparency=0}):Play()end)
 connect(aP.MouseLeave,function()ag(aP,.16,{BackgroundTransparency=1}):Play()end)
 connect(aP.MouseButton1Click,function()if aL=='Scale'then W:Select(aO)else aK:Select(aO)end end)
@@ -37991,7 +38022,7 @@ ColumnGap=8,
 }
 local ay='Theme';if aw then ay=false end
 local az=ax:Section{Title=ay,Outlined=not aw}
-local aA=az:Input{Title='Name',Icon='type',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Flat=aw,Value=aw and''or av.Name,Placeholder='My theme'}
+local aA=az:Input{Title='Name',Icon='type',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Flat=true,Value=aw and''or av.Name,Placeholder='My theme'}
 local aB=az:Dropdown{Title='Base theme',Icon='palette',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Values=ap,Value=av.Base or'Dark',MenuWidth=190}
 local aC=aw and'Save theme'or'Save and overwrite'
 local aD={Title=aC,Icon=aw and'check'or'save',Callback=function()

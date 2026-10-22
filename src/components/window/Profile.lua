@@ -234,7 +234,35 @@ function Profile.New(Window, WindUI, Config)
     local themeControl={Value=WindUI:GetCurrentTheme(),Opened=false,UIElements={}}
     scaleControl={Value='100%',Opened=false,UIElements={}}
     local function updateChecks(kind,value)
-        for option,record in pairs(optionRecords[kind])do record.Check.Visible=option==value end
+        for option,record in pairs(optionRecords[kind])do
+            local selected=option==value
+            if not record.Settings then
+                record.Check.Visible=selected
+            elseif record.Selected~=selected then
+                record.Selected=selected;record.Serial=(record.Serial or 0)+1
+                local serial=record.Serial
+                if record.GearTween then record.GearTween:Cancel()end
+                if record.CheckTween then record.CheckTween:Cancel()end
+                if record.LabelTween then record.LabelTween:Cancel()end
+                record.GearTween=Tween(record.Settings,.2,{Position=UDim2.new(1,selected and -55 or -30,0,2)},Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
+                record.LabelTween=Tween(record.Label,.2,{Size=UDim2.new(1,selected and -66 or -40,0,28)})
+                record.LabelTween:Play()
+                if selected then
+                    record.GearTween:Play()
+                    record.Check.Visible=true;record.Check.ImageLabel.ImageTransparency=1
+                    task.delay(.1,function()
+                        if record.Row.Parent and record.Serial==serial then
+                            record.CheckTween=Tween(record.Check.ImageLabel,.14,{ImageTransparency=0});record.CheckTween:Play()
+                        end
+                    end)
+                else
+                    record.CheckTween=Tween(record.Check.ImageLabel,.1,{ImageTransparency=1});record.CheckTween:Play()
+                    task.delay(.11,function()
+                        if record.Row.Parent and record.Serial==serial then record.Check.Visible=false;record.GearTween:Play()end
+                    end)
+                end
+            end
+        end
     end
     function scaleControl:Select(mode)
         if not table.find(choices,mode)then return end
@@ -259,16 +287,17 @@ function Profile.New(Window, WindUI, Config)
             local label=text(row,'Label',value,10,0,-40,28,14);label.ZIndex=213
             local mark=icon(row,'check',126,6,16);mark.AnchorPoint=Vector2.new(1,0);mark.Position=UDim2.new(1,-10,0,6);mark.ZIndex=214;mark.ImageLabel.ZIndex=214
             mark.Visible=value==(kind=='Scale' and scaleControl.Value or themeControl.Value)
+            local settings
             if kind=='Style'and Config.IsCustomTheme and Config.IsCustomTheme(value)then
-                label.Size=UDim2.new(1,-66,0,28)
-                local settings=New('TextButton',{Parent=row,Name='ThemeSettings',Text='',Position=UDim2.new(1,-55,0,2),Size=UDim2.fromOffset(24,24),BackgroundTransparency=1,AutoButtonColor=false,ZIndex=215})
+                label.Size=UDim2.new(1,mark.Visible and -66 or -40,0,28)
+                settings=New('TextButton',{Parent=row,Name='ThemeSettings',Text='',Position=UDim2.new(1,mark.Visible and -55 or -30,0,2),Size=UDim2.fromOffset(24,24),BackgroundTransparency=1,AutoButtonColor=false,ZIndex=215})
                 local settingsIcon=icon(settings,'settings',4,4,16);settingsIcon.ZIndex=216;settingsIcon.ImageLabel.ZIndex=216
                 connect(settings.MouseButton1Click,function()if Config.OnThemeSettings then Creator.SafeCallback(Config.OnThemeSettings,value)end end)
             elseif kind=='Style'and not WindUI:GetThemes()[value]then
                 mark.Visible=false
                 local add=icon(row,'plus',126,6,16);add.AnchorPoint=Vector2.new(1,0);add.Position=UDim2.new(1,-10,0,6);add.ZIndex=214;add.ImageLabel.ZIndex=214
             end
-            optionRecords[kind][value]={Row=row,Check=mark}
+            optionRecords[kind][value]={Row=row,Label=label,Check=mark,Settings=settings,Selected=mark.Visible}
             connect(row.MouseEnter,function()Tween(row,.16,{BackgroundTransparency=0}):Play()end)
             connect(row.MouseLeave,function()Tween(row,.16,{BackgroundTransparency=1}):Play()end)
             connect(row.MouseButton1Click,function()if kind=='Scale'then scaleControl:Select(value)else themeControl:Select(value)end end)
