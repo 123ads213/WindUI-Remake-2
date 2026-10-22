@@ -105,16 +105,17 @@ function ThemeEditor.New(window,wind,parent,config)
  local function attachEditor(row,entry,isCreate)
   local panel=row:Settings({
    Title=isCreate and'New custom theme'or(entry.Name..' theme'),
-   Width=isCreate and 390 or 700,
+   Width=isCreate and 344 or 700,
    Icon='settings',
    MinColumnWidth=isCreate and 1000 or 285,
    ColumnGap=8,
   })
-  local basics=panel:Section({Title=isCreate and false or'Theme',Outlined=not isCreate})
-  local nameInput=basics:Input({Title='Name',Icon='type',Value=isCreate and''or entry.Name,Placeholder='My theme'})
-  local baseInput=basics:Dropdown({Title='Base theme',Icon='palette',Values=builtins,Value=entry.Base or'Dark',MenuWidth=190})
+  local sectionTitle='Theme';if isCreate then sectionTitle=false end
+  local basics=panel:Section({Title=sectionTitle,Outlined=not isCreate})
+  local nameInput=basics:Input({Title='Name',Icon='type',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Flat=isCreate,Value=isCreate and''or entry.Name,Placeholder='My theme'})
+  local baseInput=basics:Dropdown({Title='Base theme',Icon='palette',Width=isCreate and 168 or 140,RowHeight=isCreate and 44 or 38,Values=builtins,Value=entry.Base or'Dark',MenuWidth=190})
   local actionTitle=isCreate and'Save theme'or'Save and overwrite'
-  basics:Button({Title=actionTitle,Icon=isCreate and'check'or'save',Primary=isCreate,Callback=function()
+  local actionConfig={Title=actionTitle,Icon=isCreate and'check'or'save',Callback=function()
    local name=normalizedName(nameInput.Value)
    if name==''then notify('Custom theme','Enter a theme name.','circle-alert');return end
    for _,builtin in ipairs(builtins)do if string.lower(builtin)==string.lower(name)then notify('Custom theme','That name belongs to a built-in theme.','circle-alert');return end end
@@ -136,7 +137,9 @@ function ThemeEditor.New(window,wind,parent,config)
     materialize(entry);apply(entry)
     local ok,err=saveFile();if not ok then notify('Theme not saved',tostring(err),'circle-alert')else notify('Theme saved',entry.Name,'check')end;changed()
    end
-  end})
+  end}
+  if isCreate then panel:Footer(actionConfig)else basics:Button(actionConfig)end
+  panel.UIElements.NameInput=nameInput;panel.UIElements.BaseInput=baseInput
   if not isCreate then
    basics:Button({Title='Delete theme',Icon='trash-2',Color=Color3.fromRGB(244,105,95),Callback=function()
     local deleted=entry.Name;panel:Close();removeEntry(deleted);wind:SetTheme(config.FallbackTheme or'Dark')

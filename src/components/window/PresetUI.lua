@@ -6,7 +6,7 @@ local P={}
 function P.New(window,wind,options)
  options=options or{};local manager=window.ConfigManager
  if not manager then return nil,'Preset storage needs Window.Folder and executor file functions'end
- local self={Current=nil,Sort='Created',SortReversed=false,UIElements={},Opened=false}
+ local self={Current=nil,View='Presets',Sort='Created',SortReversed=false,UIElements={},Opened=false}
  local host=window.UIElements.Main.Main
  local topbar=host.Topbar
  local bar=U.New('Frame',{Parent=host,Name='PresetToolbar',Size=UDim2.fromOffset(250,34),BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},ZIndex=30,Active=true});U.corner(bar,8)
@@ -145,10 +145,16 @@ function P.New(window,wind,options)
  for i,action in ipairs({'Rename','Export','Delete'})do local b=U.button(actions,action,6,6+(i-1)*40,152,38,function()edit(action,actionName)end);b.Label.Position=UDim2.fromOffset(36,0);b.Label.Size=UDim2.new(1,-42,1,0);U.icon(b,({'pencil','download','trash-2'})[i],10,11,16,window)end
  local add=U.button(panel,'',282,10,36,32,function()edit('Create')end);U.icon(add,'plus',10,8,16,window)
  local imp=U.button(panel,'',202,10,34,32,function()edit('Import')end);U.icon(imp,'upload',9,8,16,window)
- recent=U.button(panel,'',242,10,34,32,function()self.View='Recent';self.Sort='Modified';self.SortReversed=false;self:Refresh()end);U.icon(recent,'folder-clock',9,8,16,window)
+ recent=U.button(panel,'',242,10,34,32,function()
+  local active=self.View=='Recent'
+  self.View=active and'Presets'or'Recent';self.Sort=active and'Created'or'Modified';self.SortReversed=false;self:Refresh()
+ end);U.icon(recent,'folder-clock',9,8,16,window)
  function self:Refresh()
-  viewButton.BackgroundTransparency=.15
-  recent.BackgroundTransparency=self.View=='Recent'and .15 or 1
+  for _,choice in ipairs({{viewButton,self.View~='Recent'},{recent,self.View=='Recent'}})do
+   choice[1]:SetAttribute('IdleTransparency',choice[2]and .15 or 1)
+   choice[1]:SetAttribute('HoverTransparency',choice[2]and .15 or .65)
+   choice[1].BackgroundTransparency=choice[2]and .15 or 1
+  end
   local names=manager:AllConfigs();local meta={}
   for _,n in ipairs(names)do local ok,d=pcall(function()return Http:JSONDecode(readfile(manager.Path..n..'.json'))end);meta[n]=ok and type(d)=='table'and d.__meta or{}end
   table.sort(names,function(a,b)
@@ -166,16 +172,16 @@ function P.New(window,wind,options)
    local item=rowCache[n]
    if not item then
     local slot=U.New('CanvasGroup',{Parent=rows,Name='PresetRow',Size=UDim2.fromOffset(302,48),Position=UDim2.fromOffset(0,(count-1)*54+6),BackgroundTransparency=1,GroupTransparency=1,ZIndex=853})
-    local row=U.button(slot,n,0,0,302,48,function()U.show(actions,false);safe(function()return self:LoadFromUI(n)end)end);row.Label.Size=UDim2.new(1,-94,1,0)
+    local row=U.button(slot,n,0,0,302,48,function()U.show(actions,false);safe(function()return self:LoadFromUI(n)end)end);row.Label.Size=UDim2.new(1,-120,1,0);row:SetAttribute('NoHover',true)
     local more;more=U.button(row,'',220,7,32,34,function()actionName=n;U.place(actions,more or row,wind);U.show(actions,true)end);U.icon(more,'ellipsis',8,9,16,window)
     local load=U.button(row,'',258,7,32,34,function()U.show(actions,false);safe(function()return self:LoadFromUI(n)end)end)
-    item={Slot=slot,Row=row,Load=load,LoadIcon=U.icon(load,'download',8,9,16,window)};rowCache[n]=item
+    item={Slot=slot,Row=row,Load=load,LoadIcon=U.icon(load,'download',8,9,16,window),CurrentMark=U.icon(row,'check',196,16,16,window)};rowCache[n]=item
     row.AutoButtonColor=false
-    row.MouseEnter:Connect(function()U.Tween(row,.12,{BackgroundTransparency=n==self.Current and .35 or .8}):Play()end)
-    row.MouseLeave:Connect(function()U.Tween(row,.12,{BackgroundTransparency=n==self.Current and .5 or 1}):Play()end)
+    row.MouseEnter:Connect(function()U.Tween(row,.12,{BackgroundTransparency=.8}):Play()end)
+    row.MouseLeave:Connect(function()U.Tween(row,.12,{BackgroundTransparency=1}):Play()end)
     U.tooltip(window,wind,load,'Load preset')
    end
-   item.Row.LayoutOrder=count;item.Slot.LayoutOrder=count;item.Row.BackgroundTransparency=n==self.Current and .5 or 1
+   item.Row.LayoutOrder=count;item.Slot.LayoutOrder=count;item.Row.BackgroundTransparency=1;item.CurrentMark.Visible=n==self.Current
    if item.Motion then item.Motion:Cancel()end
    item.Motion=U.Tween(item.Slot,.24,{Position=UDim2.fromOffset(0,(count-1)*54),GroupTransparency=0});item.Motion:Play()
   end end
@@ -223,7 +229,7 @@ function P.New(window,wind,options)
  end
  local refresh=self.Refresh
  function self:SetSort(key,reversed)
-  assert(self.SortLabels[key],'Unknown sort criterion');self.Sort=key;self.SortReversed=reversed==true;self:Refresh();return self
+  assert(self.SortLabels[key],'Unknown sort criterion');self.Sort=key;self.View=key=='Modified'and'Recent'or'Presets';self.SortReversed=reversed==true;self:Refresh();return self
  end
  function self:Refresh()
   refresh(self)

@@ -7,7 +7,7 @@ local f,err=loadstring([=====[
     | |/ |/ / / _ \/ _  / /_/ // /  
     |__/|__/_/_//_/\_,_/\____/___/
     
-    v1.7.0-remake.3  |  2026-10-21  |  WindUI Remake 2 — columns, icon subtabs, compact choices, local presets and animated dependencies.
+    v1.7.0-remake.3  |  2026-10-22  |  WindUI Remake 2 — columns, icon subtabs, compact choices, local presets and animated dependencies.
     
     To view the source code, see the `src/` folder on the official GitHub repository.
     
@@ -33630,6 +33630,16 @@ for am,an in ipairs(ah:GetChildren())do
 if an:IsA'GuiObject'and an~=aj and an~=af.UIElements.Container and an:FindFirstChildWhichIsA('TextBox',true)then
 an.AnchorPoint=Vector2.new(1,.5);an.Position=UDim2.new(1,-14,.5,0);an.Size=UDim2.fromOffset(al,30)
 for ao,ap in ipairs(an:GetDescendants())do if ap:IsA'UICorner'then ap.CornerRadius=UDim.new(0,7)end end
+if ag.Flat then
+an.BackgroundTransparency=0;aa.AddThemeObject(an,{BackgroundColor3='LabelBackground'})
+aa.New('UICorner',{Parent=an,CornerRadius=UDim.new(0,7)})
+for ao,ap in ipairs(an:GetDescendants())do
+if ap:IsA'ImageLabel'then
+if aa.Objects[ap]then aa.Objects[ap].Properties.ImageTransparency=nil end
+ap.ImageTransparency=1
+elseif ap:IsA'TextBox'then ap.TextSize=14 end
+end
+end
 end
 end
 elseif ae.__type=='Dropdown'then al=ag.Width or 140
@@ -36179,60 +36189,80 @@ end
 return ai end function a.at():typeof(__modImpl())local aa=a.cache.at if not aa then aa={c=__modImpl()}a.cache.at=aa end return aa.c end end do local function __modImpl()
 
 
-local aa=a.P()a.j()
-
-local af=game:GetService'UserInputService'
-local ag={}
-function ag.New(ai,al,am,an,ao,ap,aq)
-aq=aq or{}
-local ar=math.clamp(aq.Width or 336,280,760)
-local as=aa.panel(am,'FeatureSettings',ar,120,820)
-as.ClipsDescendants=true
-local at=aa.text(as,aq.Title or ai.Title or'Settings',12,7,ar-50,28);at.TextSize=16
-local au=aa.button(as,'',ar-36,7,26,26);aa.icon(au,'x',7,7,14,am)
-local av=aa.New('ScrollingFrame',{Parent=as,Name='SettingsBody',Position=UDim2.fromOffset(12,42),Size=UDim2.new(1,-24,1,-54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize='Y',CanvasSize=UDim2.new(),ZIndex=822})
-local aw={Elements={},FeatureSettings=true,UIElements={ContainerFrame=av}}a.at()
-.Attach(aw,am,an,ao,ap)
-local ax=aw:Columns{Gap=aq.ColumnGap or 8,MinColumnWidth=aq.MinColumnWidth or 1000}
-local ay=aa.button(al.UIElements.Main,'',0,0,30,30)
-ay.Name='FeatureSettingsButton';ay.AnchorPoint=Vector2.new(0,.5);ay.Position=UDim2.new(1,-108,.5,0)
-aa.icon(ay,aq.Icon or'ellipsis',7,7,16,am)
-if al.UIElements.Title then al.UIElements.Title.Size=UDim2.new(1,-132,1,0)end
-local az={Opened=false,Sections={},UIElements={Panel=as,Button=ay,Title=at,Body=av,Columns=ax}}
+local aa=a.P()
+local af=a.j()
+local ag=game:GetService'UserInputService'
+local ai={}
+function ai.New(al,am,an,ao,ap,aq,ar)
+ar=ar or{}
+local as=math.clamp(ar.Width or 336,280,760)
+local at=aa.panel(an,'FeatureSettings',as,120,820)
+at.ClipsDescendants=true
+local au=aa.text(at,ar.Title or al.Title or'Settings',12,7,as-50,28);au.TextSize=16
+local av=aa.button(at,'',as-36,7,26,26);aa.icon(av,'x',7,7,14,an)
+local aw=aa.New('ScrollingFrame',{Parent=at,Name='SettingsBody',Position=UDim2.fromOffset(12,42),Size=UDim2.new(1,-24,1,-54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize='Y',CanvasSize=UDim2.new(),ZIndex=822})
+local ax={Elements={},FeatureSettings=true,UIElements={ContainerFrame=aw}}a.at()
+.Attach(ax,an,ao,ap,aq)
+local ay=ax:Columns{Gap=ar.ColumnGap or 8,MinColumnWidth=ar.MinColumnWidth or 1000}
+local az=aa.button(am.UIElements.Main,'',0,0,30,30)
+az.Name='FeatureSettingsButton';az.AnchorPoint=Vector2.new(0,.5);az.Position=UDim2.new(1,-108,.5,0)
+aa.icon(az,ar.Icon or'ellipsis',7,7,16,an)
+if am.UIElements.Title then am.UIElements.Title.Size=UDim2.new(1,-132,1,0)end
+local aA={Opened=false,Sections={},UIElements={Panel=at,Button=az,Title=au,Body=aw,Columns=ay}}
+local aB=0
 local function fit()
-if not as.Parent then return end
-local aA=ax.UIElements.Root.Size.Y.Offset+54
-as.Size=UDim2.fromOffset(ar,math.clamp(aA,110,math.min(620,an.ScreenGui.AbsoluteSize.Y/math.max(.01,an.UIScaleObj.Scale)-24)))
-if az.Opened then aa.beside(as,ay,an,8)end
+if not at.Parent then return end
+local b=ay.UIElements.Root.Size.Y.Offset+54+aB
+at.Size=UDim2.fromOffset(as,math.clamp(b,110,math.min(620,ao.ScreenGui.AbsoluteSize.Y/math.max(.01,ao.UIScaleObj.Scale)-24)))
+if aA.Opened then aa.beside(at,az,ao,8)end
 end
-function az.Section(aA,aB,b)
-aB=table.clone(aB or{});if aB.Outlined==nil then aB.Outlined=true end;if aB.Title==nil then aB.Title=false end
-local d=b=='Right'and ax.Right or ax.Left
-local f=d:Section(aB);table.insert(aA.Sections,f);task.defer(fit);return f
+
+function aA.Footer(b,d)
+assert(not b.UIElements.Footer,'A settings panel has only one footer')
+aB=48;aw.Size=UDim2.new(1,-24,1,-54-aB)
+local f=aa.New('Frame',{Parent=at,Name='SettingsFooter',Position=UDim2.new(0,12,1,-52),Size=UDim2.new(1,-24,0,40),BackgroundTransparency=1,ZIndex=824})
+local g=aa.button(f,'Cancel',0,4,76,32,function()b:Close()end)
+local h=aa.button(f,d.Title or'Save',as-24-126,4,126,32,d.Callback)
+h.Name='ConfirmAction';h.BackgroundTransparency=0;h:SetAttribute('NoHover',true)
+af.AddThemeObject(h,{BackgroundColor3='Primary'})
+af.AddThemeObject(h.Label,{TextColor3='Text'})
+if af.Objects[h.Label]then af.Objects[h.Label].Properties.TextColor3=nil end
+h.Label.TextColor3=Color3.new(1,1,1);h.Label.TextSize=14
+h.Label.Position=UDim2.fromOffset(34,0);h.Label.Size=UDim2.new(1,-42,1,0)
+local i=aa.icon(h,d.Icon or'check',12,8,16,an)
+if af.Objects[i.ImageLabel]then af.Objects[i.ImageLabel].Properties.ImageColor3=nil end
+i.ImageLabel.ImageColor3=Color3.new(1,1,1)
+b.UIElements.Footer=f;b.UIElements.Confirm=h;b.UIElements.Cancel=g
+task.defer(fit);return h
 end
-function az.RightSection(aA,aB)return aA:Section(aB,'Right')end
-az.Group=az.Section
-function az.Close(aA)aA.Opened=false;aa.show(as,false);if am.ActiveFeatureSettings==aA then am.ActiveFeatureSettings=nil end end
-function az.Open(aA)
-if am.ActiveFeatureSettings and am.ActiveFeatureSettings~=aA then am.ActiveFeatureSettings:Close()end
-if am.FeatureUI then am.FeatureUI:HideDescription()end
-am.ActiveFeatureSettings=aA;aA.Opened=true;fit();aa.beside(as,ay,an,8);aa.show(as,true)
+function aA.Section(b,d,f)
+d=table.clone(d or{});if d.Outlined==nil then d.Outlined=true end;if d.Title==nil then d.Title=false end
+local g=f=='Right'and ay.Right or ay.Left
+local h=g:Section(d);table.insert(b.Sections,h);task.defer(fit);return h
 end
-function az.Toggle(aA)if aA.Opened then aA:Close()else aA:Open()end end
-ay.MouseButton1Click:Connect(function()az:Toggle()end)
-au.MouseButton1Click:Connect(function()az:Close()end)
-ax.UIElements.Root:GetPropertyChangedSignal'Size':Connect(fit)
-local aA=af.InputBegan:Connect(function(aA)
-if aA.KeyCode==Enum.KeyCode.Escape then az:Close()
-elseif aA.UserInputType==Enum.UserInputType.MouseButton1 or aA.UserInputType==Enum.UserInputType.Touch then
-if az.Opened and not aa.inside(as,aA.Position)and not aa.inside(ay,aA.Position)then az:Close()end
+function aA.RightSection(b,d)return b:Section(d,'Right')end
+aA.Group=aA.Section
+function aA.Close(b)b.Opened=false;aa.show(at,false);if an.ActiveFeatureSettings==b then an.ActiveFeatureSettings=nil end end
+function aA.Open(b)
+if an.ActiveFeatureSettings and an.ActiveFeatureSettings~=b then an.ActiveFeatureSettings:Close()end
+if an.FeatureUI then an.FeatureUI:HideDescription()end
+an.ActiveFeatureSettings=b;b.Opened=true;fit();aa.beside(at,az,ao,8);aa.show(at,true)
+end
+function aA.Toggle(b)if b.Opened then b:Close()else b:Open()end end
+az.MouseButton1Click:Connect(function()aA:Toggle()end)
+av.MouseButton1Click:Connect(function()aA:Close()end)
+ay.UIElements.Root:GetPropertyChangedSignal'Size':Connect(fit)
+local b=ag.InputBegan:Connect(function(b)
+if b.KeyCode==Enum.KeyCode.Escape then aA:Close()
+elseif b.UserInputType==Enum.UserInputType.MouseButton1 or b.UserInputType==Enum.UserInputType.Touch then
+if aA.Opened and not aa.inside(at,b.Position)and not aa.inside(az,b.Position)then aA:Close()end
 end
 end)
-function az.Destroy(aB)aA:Disconnect();aB:Close();as:Destroy();ay:Destroy()end
-ay.Destroying:Connect(function()aA:Disconnect();az:Close();as:Destroy()end)
-return az
+function aA.Destroy(d)b:Disconnect();d:Close();at:Destroy();az:Destroy()end
+az.Destroying:Connect(function()b:Disconnect();aA:Close();at:Destroy()end)
+return aA
 end
-return ag end function a.au():typeof(__modImpl())local aa=a.cache.au if not aa then aa={c=__modImpl()}a.cache.au=aa end return aa.c end end do local function __modImpl()
+return ai end function a.au():typeof(__modImpl())local aa=a.cache.au if not aa then aa={c=__modImpl()}a.cache.au=aa end return aa.c end end do local function __modImpl()
 
 return{
 Elements={
@@ -37923,54 +37953,57 @@ local at
 local function attachEditor(au,av,aw)
 local ax=au:Settings{
 Title=aw and'New custom theme'or(av.Name..' theme'),
-Width=aw and 390 or 700,
+Width=aw and 344 or 700,
 Icon='settings',
 MinColumnWidth=aw and 1000 or 285,
 ColumnGap=8,
 }
-local ay=ax:Section{Title=aw and false or'Theme',Outlined=not aw}
-local az=ay:Input{Title='Name',Icon='type',Value=aw and''or av.Name,Placeholder='My theme'}
-local aA=ay:Dropdown{Title='Base theme',Icon='palette',Values=ap,Value=av.Base or'Dark',MenuWidth=190}
-local aB=aw and'Save theme'or'Save and overwrite'
-ay:Button{Title=aB,Icon=aw and'check'or'save',Primary=aw,Callback=function()
-local aC=normalizedName(az.Value)
-if aC==''then notify('Custom theme','Enter a theme name.','circle-alert');return end
-for aD,aE in ipairs(ap)do if string.lower(aE)==string.lower(aC)then notify('Custom theme','That name belongs to a built-in theme.','circle-alert');return end end
-local aD=findName(ao.Entries,aC)
+local ay='Theme';if aw then ay=false end
+local az=ax:Section{Title=ay,Outlined=not aw}
+local aA=az:Input{Title='Name',Icon='type',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Flat=aw,Value=aw and''or av.Name,Placeholder='My theme'}
+local aB=az:Dropdown{Title='Base theme',Icon='palette',Width=aw and 168 or 140,RowHeight=aw and 44 or 38,Values=ap,Value=av.Base or'Dark',MenuWidth=190}
+local aC=aw and'Save theme'or'Save and overwrite'
+local aD={Title=aC,Icon=aw and'check'or'save',Callback=function()
+local aD=normalizedName(aA.Value)
+if aD==''then notify('Custom theme','Enter a theme name.','circle-alert');return end
+for aE,aF in ipairs(ap)do if string.lower(aF)==string.lower(aD)then notify('Custom theme','That name belongs to a built-in theme.','circle-alert');return end end
+local aE=findName(ao.Entries,aD)
 if aw then
-if aD then notify('Custom theme','A theme with this name already exists.','circle-alert');return end
-local aE={Name=aC,Base=aA.Value or'Dark',Values={}}
-ensureValues(aE);ao.Entries[aC]=aE;materialize(aE);at(aE)
-local aF,aG=saveFile();if not aF then notify('Theme created, but not saved',tostring(aG),'circle-alert')else notify('Theme created',aC,'check')end
-apply(aE);ax:Close();az:Set'';changed()
+if aE then notify('Custom theme','A theme with this name already exists.','circle-alert');return end
+local aF={Name=aD,Base=aB.Value or'Dark',Values={}}
+ensureValues(aF);ao.Entries[aD]=aF;materialize(aF);at(aF)
+local aG,aH=saveFile();if not aG then notify('Theme created, but not saved',tostring(aH),'circle-alert')else notify('Theme created',aD,'check')end
+apply(aF);ax:Close();aA:Set'';changed()
 else
-local aE=av.Name
-if aD and aD~=aE then notify('Custom theme','A theme with this name already exists.','circle-alert');return end
-av.Base=aA.Value or av.Base
-if aC~=aE then
-ao.Entries[aE]=nil;al:GetThemes()[aE]=nil;ao.Rows[aE]=nil;ao.Editors[aE]=nil
-av.Name=aC;ao.Entries[aC]=av;au:SetTitle(aC);ao.Rows[aC]=au;ao.Editors[aC]=ax
+local aF=av.Name
+if aE and aE~=aF then notify('Custom theme','A theme with this name already exists.','circle-alert');return end
+av.Base=aB.Value or av.Base
+if aD~=aF then
+ao.Entries[aF]=nil;al:GetThemes()[aF]=nil;ao.Rows[aF]=nil;ao.Editors[aF]=nil
+av.Name=aD;ao.Entries[aD]=av;au:SetTitle(aD);ao.Rows[aD]=au;ao.Editors[aD]=ax
 end
 materialize(av);apply(av)
-local aF,aG=saveFile();if not aF then notify('Theme not saved',tostring(aG),'circle-alert')else notify('Theme saved',av.Name,'check')end;changed()
+local aG,aH=saveFile();if not aG then notify('Theme not saved',tostring(aH),'circle-alert')else notify('Theme saved',av.Name,'check')end;changed()
 end
 end}
+if aw then ax:Footer(aD)else az:Button(aD)end
+ax.UIElements.NameInput=aA;ax.UIElements.BaseInput=aB
 if not aw then
-ay:Button{Title='Delete theme',Icon='trash-2',Color=Color3.fromRGB(244,105,95),Callback=function()
-local aC=av.Name;ax:Close();removeEntry(aC);al:SetTheme(an.FallbackTheme or'Dark')
+az:Button{Title='Delete theme',Icon='trash-2',Color=Color3.fromRGB(244,105,95),Callback=function()
+local aE=av.Name;ax:Close();removeEntry(aE);al:SetTheme(an.FallbackTheme or'Dark')
 if an.OnThemeChanged then an.OnThemeChanged(an.FallbackTheme or'Dark')end
-notify('Theme deleted',aC,'trash-2')
+notify('Theme deleted',aE,'trash-2')
 end}
 ensureValues(av)
-local aC=ax:Section{Title='Interface colors',Outlined=true}
-local aD=ax:RightSection{Title='Element colors',Outlined=true}
-for aE,aF in ipairs(aq)do
-local aG,aH=aF[1],aF[2]
-local aI=av.Values[aG]
-local aJ,aK=pcall(Color3.fromHex,aI.Color or'#FFFFFF');if not aJ then aK=Color3.new(1,1,1)end
-local aL=aE<=math.ceil(#aq/2)and aC or aD
-aL:Colorpicker{Title=aH,Default=aK,Transparency=aI.Transparency or 0,AllowGradient=false,Callback=function(aM,aN)
-aI.Color=colorHex(aM);aI.Transparency=math.clamp(aN or 0,0,1)
+local aE=ax:Section{Title='Interface colors',Outlined=true}
+local aF=ax:RightSection{Title='Element colors',Outlined=true}
+for aG,aH in ipairs(aq)do
+local aI,aJ=aH[1],aH[2]
+local aK=av.Values[aI]
+local aL,aM=pcall(Color3.fromHex,aK.Color or'#FFFFFF');if not aL then aM=Color3.new(1,1,1)end
+local aN=aG<=math.ceil(#aq/2)and aE or aF
+aN:Colorpicker{Title=aJ,Default=aM,Transparency=aK.Transparency or 0,AllowGradient=false,Callback=function(aO,aP)
+aK.Color=colorHex(aO);aK.Transparency=math.clamp(aP or 0,0,1)
 if al:GetCurrentTheme()==av.Name then materialize(av);al:SetTheme(av.Name);al:RefreshTheme()end
 end}
 end
@@ -39536,7 +39569,7 @@ local al={}
 function al.New(am,an,ao)
 ao=ao or{};local ap=am.ConfigManager
 if not ap then return nil,'Preset storage needs Window.Folder and executor file functions'end
-local aq={Current=nil,Sort='Created',SortReversed=false,UIElements={},Opened=false}
+local aq={Current=nil,View='Presets',Sort='Created',SortReversed=false,UIElements={},Opened=false}
 local ar=am.UIElements.Main.Main
 local as=ar.Topbar
 local at=aa.New('Frame',{Parent=ar,Name='PresetToolbar',Size=UDim2.fromOffset(250,34),BackgroundTransparency=0,ThemeTag={BackgroundColor3='Dialog'},ZIndex=30,Active=true});aa.corner(at,8)
@@ -39675,10 +39708,16 @@ aa.icon(aR,'check',8,9,16,am);aR.Label.Position=UDim2.fromOffset(32,0);aR.Label.
 for aS,aT in ipairs{'Rename','Export','Delete'}do local aU=aa.button(aN,aT,6,6+(aS-1)*40,152,38,function()edit(aT,aO)end);aU.Label.Position=UDim2.fromOffset(36,0);aU.Label.Size=UDim2.new(1,-42,1,0);aa.icon(aU,({'pencil','download','trash-2'})[aS],10,11,16,am)end
 local aS=aa.button(ax,'',282,10,36,32,function()edit'Create'end);aa.icon(aS,'plus',10,8,16,am)
 local aT=aa.button(ax,'',202,10,34,32,function()edit'Import'end);aa.icon(aT,'upload',9,8,16,am)
-ay=aa.button(ax,'',242,10,34,32,function()aq.View='Recent';aq.Sort='Modified';aq.SortReversed=false;aq:Refresh()end);aa.icon(ay,'folder-clock',9,8,16,am)
+ay=aa.button(ax,'',242,10,34,32,function()
+local aU=aq.View=='Recent'
+aq.View=aU and'Presets'or'Recent';aq.Sort=aU and'Created'or'Modified';aq.SortReversed=false;aq:Refresh()
+end);aa.icon(ay,'folder-clock',9,8,16,am)
 function aq.Refresh(aU)
-az.BackgroundTransparency=.15
-ay.BackgroundTransparency=aU.View=='Recent'and.15 or 1
+for aV,aW in ipairs{{az,aU.View~='Recent'},{ay,aU.View=='Recent'}}do
+aW[1]:SetAttribute('IdleTransparency',aW[2]and.15 or 1)
+aW[1]:SetAttribute('HoverTransparency',aW[2]and.15 or.65)
+aW[1].BackgroundTransparency=aW[2]and.15 or 1
+end
 local aV=ap:AllConfigs();local aW={}
 for aX,aY in ipairs(aV)do local b,d=pcall(function()return ag:JSONDecode(readfile(ap.Path..aY..'.json'))end);aW[aY]=b and type(d)=='table'and d.__meta or{}end
 table.sort(aV,function(aX,aY)
@@ -39696,16 +39735,16 @@ aX+=1;aY[f]=true;aU.Order[aX]=f
 local g=aF[f]
 if not g then
 local h=aa.New('CanvasGroup',{Parent=aE,Name='PresetRow',Size=UDim2.fromOffset(302,48),Position=UDim2.fromOffset(0,(aX-1)*54+6),BackgroundTransparency=1,GroupTransparency=1,ZIndex=853})
-local i=aa.button(h,f,0,0,302,48,function()aa.show(aN,false);safe(function()return aU:LoadFromUI(f)end)end);i.Label.Size=UDim2.new(1,-94,1,0)
+local i=aa.button(h,f,0,0,302,48,function()aa.show(aN,false);safe(function()return aU:LoadFromUI(f)end)end);i.Label.Size=UDim2.new(1,-120,1,0);i:SetAttribute('NoHover',true)
 local l;l=aa.button(i,'',220,7,32,34,function()aO=f;aa.place(aN,l or i,an);aa.show(aN,true)end);aa.icon(l,'ellipsis',8,9,16,am)
 local m=aa.button(i,'',258,7,32,34,function()aa.show(aN,false);safe(function()return aU:LoadFromUI(f)end)end)
-g={Slot=h,Row=i,Load=m,LoadIcon=aa.icon(m,'download',8,9,16,am)};aF[f]=g
+g={Slot=h,Row=i,Load=m,LoadIcon=aa.icon(m,'download',8,9,16,am),CurrentMark=aa.icon(i,'check',196,16,16,am)};aF[f]=g
 i.AutoButtonColor=false
-i.MouseEnter:Connect(function()aa.Tween(i,.12,{BackgroundTransparency=f==aU.Current and.35 or.8}):Play()end)
-i.MouseLeave:Connect(function()aa.Tween(i,.12,{BackgroundTransparency=f==aU.Current and.5 or 1}):Play()end)
+i.MouseEnter:Connect(function()aa.Tween(i,.12,{BackgroundTransparency=.8}):Play()end)
+i.MouseLeave:Connect(function()aa.Tween(i,.12,{BackgroundTransparency=1}):Play()end)
 aa.tooltip(am,an,m,'Load preset')
 end
-g.Row.LayoutOrder=aX;g.Slot.LayoutOrder=aX;g.Row.BackgroundTransparency=f==aU.Current and.5 or 1
+g.Row.LayoutOrder=aX;g.Slot.LayoutOrder=aX;g.Row.BackgroundTransparency=1;g.CurrentMark.Visible=f==aU.Current
 if g.Motion then g.Motion:Cancel()end
 g.Motion=aa.Tween(g.Slot,.24,{Position=UDim2.fromOffset(0,(aX-1)*54),GroupTransparency=0});g.Motion:Play()
 end end
@@ -39753,7 +39792,7 @@ aq.SortOptions[aY]={Key=b[1],Button=d,Check=g,Icon=f}
 end
 local aY=aq.Refresh
 function aq.SetSort(b,d,f)
-assert(b.SortLabels[d],'Unknown sort criterion');b.Sort=d;b.SortReversed=f==true;b:Refresh();return b
+assert(b.SortLabels[d],'Unknown sort criterion');b.Sort=d;b.View=d=='Modified'and'Recent'or'Presets';b.SortReversed=f==true;b:Refresh();return b
 end
 function aq.Refresh(b)
 aY(b)

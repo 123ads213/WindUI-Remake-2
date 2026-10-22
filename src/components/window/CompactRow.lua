@@ -69,6 +69,16 @@ return function(content,frame,config)
    if control:IsA('GuiObject')and control~=title and control~=frame.UIElements.Container and control:FindFirstChildWhichIsA('TextBox',true)then
     control.AnchorPoint=Vector2.new(1,.5);control.Position=UDim2.new(1,-14,.5,0);control.Size=UDim2.fromOffset(width,30)
     for _,node in ipairs(control:GetDescendants())do if node:IsA('UICorner')then node.CornerRadius=UDim.new(0,7)end end
+    if config.Flat then
+     control.BackgroundTransparency=0;C.AddThemeObject(control,{BackgroundColor3='LabelBackground'})
+     C.New('UICorner',{Parent=control,CornerRadius=UDim.new(0,7)})
+     for _,node in ipairs(control:GetDescendants())do
+      if node:IsA('ImageLabel')then
+       if C.Objects[node]then C.Objects[node].Properties.ImageTransparency=nil end
+       node.ImageTransparency=1
+      elseif node:IsA('TextBox')then node.TextSize=14 end
+     end
+    end
    end
   end
  elseif content.__type=='Dropdown'then width=config.Width or 140

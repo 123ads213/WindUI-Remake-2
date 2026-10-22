@@ -19,11 +19,31 @@ function Settings.New(content,frame,window,wind,elements,scale,config)
  U.icon(button,config.Icon or'ellipsis',7,7,16,window)
  if frame.UIElements.Title then frame.UIElements.Title.Size=UDim2.new(1,-132,1,0)end
  local self={Opened=false,Sections={},UIElements={Panel=panel,Button=button,Title=title,Body=body,Columns=columns}}
+ local footerHeight=0
  local function fit()
   if not panel.Parent then return end
-  local height=columns.UIElements.Root.Size.Y.Offset+54
+  local height=columns.UIElements.Root.Size.Y.Offset+54+footerHeight
   panel.Size=UDim2.fromOffset(width,math.clamp(height,110,math.min(620,wind.ScreenGui.AbsoluteSize.Y/math.max(.01,wind.UIScaleObj.Scale)-24)))
   if self.Opened then U.beside(panel,button,wind,8)end
+ end
+ -- Actions live outside the scrolling cards, never inside a clipped element row.
+ function self:Footer(cfg)
+  assert(not self.UIElements.Footer,'A settings panel has only one footer')
+  footerHeight=48;body.Size=UDim2.new(1,-24,1,-54-footerHeight)
+  local footer=U.New('Frame',{Parent=panel,Name='SettingsFooter',Position=UDim2.new(0,12,1,-52),Size=UDim2.new(1,-24,0,40),BackgroundTransparency=1,ZIndex=824})
+  local cancel=U.button(footer,'Cancel',0,4,76,32,function()self:Close()end)
+  local action=U.button(footer,cfg.Title or'Save',width-24-126,4,126,32,cfg.Callback)
+  action.Name='ConfirmAction';action.BackgroundTransparency=0;action:SetAttribute('NoHover',true)
+  C.AddThemeObject(action,{BackgroundColor3='Primary'})
+  C.AddThemeObject(action.Label,{TextColor3='Text'})
+  if C.Objects[action.Label]then C.Objects[action.Label].Properties.TextColor3=nil end
+  action.Label.TextColor3=Color3.new(1,1,1);action.Label.TextSize=14
+  action.Label.Position=UDim2.fromOffset(34,0);action.Label.Size=UDim2.new(1,-42,1,0)
+  local icon=U.icon(action,cfg.Icon or'check',12,8,16,window)
+  if C.Objects[icon.ImageLabel]then C.Objects[icon.ImageLabel].Properties.ImageColor3=nil end
+  icon.ImageLabel.ImageColor3=Color3.new(1,1,1)
+  self.UIElements.Footer=footer;self.UIElements.Confirm=action;self.UIElements.Cancel=cancel
+  task.defer(fit);return action
  end
  function self:Section(cfg,side)
   cfg=table.clone(cfg or{});if cfg.Outlined==nil then cfg.Outlined=true end;if cfg.Title==nil then cfg.Title=false end
